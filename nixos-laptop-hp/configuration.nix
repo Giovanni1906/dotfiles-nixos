@@ -166,6 +166,7 @@
     libnotify    		    # Proporciona el comando 'notify-send' (esencial para Mako)
     pulseaudio  		    # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
     sound-theme-freedesktop	# Los sonidos base del sistema (/usr/share/sounds...)
+    vscode
     ];
   # --------------------------------------------------
 
