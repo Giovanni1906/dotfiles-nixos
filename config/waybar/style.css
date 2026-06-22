@@ -1,0 +1,119 @@
+/* ==========================================================================
+   VARIABLES DE COLOR (Cambia el color aquí y se aplicará a toda la barra)
+   ========================================================================== */
+@define-color texto_principal #3399cc;  /* Tu morado favorito */
+@define-color fondo_total rgba(0, 0, 0, 0) ;
+@define-color fondo_modulos rgba(19, 62, 124, 0.7);   /* El azul/oscuro base */
+@define-color borde_hover rgba(19, 62, 124, 0.2);
+@define-color fondo_focus rgba(19, 62, 124, 0.2);
+@define-color urgente #f38ba8;  /* Rojo/Rosa para alertas */
+@define-color pomo_break #a6e3a1;  /* Verde para el break */
+@define-color pomo_idle #6c7086;  /* Gris para inactivo */
+
+/* ==========================================================================
+   ESTILOS GENERALES
+   ========================================================================== */
+* {
+    font-family: "JetBrainsMono Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    color: @texto_principal;
+    margin: 2px 10px 2px 10px;
+}
+
+/* Fondo principal totalmente transparente */
+window#waybar {
+    background-color: @fondo_total;
+    color: @texto_principal;
+    border: none;    
+}
+
+/* Configuración unificada para TODOS los módulos individuales.
+   Usamos las clases internas de Waybar para no tener que escribir 
+   la lista enorme de #clock, #battery, #cpu, etc.
+*/
+.modules-center > widget,
+.modules-right > widget,
+#custom-pomo{
+    margin: 2px 5px;
+    padding: 0 5px;
+    border-radius: 8px;
+    background: @fondo_modulos;
+    border: 1px solid transparent;
+    color: @texto_principal; 
+    transition: all 0.3s ease;
+}
+
+
+/* ==========================================================================
+   ESTADOS (FOCUSED, HOVER, URGENT)
+   ========================================================================== */
+
+/* Cuando tienen el foco o están activos */
+#custom-media.focused,
+#pulseaudio.focused, 
+#clock.focused, 
+#network.focused, 
+#idle_inhibitor.focused, 
+#custom-pomo.focused,
+#custom-power.focused {
+    background-color: @fondo_focus;
+    border: 1px solid @texto_principal;
+    color: @texto_principal;
+}
+
+/* Efecto Hover (pasar el mouse por encima) */
+.modules-left > widget:hover,
+.modules-center > widget:hover,
+.modules-right > widget:hover {
+    background-color: @fondo_focus; /* Le da el color de fondo sutil al pasar el mouse */
+    border: 1px solid @texto_principal;
+}
+
+/* ==========================================================================
+   MÓDULOS ESPECIALES (POMODORO)
+   ========================================================================== */
+#custom-pomo {
+	padding: 0px 15px;
+}
+
+#custom-pomo.work {
+    color: @texto_principal;
+}
+
+#custom-pomo.break {
+    color: @pomo_break;
+}
+
+#custom-pomo.idle {
+    color: @pomo_idle;
+}
+
+/* ==========================================================================
+   CONFIGURACIÓN EXCLUSIVA DE LOS NÚMEROS (Workspaces)
+   ========================================================================== */
+#workspaces button {
+    background: transparent;
+    color: @texto_principal; /* Hace visible el número con tu color base */
+    padding: 0 8px;          /* Espaciado interno horizontal para que NO se encimen */
+    margin: 0px;           /* Separación leve entre un número y otro */
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+    background-color: rgba(33, 153, 204, 0.2); /* Efecto hover sutil exclusivo para los números */
+    color: @texto_principal;
+}
+
+#workspaces button.active {
+    background-color: @fondo_modulos;
+}
+
+/* Estado urgente (ej. batería baja o workspace con alertas) */
+#workspaces button.urgent {
+    background-color: @urgente;
+    color: @texto_principal;
+}
+
