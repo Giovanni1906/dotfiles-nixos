@@ -3,9 +3,10 @@
    ========================================================================== */
 @define-color texto_principal #3399cc;  /* Tu morado favorito */
 @define-color fondo_total rgba(0, 0, 0, 0) ;
-@define-color fondo_modulos rgba(19, 62, 124, 0.7);   /* El azul/oscuro base */
+@define-color fondo_modulos rgba(19, 62, 124, 0.7);
+@define-color fondo_hover rgba(19, 62, 124, 0.4);   /* El azul/oscuro base */
 @define-color borde_hover rgba(19, 62, 124, 0.2);
-@define-color fondo_focus rgba(19, 62, 124, 0.2);
+@define-color fondo_focus rgba(19, 62, 124, 0.8);
 @define-color urgente #f38ba8;  /* Rojo/Rosa para alertas */
 @define-color pomo_break #a6e3a1;  /* Verde para el break */
 @define-color pomo_idle #6c7086;  /* Gris para inactivo */
@@ -33,41 +34,54 @@ window#waybar {
    Usamos las clases internas de Waybar para no tener que escribir 
    la lista enorme de #clock, #battery, #cpu, etc.
 */
+
+.modules-left > widget,
 .modules-center > widget,
-.modules-right > widget,
-#custom-pomo{
-    margin: 2px 5px;
-    padding: 0 5px;
-    border-radius: 8px;
-    background: @fondo_modulos;
-    border: 1px solid transparent;
-    color: @texto_principal; 
-    transition: all 0.3s ease;
+.modules-right > widget {
+    background: transparent;
+    margin: 0;
+    padding: 0;
 }
 
+#custom-pomo,
+#custom-media,
+#window,
+#idle_inhibitor,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#battery,
+#keyboard-state,
+#clock,
+#custom-power {
+    margin: 2px 5px;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: @fondo_modulos; /* Tu azul base al 70% */
+    border: 1px solid transparent;
+    color: @texto_principal; 
+    transition: all 0.25s ease;
+}
 
 /* ==========================================================================
    ESTADOS (FOCUSED, HOVER, URGENT)
    ========================================================================== */
 
-/* Cuando tienen el foco o están activos */
-#custom-media.focused,
-#pulseaudio.focused, 
-#clock.focused, 
-#network.focused, 
-#idle_inhibitor.focused, 
-#custom-pomo.focused,
-#custom-power.focused {
-    background-color: @fondo_focus;
-    border: 1px solid @texto_principal;
-    color: @texto_principal;
-}
 
 /* Efecto Hover (pasar el mouse por encima) */
-.modules-left > widget:hover,
-.modules-center > widget:hover,
-.modules-right > widget:hover {
-    background-color: @fondo_focus; /* Le da el color de fondo sutil al pasar el mouse */
+/* Efecto Hover (pasar el mouse por encima) - Llamando a cada módulo por su ID */
+#custom-pomo:hover,
+#custom-media:hover,
+#idle_inhibitor:hover,
+#pulseaudio:hover,
+#network:hover,
+#cpu:hover,
+#memory:hover,
+#battery:hover,
+#clock:hover,
+#custom-power:hover {
+    background: @fondo_hover; /* Aplica la opacidad menor (40%) */
     border: 1px solid @texto_principal;
 }
 
@@ -95,25 +109,36 @@ window#waybar {
    ========================================================================== */
 #workspaces button {
     background: transparent;
-    color: @texto_principal; /* Hace visible el número con tu color base */
-    padding: 0 8px;          /* Espaciado interno horizontal para que NO se encimen */
-    margin: 0px;           /* Separación leve entre un número y otro */
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    color: @texto_principal; 
+    padding: 0 8px;          
+    margin: 0 2px; /* Un pequeñísimo margen para que no se peguen si tienen borde */
+    border-radius: 8px; /* Igualamos el borde redondeado al resto de la barra */
+    border: 1px solid transparent;
+    
+    /* ¡AQUÍ ESTÁ LA MAGIA QUE MATA LO BLANCO! */
+    box-shadow: none;
+    text-shadow: none;
+    
+    transition: all 0.25s ease;
 }
 
+/* El efecto al pasar el mouse idéntico a tus otros módulos */
 #workspaces button:hover {
-    background-color: rgba(33, 153, 204, 0.2); /* Efecto hover sutil exclusivo para los números */
-    color: @texto_principal;
+    background: @fondo_hover; 
+    border: 1px solid @texto_principal;
+    box-shadow: none;
+    text-shadow: none;
 }
 
+/* El espacio de trabajo en el que estás actualmente */
 #workspaces button.active {
-    background-color: @fondo_modulos;
+    background: @fondo_modulos;
+    /* Opcional: si quieres que el activo también tenga el borde, descomenta la siguiente línea */
+    /* border: 1px solid @texto_principal; */
 }
 
-/* Estado urgente (ej. batería baja o workspace con alertas) */
+/* Estado urgente (ej. ventana que requiere atención) */
 #workspaces button.urgent {
-    background-color: @urgente;
-    color: @texto_principal;
+    background: @urgente;
+    color: #1e1e2e; /* Letra oscura para contrastar con el fondo rojo */
 }
-

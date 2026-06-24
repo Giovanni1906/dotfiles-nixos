@@ -155,7 +155,7 @@
     appimage-run     	    # Para ejecutar programas en formato AppImage sin problemas
     grim          		    # El capturador
     slurp  		            # El selector de área
-    
+    pulsemixer 			    # <-- Mezclador interactivo ultra ligero
     # Herramientas básicas de terminal
     git
     wget		 	        # Descarga de paginas web
