@@ -63,8 +63,8 @@
     "idle_inhibitor": {
         "format": "{icon}",
         "format-icons": {
-            "activated": "",
-            "deactivated": ""
+            "activated": " ",
+            "deactivated": " "
         }
     },
 //	"tray": {
@@ -105,22 +105,24 @@
     },
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
-        "format-wifi": "{essid} ({signalStrength}%) ",
-        "format-ethernet": "{ipaddr}/{cidr} ",
-        "tooltip-format": "{ifname} via {gwaddr} ",
-        "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "Disconnected ⚠",
+        "format-wifi": "{essid} ({signalStrength}%)  ",
+        "format-ethernet": "{ipaddr}/{cidr}  ",
+        "tooltip-format": "{ifname} via {gwaddr}  ",
+        "format-linked": "{ifname} (No IP)  ",
+        "format-disconnected": "Disconnected ⚠ ",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
-	"pulseaudio": {
+    "pulseaudio": {
         "format": "{volume}% {icon} {format_source}",
         "format-bluetooth": "{volume}% {icon} {format_source}",
         "format-muted": " {format_source}",
+        "format-source": "{volume}% ",          // <-- Aquí añadimos el porcentaje del micro
+        "format-source-muted": "Muted ",        // <-- Y aquí un aviso cuando esté silenciado
         "format-icons": {
             "headphone": "",
             "default": ["", "", ""]
         },
-		"on-click": "hyprctl clients | grep -q 'class: pomo-mixer' && hyprctl dispatch closewindow class:pomo-mixer || kitty -o background=#133e7c -o background_opacity=0.9 --class pomo-mixer -e pulsemixer"
+        "on-click": "hyprctl clients | grep -q 'class: pomo-mixer' && hyprctl dispatch closewindow class:pomo-mixer || kitty -o background=#133e7c -o background_opacity=0.9 --class pomo-mixer -e pulsemixer"
     },
     "custom/media": {
         "format": "{icon} {text}",
@@ -148,7 +150,7 @@
     },
 
     "custom/power": {
-        "format": "⏻",
+        "format": " ⏻ ",
         "on-click": "~/.config/waybar/scripts/powermenu.sh",
         "tooltip": false
     }
