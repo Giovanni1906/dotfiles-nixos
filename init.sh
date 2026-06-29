@@ -4,6 +4,9 @@ sudo ln -s ~/dotfiles/nixos-[equipo] /etc/nixos
 ln -s ~/dotfiles/config/hypr ~/.config/hypr
 ln -s ~/dotfiles/config/waybar ~/.config/waybar
 ln -s ~/dotfiles/config/kitty ~/.config/kitty
+ln -s ~/dotfiles/icons ~/.local/share/icons
+## por si no funciona el anterior ln de cursor: 
+## ln -s ~/dotfiles/icons/ ~/.icons
 
 # dar permisos de ejecución a los scripts
 chmod +x ~/dotfiles/config/waybar/scripts/pomo.sh

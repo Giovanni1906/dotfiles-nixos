@@ -155,14 +155,16 @@
     appimage-run     	    # Para ejecutar programas en formato AppImage sin problemas
     grim          		    # El capturador
     slurp  		            # El selector de área
-    pulsemixer 			    # <-- Mezclador interactivo ultra ligero
+    pulsemixer 			    # Mezclador interactivo ultra ligero
+    catppuccin-cursors.mochaSky     # paquete de cursor bibata
+
     # Herramientas básicas de terminal
     git
     wget		 	        # Descarga de paginas web
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
     fastfetch 				# Monitoreo de PC
     # Utilidades
-    kdePackages.dolphin		# <-- El gestor de archivos moderno de KDE (Qt6)
+    kdePackages.dolphin		# El gestor de archivos moderno de KDE (Qt6)
     libnotify    		    # Proporciona el comando 'notify-send' (esencial para Mako)
     pulseaudio  		    # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
     sound-theme-freedesktop	# Los sonidos base del sistema (/usr/share/sounds...)
