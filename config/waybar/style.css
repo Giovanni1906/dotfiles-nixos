@@ -43,6 +43,15 @@ window#waybar {
     padding: 0;
 }
 
+/* --- Restricción para paginación de ventanas ---  */
+/* ---  > Evita desborde en la barra                */
+/*
+.modules-left {
+    max-width: 33%;
+}
+*/
+/* ------------------------------------------------ */
+
 #custom-pomo,
 #custom-media,
 #window,
@@ -50,6 +59,7 @@ window#waybar {
 #pulseaudio,
 #network,
 #cpu,
+#tray,
 #memory,
 #battery,
 #keyboard-state,
@@ -77,6 +87,7 @@ window#waybar {
 #pulseaudio:hover,
 #network:hover,
 #cpu:hover,
+#tray:hover,
 #memory:hover,
 #battery:hover,
 #clock:hover,
@@ -110,7 +121,7 @@ window#waybar {
 #workspaces button {
     background: transparent;
     color: @texto_principal; 
-    padding: 0 8px;          
+    padding: 0;          
     margin: 0 2px; /* Un pequeñísimo margen para que no se peguen si tienen borde */
     border-radius: 8px; /* Igualamos el borde redondeado al resto de la barra */
     border: 1px solid transparent;

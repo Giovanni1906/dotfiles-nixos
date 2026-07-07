@@ -1,0 +1,5 @@
+gtk-theme-name = "Adwaita-dark"
+gtk-icon-theme-name = "breeze-dark"
+gtk-cursor-theme-name = "catppuccin-mocha-sky-cursors"
+gtk-cursor-theme-size = 24
+gtk-application-prefer-dark-theme = 1

@@ -8,43 +8,44 @@
     // Choose the order of the modules
     "modules-left": [
         "custom/pomo",
-        "hyprland/workspaces",
-        "custom/media"
+        "custom/media",
+        "hyprland/workspaces"
     ],
     "modules-center": [
         "hyprland/window"
     ],
     "modules-right": [
-        "idle_inhibitor",
+        //"idle_inhibitor",
         "pulseaudio",
-        "network",
+        //"network",
         "cpu",
         "memory",
         "battery",
-        "keyboard-state",
+        // "keyboard-state",
         "clock",
-        // "tray",
+        "tray",
         "custom/power"
     ],
     // Modules configuration
     "hyprland/workspaces": {
         "disable-scroll": true,
-        "all-outputs": true,
+        "all-outputs": false,
+        "active-first": true,
         "active-only": false,
         "on-click": "activate",
     },
     
     "mpd": {
         "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
-        "format-disconnected": "Disconnected ",
-        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+        "format-disconnected": "Disconnected  ",
+        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped  ",
         "unknown-tag": "N/A",
         "interval": 5,
         "consume-icons": {
             "on": " "
         },
         "random-icons": {
-            "off": "<span color=\"#f53c3c\"></span> ",
+            "off": "<span color=\"#f53c3c\"> </span> ",
             "on": " "
         },
         "repeat-icons": {
@@ -67,21 +68,21 @@
             "deactivated": " "
         }
     },
-//	"tray": {
-//	        "icon-size": 16,
-//	        "spacing": 10
-//	    },
+	"tray": {
+		"icon-size": 16,
+	    "spacing": 10
+	},
     "clock": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d}"
     },
     "cpu": {
-        "format": "{usage}% ",
+        "format": "{usage}%  ",
         "tooltip": false
     },
     "memory": {
-        "format": "{}% "
+        "format": "{}%  "
     },
     "battery": {
             "states": {
@@ -93,7 +94,7 @@
             "format-charging": "{capacity}% ",
             "format-plugged": "{capacity}% ",
             "format-alt": "{time} {icon}",
-            "format-icons": ["", "", "", "", ""]
+            "format-icons": [" ", " ", " ", " ", " "]
         },
     "temperature": {
         // "thermal-zone": 2,
@@ -103,21 +104,20 @@
         "format": "{temperatureC}°C {icon}",
         "format-icons": ["", "", ""]
     },
-    "network": {
-        // "interface": "wlp2*", // (Optional) To force the use of this interface
-        "format-wifi": "{essid} ({signalStrength}%)  ",
+	"network": {
+        "format-wifi": "{signalStrength}%  ", 
         "format-ethernet": "{ipaddr}/{cidr}  ",
-        "tooltip-format": "{ifname} via {gwaddr}  ",
+        "tooltip-format": "Red: {essid} | Mi IP: {ipaddr}",
         "format-linked": "{ifname} (No IP)  ",
         "format-disconnected": "Disconnected ⚠ ",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+        "on-click": "nm-connection-editor"
     },
     "pulseaudio": {
         "format": "{volume}% {icon} {format_source}",
         "format-bluetooth": "{volume}% {icon} {format_source}",
         "format-muted": " {format_source}",
         "format-source": "{volume}% ",          // <-- Aquí añadimos el porcentaje del micro
-        "format-source-muted": "Muted ",        // <-- Y aquí un aviso cuando esté silenciado
+        "format-source-muted": "Muted  ",        // <-- Y aquí un aviso cuando esté silenciado
         "format-icons": {
             "headphone": "",
             "default": ["", "", ""]
@@ -125,19 +125,19 @@
         "on-click": "hyprctl clients | grep -q 'class: pomo-mixer' && hyprctl dispatch closewindow class:pomo-mixer || kitty -o background=#133e7c -o background_opacity=0.9 --class pomo-mixer -e pulsemixer"
     },
     "custom/media": {
-        "format": "{icon} {text}",
+        "format": " {icon}",
         "return-type": "json",
-        "max-length": 40,
+        "tooltip": true,
         "format-icons": {
-            "spotify": "",
-            "zen": "",      // Zen Browser (donde ves YouTube)
-            "firefox": "",  // Por si usas Firefox
-            "chromium": "",
-            "default": "🎜"
+            "spotify": " ",
+            "zen": " ",      // Zen Browser (donde ves YouTube)
+            "firefox": " ",  // Por si usas Firefox
+            "chromium": " ",
+            "default": "♫"
         },
         "escape": true,
-        // Usamos {{playerName}} para que Waybar sepa qué icono poner
-        "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{title}}\", \"alt\": \"{{playerName}}\", \"class\": \"{{playerName}}\"}' -F",
+        // Mandamos la canción al "tooltip" en lugar del "text"
+        "exec": "playerctl -a metadata --format '{\"text\": \"\", \"alt\": \"{{playerName}}\", \"tooltip\": \"{{artist}} - {{title}}\", \"class\": \"{{playerName}}\"}' -F",
         "on-click": "playerctl play-pause"
     },
 

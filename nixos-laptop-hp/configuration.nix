@@ -25,6 +25,13 @@
   # -- Variables del sistema y limpieza automática ---
   # --------------------------------------------------
 
+  environment.variables = {
+    XCURSOR_THEME = "catppuccin-mocha-sky-cursors";
+    XCURSOR_SIZE = "24";
+    HYPRCURSOR_THEME = "catppuccin-mocha-sky-cursors";
+    HYPRCURSOR_SIZE = "24";
+  };
+
   nixpkgs.config.allowUnfree = true;
   nix.settings.auto-optimise-store = true;
   nix.gc = {
@@ -79,7 +86,15 @@
   
   # --- Descarga de hyperland ---
   programs.hyprland.enable = true;
-  
+
+  # --- Gestor de preferencias ---
+  programs.dconf.enable = true;
+  # Forzar el motor de temas para aplicaciones Qt (Dolphin, etc.)
+#  qt = {
+#    enable = true;
+#    platformTheme = "kde";
+#    style = "breeze";
+#  };  
   # -------------------------------------------------
 
   # Configure keymap in X11
@@ -110,6 +125,9 @@
     #media-session.enable = true;
   };
 
+  # Para habilitar GVFS (GNOME Virtual File System)
+  services.gvfs.enable = true;
+
   # --------------------------------------------------------
   # ---                    Desarrollo                     
   # --------------------------------------------------------
@@ -126,7 +144,7 @@
   users.users."nova" = {
     isNormalUser = true;
     description = "Jorge Velasquez Valdivia";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "input" ];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
@@ -156,19 +174,29 @@
     grim          		    # El capturador
     slurp  		            # El selector de área
     pulsemixer 			    # Mezclador interactivo ultra ligero
-    catppuccin-cursors.mochaSky     # paquete de cursor bibata
-
+    catppuccin-cursors.mochaSky     # paquete de cursor catppuccin
+    glib                      # Provee el comando gsettings
+    # kdePackages.breeze        # Tema nativo de Dolphin
+    # kdePackages.breeze-icons  # Iconos oficiales para que no falten carpetas
+	papirus-icon-theme        # Para iconos 
+    gsettings-desktop-schemas # El diccionario de reglas visuales
+    adwaita-icon-theme        # Iconos y cursores base oscuros
+    networkmanagerapplet      # Gestor de red
+    gnome-themes-extra        # Aquí vive físicamente el código de Adwaita-dark
+    nwg-look       		      # Gestor gráfico de apariencia exclusivo para Wayland/Hyprland
     # Herramientas básicas de terminal
     git
     wget		 	        # Descarga de paginas web
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
     fastfetch 				# Monitoreo de PC
     # Utilidades
-    kdePackages.dolphin		# El gestor de archivos moderno de KDE (Qt6)
+    # kdePackages.dolphin	# El gestor de archivos moderno de KDE (Qt6)
+	xfce.thunar				# Gestor de archivos del entorno XFCE
     libnotify    		    # Proporciona el comando 'notify-send' (esencial para Mako)
     pulseaudio  		    # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
     sound-theme-freedesktop	# Los sonidos base del sistema (/usr/share/sounds...)
-    vscode
+    vscode					# Editor de código con copilot
+    playerctl               # Modulo de musica
     ];
   # --------------------------------------------------
 
