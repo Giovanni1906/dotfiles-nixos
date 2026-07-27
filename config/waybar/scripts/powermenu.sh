@@ -1,6 +1,6 @@
 # Configuración de colores y estilo
 MORADO="#3399cc" 
-FONDO="rgba(19, 62, 124, 0.95)"
+FONDO="rgba(19, 62, 124, 0.4)"
 BORDE="rgba(19, 62, 124, 0.2)"
 TEXTO="#3399cc"
 FONDO_SELECT="rgba(10, 30, 60, 0.95)" 

@@ -18,6 +18,7 @@ rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.local/share/icons/icon
 ln -sfn ~/dotfiles/config/hypr ~/.config/hypr
 ln -sfn ~/dotfiles/config/waybar ~/.config/waybar
 ln -sfn ~/dotfiles/config/kitty ~/.config/kitty
+ln -sfn ~/dotfiles/config/fastfetch ~/.config/fastfetch
 ln -sfn ~/dotfiles/icons ~/.local/share/icons
 
 # 4. Enlaces simbólicos de GTK (Unificando todas las versiones)
@@ -30,6 +31,8 @@ ln -sfn ~/dotfiles/config/gtkrc-2.0 ~/.config/gtkrc
 # 5. Permisos de ejecución a los scripts
 chmod +x ~/dotfiles/config/waybar/scripts/pomo.sh
 chmod +x ~/dotfiles/config/waybar/scripts/powermenu.sh
+chmod +x ~/dotfiles/utils/reset-trial-navicat.sh
+chmod +x ~/dotfiles/utils/valent-clipboard.sh
 
 # 6. Forzar enlaces del cursor Catppuccin directo desde NixOS
 rm -rf ~/.icons/catppuccin-mocha-sky-cursors ~/.local/share/icons/catppuccin-mocha-sky-cursors

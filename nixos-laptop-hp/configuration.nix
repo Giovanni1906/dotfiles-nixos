@@ -32,7 +32,7 @@
     HYPRCURSOR_SIZE = "24";
   };
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = true;		# Habilitar software privativo
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;
@@ -61,7 +61,7 @@
   hardware.bluetooth.powerOnBoot = true;
 
   # Activar KDE Connect (NixOS abrirá automáticamente los puertos del Firewall)
-  programs.kdeconnect.enable = true;
+  # programs.kdeconnect.enable = true;
   
   # --------------------------------------------------    
 
@@ -81,8 +81,23 @@
   # -------------------------------------------------
 
   # --- Enable the KDE Plasma Desktop Environment. ---
-  services.displayManager.sddm.enable = true;
+  # services.displayManager.sddm = {
+  #   enable = true;
+  #   wayland.enable = true;      # Comunicacion directa con wayland (evita cuelgue)
+  #   theme = "catppuccin-mocha"; # El diseño moderno y oscuro
+  # };
   # services.desktopManager.plasma6.enable = true;
+
+  # Gestor de inicio de sesión Greetd
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --asterisks --greeting 'Iniciando Sistema...' --theme 'prompt=cyan;text=cyan;input=white' --cmd start-hyprland";
+        user = "greeter";
+      };
+    };
+  };
   
   # --- Descarga de hyperland ---
   programs.hyprland.enable = true;
@@ -176,7 +191,8 @@
     pulsemixer 			    # Mezclador interactivo ultra ligero
     catppuccin-cursors.mochaSky     # paquete de cursor catppuccin
     glib                      # Provee el comando gsettings
-    # kdePackages.breeze        # Tema nativo de Dolphin
+	swaybg					# fondo de pantalla
+    # kdePackages.breeze        # Tema nativo para familia KDE - Qt (KDE connect, navicat, etc)
     # kdePackages.breeze-icons  # Iconos oficiales para que no falten carpetas
 	papirus-icon-theme        # Para iconos 
     gsettings-desktop-schemas # El diccionario de reglas visuales
@@ -185,18 +201,24 @@
     gnome-themes-extra        # Aquí vive físicamente el código de Adwaita-dark
     nwg-look       		      # Gestor gráfico de apariencia exclusivo para Wayland/Hyprland
     # Herramientas básicas de terminal
-    git
     wget		 	        # Descarga de paginas web
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
     fastfetch 				# Monitoreo de PC
     # Utilidades
     # kdePackages.dolphin	# El gestor de archivos moderno de KDE (Qt6)
-	xfce.thunar				# Gestor de archivos del entorno XFCE
+	thunar					# Gestor de archivos del entorno XFCE
     libnotify    		    # Proporciona el comando 'notify-send' (esencial para Mako)
     pulseaudio  		    # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
     sound-theme-freedesktop	# Los sonidos base del sistema (/usr/share/sounds...)
-    vscode					# Editor de código con copilot
     playerctl               # Modulo de musica
+    valent					# Conectar con celular
+    _7zip-zstd					# descomprimir (7z x nombrearchivo)
+    libqalculate			# calculadora para terminal
+    # para informática
+    git
+    vscode					# Editor de código con copilot
+    filezilla				# 
+    navicat-premium			
     ];
   # --------------------------------------------------
 
@@ -230,18 +252,36 @@
     nix-clean  = "sudo nix-env --delete-generations old && sudo nixos-rebuild boot && sudo nix-store --gc";
     nix-config = "sudo micro /etc/nixos/configuration.nix";
 
+	hypr-config = "sudo micro ~/dotfiles/config/hypr/hyprland.conf";
+	kitty-config = "sudo micro ~/dotfiles/config/kitty/kitty.conf";
+	waybar-config = "sudo micro ~/dotfiles/config/waybar/config";
+	
     # Atajos de desarrollo e infraestructura
     ll = "ls -lha";
     k  = "kubectl";
     d  = "docker";
     dc-up = "docker compose up -d";
     dc-down = "docker compose down";
-    
-    # Ejecutar AppImages de forma nativa en NixOS
-    navicat = "appimage-run ~/Apps/Navicat.AppImage";
+
+    reset-trial-navicat = "~/dotfiles/utils/reset-trial-navicat.sh";
   };
 
   # --------------------------------------
+
+
+
+  # ----------------------------------------------------
+  # ---              Firewall y permisos             ---
+  # ----------------------------------------------------
+
+  # Portales de XDG para compatibilidad en Wayland (necesario para Valent, OBS, etc.)
+    xdg.portal = {
+      enable = true;
+      extraPortals = [ 
+        pkgs.xdg-desktop-portal-hyprland 
+        pkgs.xdg-desktop-portal-gtk 
+      ];
+    };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -256,11 +296,20 @@
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
+  # Abrir los puertos para que el celular encuentre a Valent
+    networking.firewall = {
+      enable = true;
+      allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
+      allowedUDPPortRanges = [ { from = 1714; to = 1764; } ];
+    };
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  # ----------------------------------------------------
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
