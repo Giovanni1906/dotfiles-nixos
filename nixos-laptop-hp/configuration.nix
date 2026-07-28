@@ -33,6 +33,7 @@
   };
 
   nixpkgs.config.allowUnfree = true;		# Habilitar software privativo
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;
@@ -214,6 +215,7 @@
     valent					# Conectar con celular
     _7zip-zstd					# descomprimir (7z x nombrearchivo)
     libqalculate			# calculadora para terminal
+	onlyoffice-desktopeditors	# editor de documentos
     # para informática
     git
     vscode					# Editor de código con copilot

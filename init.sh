@@ -52,3 +52,26 @@ echo -e "[Icon Theme]\nInherits=catppuccin-mocha-sky-cursors" > ~/.icons/default
 echo -e "[Icon Theme]\nInherits=catppuccin-mocha-sky-cursors" > ~/.local/share/icons/default/index.theme
 
 echo "✅ ¡Dotfiles instalados correctamente! Reinicia la sesión o aplica nix-switch."
+
+#9. intalación de paquetes desde Faltpak
+
+# Se asegura que el repositorio principal de Flathub esté agregado
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+flatpak install -y flathub io.github.zen_browser.zen
+
+#10. instalación de paquetes por AppImages
+# carpeta oculta para los AppImages
+mkdir -p ~/.local/bin/appimages
+
+# Thorium: Descarga del programa real                                                            
+echo "Descargando Thorium..."                                         
+wget -O ~/.local/bin/appimages/Thorium.AppImage "AQUÍ_VA_EL_ENLACE_COMPLETO_QUE_TERMINA_EN_AVX2.AppImage"
+chmod +x ~/.local/bin/appimages/Thorium.AppImage                      
+
+# Thorium: Creación del acceso directo en el menú (drun)
+echo "Enlazando acceso directo de Thorium..."
+mkdir -p ~/.local/share/applications
+ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
+
+# ...
