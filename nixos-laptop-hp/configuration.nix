@@ -170,7 +170,18 @@
     ];
   };
 
-  # Install firefox.
+  # --- Thunar (para gestor de archivos) ---
+  # Habilitar Thunar y sus plugins oficiales (para comprimir/descomprimir)
+    programs.thunar.enable = true;
+    programs.thunar.plugins = with pkgs.xfce; [
+      thunar-archive-plugin
+      thunar-volman
+    ];
+  
+    # Habilitar el servicio de miniaturas (para ver las imágenes)
+    services.tumbler.enable = true; 
+  
+  # --- Install firefox ---
   programs.firefox.enable = true;
 
   
@@ -182,6 +193,7 @@
   environment.systemPackages = with pkgs; [
     kitty
     waybar
+    htop
     # vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
 
     # Utilidades de entorno Wayland / Hyprland
@@ -210,7 +222,8 @@
     fastfetch 				# Monitoreo de PC
     # Utilidades
     # kdePackages.dolphin	# El gestor de archivos moderno de KDE (Qt6)
-	thunar					# Gestor de archivos del entorno XFCE
+	#thunar					# Gestor de archivos del entorno XFCE
+	file-roller 			# Interfaz gráfica para comprimir/descomprimir
     libnotify    		    # Proporciona el comando 'notify-send' (esencial para Mako)
     pulseaudio  		    # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
     sound-theme-freedesktop	# Los sonidos base del sistema (/usr/share/sounds...)
@@ -220,6 +233,13 @@
     libqalculate			# calculadora para terminal
 	onlyoffice-desktopeditors	# editor de documentos
 	wayvnc					# Conexion remota desde otro dispositivo
+	zathura					# Para visualizar pdf
+	imv						# para visualizar imagenes
+	poppler-utils			# Utilidades para pdf (pdfunite, pdfseparate, pdftotext, pdfimages, etc)
+	ffmpeg					# manejo de formatos de videos
+	yt-dlp					# descargar videos de yt
+	rename					# renombrar archivos
+	imagemagick				# cambiar resolucion, tamaño, formato, etc 
     # para informática
     git
     vscode					# Editor de código con copilot
