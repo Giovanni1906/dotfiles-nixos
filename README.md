@@ -92,7 +92,7 @@ exec-once = gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 exec-once = gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-sky-cursors'
 ```
 
-## Comandos útiles
+## Comandos para valent
 
 ### Bloquear pantalla
 
@@ -103,7 +103,7 @@ swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0
 ### Desbloquear pantalla
 
 ```bash
-killall swaylock
+source ~/dotfiles/.env && wtype "$PASS_SWAYLOCK" && wtype -k Return
 ```
 
 ### Apagar PC

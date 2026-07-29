@@ -1,4 +1,8 @@
-#!/bin/bash
+echo "permisos ... "
+# Pedir contraseña de administrador al inicio
+sudo -v
+# Mantener vivo a sudo mientras el script siga corriendo
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 echo "🚀 Iniciando configuración de dotfiles..."
 
