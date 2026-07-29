@@ -35,3 +35,11 @@ env = XCURSOR_SIZE,24
 exec-once = gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 exec-once = gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 exec-once = gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-sky-cursors'
+
+# Comandos para valent
+### Bloquear pantalla
+hyprlock
+### Desbloquear pantalla
+killall hyprlock
+### Apagar pc
+systemctl poweroff
