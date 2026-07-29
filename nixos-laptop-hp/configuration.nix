@@ -63,6 +63,9 @@
 
   # Activar KDE Connect (NixOS abrirá automáticamente los puertos del Firewall)
   # programs.kdeconnect.enable = true;
+
+  # conexion con tailscale 
+  services.tailscale.enable = true;  
   
   # --------------------------------------------------    
 
@@ -216,6 +219,7 @@
     _7zip-zstd					# descomprimir (7z x nombrearchivo)
     libqalculate			# calculadora para terminal
 	onlyoffice-desktopeditors	# editor de documentos
+	wayvnc					# Conexion remota desde otro dispositivo
     # para informática
     git
     vscode					# Editor de código con copilot
@@ -265,7 +269,10 @@
     dc-up = "docker compose up -d";
     dc-down = "docker compose down";
 
+	remote-conexion = "wayvnc 0.0.0.0";
     reset-trial-navicat = "~/dotfiles/utils/reset-trial-navicat.sh";
+
+    ip-public= "curl -s ipinfo.io/ip";
   };
 
   # --------------------------------------
@@ -301,6 +308,7 @@
   # Abrir los puertos para que el celular encuentre a Valent
     networking.firewall = {
       enable = true;
+      allowedTCPPorts = [ 5900 ]; # Puerto para la conexión remota WayVNC
       allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
       allowedUDPPortRanges = [ { from = 1714; to = 1764; } ];
     };

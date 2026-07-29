@@ -77,3 +77,7 @@ mkdir -p ~/.local/share/applications
 ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
 
 # ...
+
+# Conectar tailscale
+echo "Iniciando sesion en tailscale (github)"
+sudo tailscale up
