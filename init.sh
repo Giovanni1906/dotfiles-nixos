@@ -7,6 +7,14 @@ mkdir -p ~/.config
 mkdir -p ~/.icons/default
 mkdir -p ~/.local/share/icons/default
 
+# Archivo .env
+echo "Creando archivo de .env"
+## Crea el archivo vacío
+touch ~/dotfiles/.env
+## permisos de seguridad de inmediato
+chmod 600 ~/dotfiles/.env
+
+
 # 2. Configuración de NixOS (Requiere permisos de administrador)
 # usuario y contra de git desde terminal
 git config --global core.askpass ""
@@ -81,3 +89,4 @@ ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thori
 # Conectar tailscale
 echo "Iniciando sesion en tailscale (github)"
 sudo tailscale up
+

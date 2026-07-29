@@ -173,7 +173,7 @@
   # --- Thunar (para gestor de archivos) ---
   # Habilitar Thunar y sus plugins oficiales (para comprimir/descomprimir)
     programs.thunar.enable = true;
-    programs.thunar.plugins = with pkgs.xfce; [
+    programs.thunar.plugins = with pkgs; [
       thunar-archive-plugin
       thunar-volman
     ];
@@ -216,6 +216,8 @@
     networkmanagerapplet      # Gestor de red
     gnome-themes-extra        # Aquí vive físicamente el código de Adwaita-dark
     nwg-look       		      # Gestor gráfico de apariencia exclusivo para Wayland/Hyprland
+	swaylock-effects		  # Bloqueo de wayland
+	wtype					# Desbloqueo para swaylock
     # Herramientas básicas de terminal
     wget		 	        # Descarga de paginas web
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
@@ -240,6 +242,7 @@
 	yt-dlp					# descargar videos de yt
 	rename					# renombrar archivos
 	imagemagick				# cambiar resolucion, tamaño, formato, etc 
+	bitwarden-cli 		 	# CLI de Bitwarden
     # para informática
     git
     vscode					# Editor de código con copilot
@@ -311,6 +314,9 @@
         pkgs.xdg-desktop-portal-gtk 
       ];
     };
+
+  # Permiso de swaylock para verificacion
+  security.pam.services.swaylock = {};
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

@@ -38,8 +38,13 @@ exec-once = gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-m
 
 # Comandos para valent
 ### Bloquear pantalla
-hyprlock
+swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2
 ### Desbloquear pantalla
-killall hyprlock
+killall swaylock
 ### Apagar pc
 systemctl poweroff
+### Suspender pc
+swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend
+
+# Environents
+#### copiar y pegar el .env.example y cambiar los datos a los reales
