@@ -28,11 +28,12 @@ sudo mv /etc/nixos /etc/nixos.bak 2>/dev/null || true
 # sudo ln -sfn ~/dotfiles/nixos-[equipo] /etc/nixos
 
 # 3. Enlaces simbólicos de aplicaciones (Usamos -sfn para forzar y evitar anidaciones)
-rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.local/share/icons/icons
+rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi  ~/.local/share/icons/icons
 ln -sfn ~/dotfiles/config/hypr ~/.config/hypr
 ln -sfn ~/dotfiles/config/waybar ~/.config/waybar
 ln -sfn ~/dotfiles/config/kitty ~/.config/kitty
 ln -sfn ~/dotfiles/config/fastfetch ~/.config/fastfetch
+ln -sfn ~/dotfiles/config/rofi ~/.config/rofi
 ln -sfn ~/dotfiles/icons ~/.local/share/icons
 
 # 4. Enlaces simbólicos de GTK (Unificando todas las versiones)
