@@ -223,6 +223,7 @@
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
     fastfetch 				# Monitoreo de PC
     # Utilidades
+	brightnessctl			# Utilidad para brillo
     # kdePackages.dolphin	# El gestor de archivos moderno de KDE (Qt6)
 	#thunar					# Gestor de archivos del entorno XFCE
 	file-roller 			# Interfaz gráfica para comprimir/descomprimir
@@ -247,7 +248,10 @@
     git
     vscode					# Editor de código con copilot
     filezilla				# 
-    navicat-premium			
+    navicat-premium		
+    postman	
+    code-cursor
+    remmina
     ];
   # --------------------------------------------------
 
