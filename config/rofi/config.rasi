@@ -168,4 +168,6 @@ configuration {
 }
 //@theme "themes/material.rasi"
 
-@theme "/nix/store/7hcqxivf38vv1rflynm9fsk4wazs166f-rofi-2.0.0/share/rofi/themes/material.rasi"
+//@theme "/nix/store/7hcqxivf38vv1rflynm9fsk4wazs166f-rofi-2.0.0/share/rofi/themes/material.rasi"
+
+@theme "/nix/store/f6jj0h6nn40cv8hq7ksgikx04vayxjlw-rofi-2.0.0/share/rofi/themes/material.rasi"

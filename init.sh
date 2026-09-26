@@ -10,7 +10,7 @@ echo "🚀 Iniciando configuración de dotfiles..."
 mkdir -p ~/.config
 mkdir -p ~/.icons/default
 mkdir -p ~/.local/share/icons/default
-
+mkdir -p ~/Imágenes/CapturasPantalla
 # Archivo .env
 echo "Creando archivo de .env"
 ## Crea el archivo vacío
@@ -23,7 +23,7 @@ chmod 600 ~/dotfiles/.env
 # usuario y contra de git desde terminal
 git config --global core.askpass ""
 # Recomendación: Hacer backup de la carpeta original antes de enlazar
-sudo mv /etc/nixos /etc/nixos.bak 2>/dev/null || true
+# sudo mv /etc/nixos /etc/nixos.bak 2>/dev/null || true
 # IMPORTANTE: Descomentar la siguiente línea y ajustar [equipo] cuando lo uses
 # sudo ln -sfn ~/dotfiles/nixos-[equipo] /etc/nixos
 

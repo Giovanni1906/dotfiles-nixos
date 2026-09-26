@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Thorium Browser
+Comment=Navegador Web rápido
+Exec=appimage-run /home/nova/.local/bin/appimages/Thorium.AppImage %U
+Terminal=false
+Type=Application
+Icon=web-browser
+Categories=Network;WebBrowser;

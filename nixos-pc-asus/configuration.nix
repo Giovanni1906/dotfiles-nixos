@@ -13,7 +13,14 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
+  #libvirtd y virt-manager
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      swtpm.enable = true;
+    };
+  };  programs.virt-manager.enable = true;
+  
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -163,7 +170,7 @@
   users.users."nova" = {
     isNormalUser = true;
     description = "Jorge Velasquez Valdivia";
-    extraGroups = [ "networkmanager" "wheel" "docker" "input" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" "input" "libvirtd" "kvm" ];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
