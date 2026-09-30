@@ -18,15 +18,6 @@ touch ~/dotfiles/.env
 ## permisos de seguridad de inmediato
 chmod 600 ~/dotfiles/.env
 
-
-# 2. Configuración de NixOS (Requiere permisos de administrador)
-# usuario y contra de git desde terminal
-git config --global core.askpass ""
-# Recomendación: Hacer backup de la carpeta original antes de enlazar
-# sudo mv /etc/nixos /etc/nixos.bak 2>/dev/null || true
-# IMPORTANTE: Descomentar la siguiente línea y ajustar [equipo] cuando lo uses
-# sudo ln -sfn ~/dotfiles/nixos-[equipo] /etc/nixos
-
 # 3. Enlaces simbólicos de aplicaciones (Usamos -sfn para forzar y evitar anidaciones)
 rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi  ~/.local/share/icons/icons
 ln -sfn ~/dotfiles/config/hypr ~/.config/hypr
@@ -81,13 +72,13 @@ mkdir -p ~/.local/bin/appimages
 
 # Thorium: Descarga del programa real                                                            
 echo "Descargando Thorium..."                                         
-wget -O ~/.local/bin/appimages/Thorium.AppImage "AQUÍ_VA_EL_ENLACE_COMPLETO_QUE_TERMINA_EN_AVX2.AppImage"
-chmod +x ~/.local/bin/appimages/Thorium.AppImage                      
+# wget -O ~/.local/bin/appimages/Thorium.AppImage "AQUÍ_VA_EL_ENLACE_COMPLETO_QUE_TERMINA_EN_AVX2.AppImage"
+# chmod +x ~/.local/bin/appimages/Thorium.AppImage                      
 
 # Thorium: Creación del acceso directo en el menú (drun)
-echo "Enlazando acceso directo de Thorium..."
-mkdir -p ~/.local/share/applications
-ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
+# echo "Enlazando acceso directo de Thorium..."
+# mkdir -p ~/.local/share/applications
+# ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
 
 # ...
 
