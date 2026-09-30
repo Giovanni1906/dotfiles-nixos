@@ -2,33 +2,52 @@
 
 Este repositorio contiene mi configuración personal de NixOS, Hyprland y varias herramientas de escritorio. La instalación está pensada para simplificarse con `init.sh`, que crea enlaces simbólicos y deja listo el entorno base.
 
-## Instalación rápida
+## Instalación rápida en una PC Nueva (NixOS)
 
-1. Clona el repositorio en `~/dotfiles`.
-2. Revisa y ajusta tu archivo `.env` a partir de `.env.example`.
-3. Ejecuta el script de inicio:
+> **Importante:** Instala NixOS usando la opción "No Desktop" y activa "Allow unfree software".
 
+**1. Clona el repositorio temporalmente**
+Inicia sesión en tu nuevo sistema y descarga los dotfiles:
 ```bash
-bash ~/dotfiles/init.sh
+nix-shell -p git
+git clone [https://github.com/tu_usuario/tu_repositorio.git](https://github.com/tu_usuario/tu_repositorio.git) ~/dotfiles
 ```
 
-4. Reinicia la sesión o el sistema para aplicar los cambios.
+**2. Copia la configuración del sistema (¡No uses enlaces simbólicos!)**
+Para evitar un pánico del kernel por incompatibilidad de discos, debes **copiar** tu configuración general respetando el hardware de la máquina nueva:
+```bash
+sudo cp ~/dotfiles/ruta_de_tu_carpeta/configuration.nix /etc/nixos/configuration.nix
+```
 
-> Nota: `init.sh` asume que el repositorio vive en `~/dotfiles`.
+**3. Verifica las importaciones**
+Abre el archivo recién copiado y asegúrate de que la línea de `imports` solo llame al hardware local y no a configuraciones de otras PCs:
+```bash
+sudo nano /etc/nixos/configuration.nix
+# Debe decir: imports = [ ./hardware-configuration.nix ];
+```
 
-## Qué hace `init.sh`
+**4. Aplica los cambios del sistema base**
+Este paso descargará todos los paquetes esenciales, gestores de ventanas y dependencias necesarias (asegúrate de que `appimage-run` esté en tus systemPackages):
+```bash
+sudo nixos-rebuild switch
+```
 
-El script de inicialización automatiza los pasos más repetitivos:
+**5. Configura tus secretos**
+Revisa y ajusta tu archivo `.env` a partir de `.env.example`:
+```bash
+cp ~/dotfiles/.env.example ~/dotfiles/.env
+nano ~/dotfiles/.env
+```
 
-- crea carpetas base en `~/.config`, `~/.icons/default` y `~/.local/share/icons/default`
-- prepara la configuración de NixOS
-- enlaza los directorios de configuración de Hyprland, Waybar, Kitty, Fastfetch e iconos
-- unifica la configuración GTK
-- da permisos de ejecución a scripts auxiliares
-- fuerza el uso del cursor Catppuccin desde el sistema
-- agrega variables necesarias al perfil del usuario si no existen
+**6. Ejecuta el script de personalización**
+Una vez que el sistema base está instalado, despliega tu entorno gráfico (Hyprland, Waybar, temas y AppImages):
+```bash
+cd ~/dotfiles
+./init.sh
+```
 
-Si quieres revisar o modificar el comportamiento del arranque, el punto principal es `init.sh`.
+**7. Reinicia el sistema**
+Aplica todos los cambios y entra a tu nuevo entorno.
 
 ## Variables de entorno y `.env`
 
