@@ -72,13 +72,13 @@ mkdir -p ~/.local/bin/appimages
 
 # Thorium: Descarga del programa real                                                            
 echo "Descargando Thorium..."                                         
-# wget -O ~/.local/bin/appimages/Thorium.AppImage "AQUÍ_VA_EL_ENLACE_COMPLETO_QUE_TERMINA_EN_AVX2.AppImage"
-# chmod +x ~/.local/bin/appimages/Thorium.AppImage                      
+ wget -O ~/.local/bin/appimages/Thorium.AppImage "https://github.com/Alex313031/Thorium/releases/download/M128.0.6613.189/Thorium_Browser_128.0.6613.189_AVX2.AppImage"
+ chmod +x ~/.local/bin/appimages/Thorium.AppImage                      
 
 # Thorium: Creación del acceso directo en el menú (drun)
-# echo "Enlazando acceso directo de Thorium..."
-# mkdir -p ~/.local/share/applications
-# ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
+ echo "Enlazando acceso directo de Thorium..."
+ mkdir -p ~/.local/share/applications
+ ln -sf ~/dotfiles/applications/thorium.desktop ~/.local/share/applications/thorium.desktop
 
 # ...
 
