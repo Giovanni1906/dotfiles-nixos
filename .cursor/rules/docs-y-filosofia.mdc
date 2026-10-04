@@ -1,3 +1,15 @@
 ---
 alwaysApply: true
 ---
+
+# Lista de atajos (`utils/atajos.txt`)
+
+`utils/atajos.txt` es la única lista de atajos del proyecto. La muestra `SUPER + F1` (`utils/atajos.sh`, Rofi) y la documentación remite a ella en lugar de duplicarla.
+
+Cada vez que se gestione el proyecto, si el cambio añade, quita o modifica un atajo, actualizar `utils/atajos.txt` en el mismo cambio. Fuentes a revisar:
+
+- `config/hypr/hyprland.conf`: líneas `bind*` (teclado y ratón).
+- `config/kitty/kitty.conf`: líneas `map`.
+- `config/waybar/config`: acciones `on-click*` y `on-scroll*` de los módulos.
+
+Formato de cada línea: `Sección | Atajo | Descripción` (en español, verbo en infinitivo, atajo en mayúsculas como `SUPER + SHIFT + S`). Mantener el orden por sección: Hyprland, Kitty, Waybar.

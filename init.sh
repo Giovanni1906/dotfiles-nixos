@@ -39,6 +39,8 @@ chmod +x ~/dotfiles/config/waybar/scripts/pomo.sh
 chmod +x ~/dotfiles/config/waybar/scripts/powermenu.sh
 chmod +x ~/dotfiles/utils/reset-trial-navicat.sh
 chmod +x ~/dotfiles/utils/valent-clipboard.sh
+chmod +x ~/dotfiles/utils/kitty-zoom.sh
+chmod +x ~/dotfiles/utils/atajos.sh
 
 # 6. Forzar enlaces del cursor Catppuccin directo desde NixOS
 rm -rf ~/.icons/catppuccin-mocha-sky-cursors ~/.local/share/icons/catppuccin-mocha-sky-cursors

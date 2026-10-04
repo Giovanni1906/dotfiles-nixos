@@ -62,20 +62,9 @@ Después de cada cambio que funcione: `git add -A && git commit -m "feat|fix|doc
 | `reset-trial-navicat` | `~/dotfiles/utils/reset-trial-navicat.sh` |
 | `ip-public` | `curl -s ipinfo.io/ip` |
 
-## Atajos principales de Hyprland
+## Atajos
 
-| Atajo | Acción |
-| --- | --- |
-| `SUPER + Q` / `E` / `R` / `B` | Kitty / Thunar / Rofi drun / Zen Browser |
-| `SUPER + C` | Cerrar ventana |
-| `SUPER + V` / `F` | Flotante / pantalla completa |
-| `SUPER + X` | Menú de apagado |
-| `SUPER + M` | Cerrar sesión |
-| `SUPER + flechas` / `SUPER + SHIFT + flechas` | Mover foco / mover ventana |
-| `SUPER + 0-9` / `SUPER + SHIFT + 0-9` | Ir a workspace / enviar ventana |
-| `Print` | Captura completa al portapapeles y a `~/Imágenes/CapturasPantalla/` |
-| `SUPER + SHIFT + S` | Captura de área (`slurp`) al portapapeles y a archivo |
-| `CTRL + rueda del ratón` | Aumentar / reducir la fuente de la ventana de Kitty enfocada (`utils/kitty-zoom.sh`) |
+La lista completa (Hyprland, Kitty y Waybar) está en `utils/atajos.txt` y se ve con **`SUPER + F1`** o con el botón del teclado en Waybar (módulo `custom/atajos`); ambos ejecutan `utils/atajos.sh` (Rofi; escribir filtra). Es la única fuente: no duplicarla aquí. Al añadir, quitar o cambiar un atajo, actualizar ese archivo en el mismo cambio (ver `.cursor/rules/docs-y-filosofia.mdc`).
 
 ## Comandos de Valent (comandos remotos desde el celular)
 

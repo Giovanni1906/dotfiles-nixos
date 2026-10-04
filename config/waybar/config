@@ -24,6 +24,7 @@
         // "keyboard-state",
         "clock",
         "tray",
+        "custom/atajos",
         "custom/power"
     ],
     // Modules configuration
@@ -147,6 +148,12 @@
         "on-click-right": "~/.config/waybar/scripts/pomo.sh stop",
         "interval": 1,
         "return-type": "json" // ¡ESTO ES CLAVE!
+    },
+
+    "custom/atajos": {
+        "format": " \uf11c ", // Icono de teclado (Nerd Font)
+        "tooltip-format": "Atajos de teclado (SUPER + F1)",
+        "on-click": "~/dotfiles/utils/atajos.sh"
     },
 
     "custom/power": {

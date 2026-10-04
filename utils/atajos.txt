@@ -1,0 +1,41 @@
+# Lista de atajos que muestra utils/atajos.sh (SUPER + F1).
+# Formato: Sección | Atajo | Descripción
+# Mantener sincronizado con config/hypr/hyprland.conf, config/kitty/kitty.conf y config/waybar/config.
+
+Hyprland | SUPER + F1                  | Mostrar esta lista de atajos
+Hyprland | SUPER + Q                   | Abrir terminal (Kitty)
+Hyprland | SUPER + E                   | Abrir gestor de archivos (Thunar)
+Hyprland | SUPER + R                   | Abrir lanzador de aplicaciones (Rofi)
+Hyprland | SUPER + B                   | Abrir navegador (Zen Browser)
+Hyprland | SUPER + C                   | Cerrar ventana activa
+Hyprland | SUPER + V                   | Alternar ventana flotante
+Hyprland | SUPER + F                   | Pantalla completa
+Hyprland | SUPER + X                   | Menú de apagado
+Hyprland | SUPER + M                   | Cerrar sesión
+Hyprland | SUPER + Flechas             | Mover el foco entre ventanas
+Hyprland | SUPER + SHIFT + Flechas     | Mover la ventana dentro del mosaico
+Hyprland | SUPER + 0-9                 | Ir al workspace 1-10
+Hyprland | SUPER + SHIFT + 0-9         | Enviar ventana al workspace 1-10
+Hyprland | SUPER + Arrastrar clic izq. | Mover ventana con el ratón
+Hyprland | SUPER + Arrastrar clic der. | Redimensionar ventana con el ratón
+Hyprland | Impr Pant                   | Captura completa (portapapeles + ~/Imágenes/CapturasPantalla)
+Hyprland | SUPER + SHIFT + S           | Captura de un área (portapapeles + archivo)
+
+Kitty    | CTRL + Rueda del ratón      | Aumentar / reducir el tamaño de la fuente
+Kitty    | CTRL + Enter                | Nuevo panel a la derecha
+Kitty    | CTRL + SHIFT + Enter        | Nuevo panel abajo
+Kitty    | CTRL + W                    | Cerrar panel activo
+Kitty    | CTRL + Flechas              | Mover el foco entre paneles
+Kitty    | CTRL + SHIFT + Flechas      | Mover el panel de posición
+Kitty    | CTRL + ALT + Flechas        | Redimensionar el panel
+Kitty    | CTRL + F                    | Maximizar / restaurar el panel activo
+Kitty    | CTRL + SHIFT + F5           | Recargar la configuración de Kitty
+
+Waybar   | Clic en un workspace        | Ir a ese workspace
+Waybar   | Clic en Pomodoro            | Iniciar Pomodoro
+Waybar   | Clic derecho en Pomodoro    | Detener Pomodoro
+Waybar   | Clic en volumen             | Abrir / cerrar el mezclador (pulsemixer)
+Waybar   | Clic en red                 | Abrir el editor de conexiones
+Waybar   | Clic en multimedia          | Reproducir / pausar
+Waybar   | Clic en el teclado          | Mostrar esta lista de atajos
+Waybar   | Clic en ⏻                   | Menú de apagado

@@ -48,7 +48,8 @@ dotfiles/
 │   ├── default/index.theme      # Hereda el cursor Catppuccin
 │   └── catppuccin-mocha-sky-cursors -> /run/current-system/sw/share/icons/...  (symlink versionado)
 ├── applications/thorium.desktop # Acceso directo para Rofi drun
-├── utils/                       # Scripts sueltos (valent-clipboard.sh, reset-trial-navicat.sh, kitty-zoom.sh)
+├── utils/                       # Scripts sueltos (valent-clipboard.sh, reset-trial-navicat.sh, kitty-zoom.sh, atajos.sh)
+│   └── atajos.txt               # Lista única de atajos que muestra SUPER + F1
 └── public/                      # Fondos de pantalla y PNG para el logo de fastfetch
 ```
 
@@ -68,7 +69,8 @@ flowchart TD
     PKGS --> GREETD[greetd/tuigreet] --> HYPR[Hyprland]
     CFG --> HYPR
     HYPR -->|exec-once| WAYBAR[Waybar] & MAKO[Mako] & VALENT[Valent] & NMA[nm-applet] & SWAYBG[swaybg] & VNC[WayVNC]
-    WAYBAR --> POMO[pomo.sh] & POWER[powermenu.sh]
+    WAYBAR --> POMO[pomo.sh] & POWER[powermenu.sh] & ATAJOS[atajos.sh]
+    HYPR -->|SUPER + F1| ATAJOS
     HYPR -->|wl-paste --watch| CLIP[valent-clipboard.sh] -->|gdbus| VALENT
     VALENT <-->|LAN / Tailscale| PHONE[Celular]
 ```
