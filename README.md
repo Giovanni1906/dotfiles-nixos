@@ -46,7 +46,21 @@ cd ~/dotfiles
 ./init.sh
 ```
 
-**7. Reinicia el sistema**
+**7. Configura el acceso a GitHub (para hacer `git push`)**
+`gh` ya viene instalado desde `configuration.nix`. Inicia sesión (elige GitHub.com, HTTPS y "Login with a web browser") y deja que git use esas credenciales:
+```bash
+gh auth login
+gh auth setup-git
+```
+`gh auth setup-git` guarda en `~/.gitconfig` la ruta de `gh` dentro de `/nix/store`, que desaparece al actualizar `gh` y limpiar el store. Cámbiala por el comando `gh` del sistema:
+```bash
+for h in https://github.com https://gist.github.com; do
+  git config --global --replace-all "credential.$h.helper" '!gh auth git-credential' '/nix/store/'
+done
+```
+Comprueba que funciona con `git ls-remote origin HEAD` (debe responder sin pedir usuario).
+
+**8. Reinicia el sistema**
 Aplica todos los cambios y entra a tu nuevo entorno.
 
 ## Variables de entorno y `.env`

@@ -259,6 +259,7 @@
     postman	
     code-cursor
     remmina
+    gh						# GitHub CLI (credenciales para git push)
     ];
   # --------------------------------------------------
 
