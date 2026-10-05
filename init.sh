@@ -156,9 +156,9 @@ nuevo_equipo() {
     version=$(grep -oP 'system\.stateVersion\s*=\s*"\K[0-9.]+' /etc/nixos/configuration.nix 2> /dev/null || true)
     [ -n "$version" ] || version=$(nixos-version | cut -d. -f1,2)
     mkdir -p "$destino"
-    sed -e "s/@EQUIPO@/$nombre/g" -e "s/@VERSION@/$version/g" \
+    sed -e "s/@EQUIPO@/$nombre/g" -e "s/@VERSION@/$version/g" -e "s/@USUARIO@/$USER/g" \
         "$DOTFILES/nixos/equipos/plantilla/default.nix" > "$destino/default.nix"
-    ok "Creado nixos/equipos/$nombre (stateVersion $version)"
+    ok "Creado nixos/equipos/$nombre (stateVersion $version, usuario $USER)"
     aviso "Revisa los módulos que importa nixos/equipos/$nombre/default.nix y súbelo con git"
     [ -d /sys/firmware/efi ] || aviso "Esta máquina arranca en modo BIOS: ajusta boot.loader.grub en nixos/equipos/$nombre/default.nix"
 }

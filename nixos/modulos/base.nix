@@ -10,6 +10,12 @@
     description = "Nombre de la carpeta del equipo en nixos/equipos/ (lo usan los alias).";
   };
 
+  options.dotfiles.usuario = lib.mkOption {
+    type = lib.types.str;
+    default = "nova";
+    description = "Usuario principal del equipo (los módulos le añaden grupos y paquetes).";
+  };
+
   config = {
     # --------------------------------------------------
     # ---          Nix y limpieza automática         ---
@@ -60,7 +66,7 @@
     # ---                  Usuario                   ---
     # --------------------------------------------------
     # Contraseña con `passwd`. Los grupos de Docker, libvirt, etc. los añade cada módulo.
-    users.users."nova" = {
+    users.users.${config.dotfiles.usuario} = {
       isNormalUser = true;
       description = "Jorge Velasquez Valdivia";
       extraGroups = [ "networkmanager" "wheel" "input" ];

@@ -170,3 +170,11 @@
 - **Consecuencias**:
   - Positivas: las carpetas cambian con `SUPER + F2`, en vivo en Thunar.
   - Negativas: solo funciona con temas de iconos Papirus (con otros avisa y deja las carpetas como están); el tema de iconos vive fuera del repo.
+
+## ADR-025: Usuario por equipo y Kubernetes local en desarrollo
+- **Fecha**: 2026-10-05
+- **Contexto**: La PC de admisión (`pc-admision-jorge`) usa el usuario `admision` y arranca con systemd-boot; los módulos tenían `nova` fijo. Su configuración antigua incluía la capa de Kubernetes local (Kind + Skaffold) con dominios `*.admision.dev` en `/etc/hosts`.
+- **Decisión**: Opción `dotfiles.usuario` en `base.nix` (por defecto `nova`); los módulos usan `users.users.${config.dotfiles.usuario}`. `pc-admision-jorge` la fija en `admision`, mantiene systemd-boot (el tema de GRUB de `tema.nix` no aplica) y define sus aliases de infraestructura (`k-prod`, `open-conexion`). Kind, Skaffold, `kubectl`, `gnumake`, los dominios locales y el aumento de inotify van en `desarrollo.nix`, para todos los equipos que lo usan.
+- **Consecuencias**:
+  - Positivas: los mismos módulos sirven para cualquier usuario; el entorno de Kubernetes local es igual en todas las máquinas de desarrollo.
+  - Negativas: el repo sigue debiendo estar en `~/dotfiles` del usuario; los dominios de admisión apuntan a `127.0.0.1` en todas las máquinas con `desarrollo.nix`.

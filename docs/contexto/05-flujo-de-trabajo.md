@@ -2,7 +2,7 @@
 
 ## Requisitos Previos
 
-- PC x86_64 con NixOS instalado con la opción **"No Desktop"** y **"Allow unfree software"** marcados, y usuario `nova`.
+- PC x86_64 con NixOS instalado con la opción **"No Desktop"** y **"Allow unfree software"** marcados, y usuario `nova` (u otro: se indica en el equipo con `dotfiles.usuario`).
 - Repo clonado en `~/dotfiles` (las rutas son absolutas).
 - Conexión a internet (Nix, Flathub, descarga de Thorium desde GitHub, Tailscale).
 - Cuenta de Tailscale (el login se hace con GitHub durante `init.sh`).
@@ -85,7 +85,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | `tema-aplicar [nombre]` | `utils/aplicar-tema.sh` (genera los `tema.*` y recarga el escritorio) | escritorio |
 | `hypr-config`, `kitty-config`, `waybar-config` | Abren la config correspondiente con `micro` | escritorio |
 | `d`, `dc-up`, `dc-down` | Docker / `docker compose up -d` / `down` | desarrollo |
-| `k` | `kubectl` (no instalado actualmente) | desarrollo |
+| `k` | `kubectl` | desarrollo |
 | `reset-trial-navicat` | `utils/reset-trial-navicat.sh` | desarrollo |
 | `remote-conexion` | `utils/wayvnc-tailscale.sh` (WayVNC solo en la IP de Tailscale; ya arranca al iniciar sesión) | remoto |
 

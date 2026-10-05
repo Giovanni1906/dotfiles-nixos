@@ -11,6 +11,7 @@ dotfiles/
 │   ├── modulos/       # Piezas por función: base, escritorio, tema, desarrollo, remoto, juegos
 │   └── equipos/       # Una carpeta por máquina: qué módulos usa, nombre, arranque
 │       ├── pc-asus/
+│       ├── pc-admision-jorge/
 │       └── plantilla/ # Base para equipos nuevos (./init.sh nuevo-equipo <nombre>)
 ├── config/            # Configuración de cada app, enlazada en ~/.config/<app>
 ├── tema/temas/        # Temas completos (colores, fuente, fondo); se eligen con SUPER + F2
@@ -33,7 +34,7 @@ dotfiles/
 
 ## Instalación en una máquina nueva
 
-> Instala NixOS con la opción "No Desktop" y "Allow unfree software". Usa el usuario `nova` (lo definen los módulos).
+> Instala NixOS con la opción "No Desktop" y "Allow unfree software". Usa el usuario `nova` (lo definen los módulos); si la máquina usa otro, ponlo en su equipo con `dotfiles.usuario = "<usuario>";`.
 
 ```bash
 nix-shell -p git

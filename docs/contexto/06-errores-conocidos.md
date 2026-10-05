@@ -7,11 +7,6 @@
 - **Error**: No hay agente polkit gráfico; las apps que piden contraseña de administrador (Thunar al montar, virt-manager, etc.) fallan o no muestran diálogo.
   - **Causa**: `exec-once = ${pkgs.polkit_gnome}/libexec/…` usa interpolación de Nix dentro de `hyprland.conf`, que es un archivo plano y no pasa por Nix. Además `polkit_gnome` no está en `systemPackages`.
   - **Solución**: añadir `polkit_gnome` a `environment.systemPackages` y usar `exec-once = /run/current-system/sw/libexec/polkit-gnome-authentication-agent-1`, o declarar un servicio de usuario en `configuration.nix` (`systemd.user.services.polkit-gnome-authentication-agent-1`).
-
-- **Error**: Alias `k` falla con "command not found".
-  - **Causa**: `kubectl` no está en `systemPackages`.
-  - **Solución**: instalar `kubectl` o eliminar el alias.
-
 ## Riesgos de seguridad
 
 - **WayVNC sin contraseña dentro de la tailnet**: cualquier dispositivo de la cuenta de Tailscale puede ver y controlar el escritorio (decisión del usuario, ver ADR-010). Si se comparte la tailnet, configurar `enable_auth` en `~/.config/wayvnc/config`.
@@ -23,7 +18,7 @@
 
 - **ID de dispositivo Valent hardcodeado** en `valent-clipboard.sh` (`9f91b45437b94e139957b9d336079ea0`): si se vuelve a emparejar el celular o se cambia de teléfono, el puente deja de funcionar en silencio (la salida va a `/dev/null`). Mover el ID a `.env`.
 - **Escapado incompleto en `valent-clipboard.sh`**: solo escapa `"`; textos con `\` o saltos de línea pueden romper el GVariant que recibe `gdbus`.
-- **Rutas hardcodeadas a `/home/nova`** en `applications/thorium.desktop` y `config/gtkrc-2.0`: fallan con otro usuario.
+- **Ruta hardcodeada a `/home/nova`** en `config/gtkrc-2.0` (la escribe nwg-look): falla con otro usuario.
 - **Thorium fijado a la versión M128 AVX2** en `init.sh`: sin actualizaciones; falla en CPUs sin AVX2. Para actualizarlo, cambiar la URL y borrar `~/.local/bin/appimages/Thorium.AppImage`.
 - **`hardware-configuration.nix` sin respaldo en git**: si se pierde, `init.sh sistema` lo regenera con `nixos-generate-config`, que puede omitir módulos como `uas`/`sd_mod` (irrelevante si el disco raíz es interno) y copia todo lo montado en ese momento (`init.sh` filtra Docker, overlay, fuse, `/run` y `/tmp`; revisar si hay otros montajes temporales).
 - **Entrada antigua de systemd-boot en el firmware** (`Linux Boot Manager`, `\EFI\systemd\systemd-bootx64.efi`): queda como respaldo detrás de GRUB en el orden de arranque; sus entradas apuntan a generaciones viejas.
@@ -37,6 +32,8 @@
 
 ## Resueltos
 
+- **2026-10-05** — Los módulos declaraban el usuario `nova` fijo: en la PC de admisión (usuario `admision`) NixOS habría creado `nova` y borrado `admision`. Ahora cada equipo elige su usuario con `dotfiles.usuario` (ADR-025). `thorium.desktop` usa `$HOME` en lugar de `/home/nova`.
+- **2026-10-05** — Alias `k` fallaba con "command not found": `desarrollo.nix` instala `kubectl`, `kind` y `skaffold`.
 - **2026-10-04** — WayVNC no arrancaba al iniciar sesión (`exec-once = exec-once = wayvnc 0.0.0.0` en `hyprland.conf`) y, lanzado a mano, quedaba expuesto sin contraseña en toda la red local. Ahora `utils/wayvnc-tailscale.sh` espera la IP de Tailscale y escucha solo en ella, y el firewall abre el 5900 solo en `tailscale0`.
 - **2026-10-04** — Las carpetas siempre eran azules: el tema genera `dotfiles-iconos` (Papirus con las carpetas de `COLOR_CARPETAS`, ver ADR-024).
 

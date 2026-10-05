@@ -1,5 +1,5 @@
 # =============================================================================
-# DESARROLLO: contenedores, máquinas virtuales y editores
+# DESARROLLO: contenedores, Kubernetes local, máquinas virtuales y editores
 # =============================================================================
 
 { config, pkgs, ... }:
@@ -14,7 +14,21 @@
   };
   programs.virt-manager.enable = true;
 
-  users.users."nova".extraGroups = [ "docker" "libvirtd" "kvm" ];
+  users.users.${config.dotfiles.usuario}.extraGroups = [ "docker" "libvirtd" "kvm" ];
+
+  # --------------------------------------------------
+  # ---     Kubernetes local (Kind + Skaffold)     ---
+  # --------------------------------------------------
+  # Dominios locales de la capa k8s/ (Ingress de Kind en 127.0.0.1)
+  networking.extraHosts = ''
+    127.0.0.1 postula.admision.dev panel.postula.admision.dev credential.postula.admision.dev valida.postula.admision.dev asisto.admision.dev
+  '';
+
+  # Kind y la sincronización de archivos de Skaffold necesitan más inotify
+  boot.kernel.sysctl = {
+    "fs.inotify.max_user_watches" = 524288;
+    "fs.inotify.max_user_instances" = 512;
+  };
 
   environment.systemPackages = with pkgs; [
     vscode                      # Editor de código con Copilot
@@ -22,6 +36,10 @@
     filezilla
     navicat-premium
     postman
+    kubectl                     # Cliente de Kubernetes (alias k)
+    kind                        # Clúster de Kubernetes dentro de Docker
+    skaffold                    # Construye y despliega en el clúster mientras se edita
+    gnumake                     # make para los Makefile de los proyectos
   ];
 
   environment.shellAliases = {

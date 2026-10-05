@@ -5,7 +5,7 @@
 ## Conceptos del proyecto
 
 - **Dotfiles**: este repositorio. Configuración personal versionada que se despliega en `~/.config`, `~/.local/share` y `/etc/nixos`.
-- **Equipo**: una máquina física, descrita en `nixos/equipos/<equipo>/default.nix` (hoy `pc-asus`). Elige qué módulos usa; no contiene hardware. Su nombre queda en la opción `dotfiles.equipo`.
+- **Equipo**: una máquina física, descrita en `nixos/equipos/<equipo>/default.nix` (hoy `pc-asus` y `pc-admision-jorge`). Elige qué módulos usa y su usuario (`dotfiles.usuario`); no contiene hardware. Su nombre queda en la opción `dotfiles.equipo`.
 - **Módulo**: archivo de `nixos/modulos/` que agrupa una función del sistema (base, escritorio, tema, desarrollo, remoto, juegos). Los equipos lo activan importándolo.
 - **Plantilla**: `nixos/equipos/plantilla`, base de los equipos nuevos (`./init.sh nuevo-equipo <nombre>`).
 - **Local**: lo que solo existe en una máquina y no se versiona: `/etc/nixos/*`, `tema/tema.conf`, `config/hypr/local.conf`, `.env` y los archivos generados por el tema.

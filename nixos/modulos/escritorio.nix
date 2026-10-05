@@ -63,7 +63,7 @@
   programs.firefox.enable = true;
   services.flatpak.enable = true;              # Zen Browser (lo instala init.sh)
 
-  users.users."nova".packages = with pkgs; [
+  users.users.${config.dotfiles.usuario}.packages = with pkgs; [
     kdePackages.kate
   ];
 

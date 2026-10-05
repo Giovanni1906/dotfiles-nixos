@@ -23,7 +23,7 @@
 
 ### Nix (`nixos/`)
 - Cada módulo empieza con un comentario que dice qué agrupa; los equipos importan con rutas relativas (`../../modulos/x.nix`).
-- Un módulo que necesita grupos para `nova` los añade en su propio archivo (`users.users.nova.extraGroups`); Nix fusiona las listas.
+- Un módulo que necesita grupos para el usuario los añade en su propio archivo (`users.users.${config.dotfiles.usuario}.extraGroups`); Nix fusiona las listas. Nunca escribir `nova` fijo: cada equipo elige su usuario con `dotfiles.usuario`.
 - Secciones delimitadas con banners de comentarios:
   ```nix
   # --------------------------------------------------

@@ -6,7 +6,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 
 - **Alcance**: sistema operativo (paquetes, servicios, firewall, usuarios), sesión gráfica (compositor, barra, lanzador, terminal, temas), utilidades propias (Pomodoro, menú de apagado, selector de temas, puente de portapapeles con el celular) y acceso remoto.
 - **Fuera de alcance**: no hay aplicación, API ni base de datos. No se usa Home Manager ni flakes (aunque `flakes` está habilitado en Nix).
-- **Equipos**: `pc-asus` (CPU AMD, disco NVMe, ext4, GRUB EFI). La laptop se añadirá como otro equipo. Usuario `nova`. Remoto: `github.com/Giovanni1906/dotfiles-nixos`.
+- **Equipos**: `pc-asus` (CPU AMD, disco NVMe, ext4, GRUB EFI, usuario `nova`) y `pc-admision-jorge` (CPU Intel, disco NVMe, ext4, systemd-boot, usuario `admision`). La laptop se añadirá como otro equipo. El usuario lo elige cada equipo con `dotfiles.usuario` (por defecto `nova`). Remoto: `github.com/Giovanni1906/dotfiles-nixos`.
 
 ## Stack Tecnológico
 
@@ -38,14 +38,15 @@ dotfiles/
 ├── .env.example                 # Plantilla de secretos (PASS_SWAYLOCK)
 ├── nixos/
 │   ├── modulos/                 # Configuración de sistema por función (compartida)
-│   │   ├── base.nix             # Nix, idioma, red, audio, usuario nova, CLI, aliases; opción dotfiles.equipo
+│   │   ├── base.nix             # Nix, idioma, red, audio, usuario, CLI, aliases; opciones dotfiles.equipo y dotfiles.usuario
 │   │   ├── escritorio.nix       # Hyprland, hyprlock, portales, fuentes, apps gráficas, cursor e iconos
 │   │   ├── tema.nix             # GRUB, login greetd/nwg-hello y cursor, leídos del tema activo
-│   │   ├── desarrollo.nix       # Docker, virtualización, editores y clientes de BD/API
+│   │   ├── desarrollo.nix       # Docker, Kubernetes local (Kind, Skaffold, dominios en /etc/hosts), virtualización, editores y clientes de BD/API
 │   │   ├── remoto.nix           # Tailscale, Valent, WayVNC, Remmina y sus puertos
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
 │   └── equipos/                 # Una carpeta por máquina (sin hardware)
 │       ├── pc-asus/default.nix  # Módulos que usa, hostname, cargador de arranque, stateVersion
+│       ├── pc-admision-jorge/default.nix  # Igual, con usuario admision, systemd-boot y aliases de admisión
 │       └── plantilla/default.nix  # Base que copia `init.sh nuevo-equipo`
 ├── tema/
 │   ├── temas/*.conf             # Temas completos: nova (por defecto), carmesi, violeta, noche, neon, relampago
@@ -102,7 +103,7 @@ flowchart TD
 
 ## Capas y responsabilidades
 
-- **Módulos de sistema (`nixos/modulos/`)**: única fuente de verdad de paquetes, servicios, firewall y aliases, agrupados por función. Cada módulo añade sus grupos al usuario `nova` (las listas de Nix se fusionan).
+- **Módulos de sistema (`nixos/modulos/`)**: única fuente de verdad de paquetes, servicios, firewall y aliases, agrupados por función. Cada módulo añade sus grupos al usuario del equipo, `config.dotfiles.usuario` (las listas de Nix se fusionan).
 - **Equipos (`nixos/equipos/<equipo>/`)**: deciden qué módulos usa cada máquina y lo que es propio de ella (hostname, cargador de arranque, `stateVersion`, paquetes sueltos). No contienen hardware.
 - **Capa local de cada máquina**: `/etc/nixos/configuration.nix` (solo importa el hardware local y el equipo), `hardware-configuration.nix`, `tema/tema.conf`, `config/hypr/local.conf` y `.env`. `init.sh` los crea; ninguno se versiona.
 - **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes. Al final incluye `local.conf`.

@@ -3,6 +3,7 @@
 # Locales de cada máquina (los crea init.sh)
 tema/tema.conf
 config/hypr/local.conf
+config/gtk-3.0/bookmarks
 
 # Generados por utils/aplicar-tema.sh desde el tema activo
 config/hypr/tema.conf

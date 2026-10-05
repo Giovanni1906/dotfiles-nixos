@@ -20,6 +20,7 @@
   ];
 
   dotfiles.equipo = "@EQUIPO@";
+  dotfiles.usuario = "@USUARIO@";
   networking.hostName = "@EQUIPO@";
 
   # Arranque: GRUB en modo EFI. Para BIOS antiguo: efiSupport = false y
