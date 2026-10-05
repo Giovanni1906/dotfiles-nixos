@@ -95,7 +95,8 @@
     catppuccin-cursors.mochaSky # Cursor
     papirus-icon-theme          # Iconos
     adwaita-icon-theme          # Iconos y cursores base oscuros
-    gnome-themes-extra          # Aquí vive físicamente el código de Adwaita-dark
+    gnome-themes-extra          # Adwaita-dark (solo para apps GTK2)
+    adw-gtk3                    # Tema GTK3/GTK4 con colores redefinibles: los pone el tema (gtk.css)
     gsettings-desktop-schemas   # El diccionario de reglas visuales
     glib                        # Provee el comando gsettings
     nwg-look                    # Gestor gráfico de apariencia exclusivo para Wayland/Hyprland

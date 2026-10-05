@@ -175,6 +175,69 @@ border-color=$TEXTO_TENUE
 border-color=$URGENTE
 EOF
 
+# --- COLORES DE GTK (Thunar y demás apps GTK3/GTK4) ---
+# adw-gtk3 define sus colores como variables que se pueden redefinir. El tema GTK
+# "dotfiles-tema" lo importa y pone la paleta: GTK vuelve a leer el tema al cambiar su nombre,
+# así las ventanas abiertas se recolorean (el gtk.css del usuario solo se lee al abrir la app).
+# Las apps de libadwaita (GTK4) ignoran el tema GTK y leen ~/.config/gtk-4.0/gtk.css.
+TEMA_GTK="$HOME/.local/share/themes/dotfiles-tema"
+ADW_GTK3=""
+for dir in /run/current-system/sw/share/themes "$HOME/.local/share/themes"; do
+    [ -d "$dir/adw-gtk3-dark" ] && { ADW_GTK3="$dir/adw-gtk3-dark"; break; }
+done
+colores_gtk() {
+    cat <<EOF
+@define-color accent_color $ACENTO;
+@define-color accent_bg_color $ACENTO;
+@define-color accent_fg_color $FONDO;
+@define-color destructive_color $URGENTE;
+@define-color destructive_bg_color $URGENTE;
+@define-color destructive_fg_color $FONDO;
+@define-color error_color $URGENTE;
+@define-color error_bg_color $URGENTE;
+@define-color error_fg_color $FONDO;
+@define-color success_color $EXITO;
+@define-color success_bg_color $EXITO;
+@define-color success_fg_color $FONDO;
+@define-color warning_color $AVISO;
+@define-color warning_bg_color $AVISO;
+@define-color warning_fg_color $FONDO;
+
+@define-color window_bg_color $FONDO;
+@define-color window_fg_color $TEXTO;
+@define-color view_bg_color shade($FONDO, 0.8);
+@define-color view_fg_color $TEXTO;
+@define-color headerbar_bg_color mix($FONDO, $SUPERFICIE, 0.45);
+@define-color headerbar_fg_color $TEXTO;
+@define-color headerbar_backdrop_color $FONDO;
+@define-color sidebar_bg_color mix($FONDO, $SUPERFICIE, 0.25);
+@define-color sidebar_fg_color $TEXTO;
+@define-color sidebar_backdrop_color mix($FONDO, $SUPERFICIE, 0.15);
+@define-color card_bg_color alpha($SUPERFICIE, 0.35);
+@define-color card_fg_color $TEXTO;
+@define-color dialog_bg_color mix($FONDO, $SUPERFICIE, 0.3);
+@define-color dialog_fg_color $TEXTO;
+@define-color popover_bg_color mix($FONDO, $SUPERFICIE, 0.3);
+@define-color popover_fg_color $TEXTO;
+EOF
+}
+mkdir -p "$TEMA_GTK/gtk-3.0" "$TEMA_GTK/gtk-4.0"
+printf '[Desktop Entry]\nType=X-GNOME-Metatheme\nName=dotfiles-tema\n\n[X-GNOME-Metatheme]\nGtkTheme=dotfiles-tema\n' \
+    > "$TEMA_GTK/index.theme"
+if [ -n "$ADW_GTK3" ]; then
+    { echo "/* $CABECERA */"; echo "@import url(\"file://$ADW_GTK3/gtk-3.0/gtk.css\");"; colores_gtk; } \
+        | escribir "$TEMA_GTK/gtk-3.0/gtk.css"
+    { echo "/* $CABECERA */"; echo "@import url(\"file://$ADW_GTK3/gtk-4.0/gtk.css\");"; } \
+        | escribir "$TEMA_GTK/gtk-4.0/gtk.css"
+else
+    # Sin adw-gtk3 (falta nix-switch): Adwaita oscuro de GTK, sin los colores del tema
+    echo "Aviso: adw-gtk3 no está instalado (nix-switch): las apps GTK no toman los colores del tema" >&2
+    echo '@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");' \
+        | escribir "$TEMA_GTK/gtk-3.0/gtk.css"
+    : | escribir "$TEMA_GTK/gtk-4.0/gtk.css"
+fi
+{ echo "/* $CABECERA */"; colores_gtk; } | escribir "$DOTFILES/config/gtk-4.0/gtk.css"
+
 # --- GTK Y CURSOR (solo las claves del tema; el resto lo gestiona nwg-look) ---
 sed -i -E \
     -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS|" \
@@ -202,6 +265,10 @@ if command -v dconf > /dev/null; then
     dconf write /org/gnome/desktop/interface/icon-theme "'$ICONOS'" || true
     dconf write /org/gnome/desktop/interface/cursor-theme "'$CURSOR'" || true
     dconf write /org/gnome/desktop/interface/cursor-size "$CURSOR_TAMANO" || true
+    # Cambiar el nombre del tema GTK y volver hace que las apps abiertas lo relean
+    dconf write /org/gnome/desktop/interface/gtk-theme "'adw-gtk3-dark'" || true
+    sleep 0.3
+    dconf write /org/gnome/desktop/interface/gtk-theme "'dotfiles-tema'" || true
 fi
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     hyprctl reload > /dev/null || echo "Aviso: no se pudo recargar Hyprland (hyprctl reload)" >&2
