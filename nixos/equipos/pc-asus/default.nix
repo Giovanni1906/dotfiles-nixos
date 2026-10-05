@@ -25,6 +25,7 @@
     enable = true;
     efiSupport = true;
     device = "nodev";
+    configurationLimit = 10;   # Generaciones en el submenú (para volver atrás si una falla)
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
