@@ -146,3 +146,11 @@
 - **Consecuencias**:
   - Positivas: instalar y actualizar es el mismo script; se puede repetir sin efectos acumulados; el alias `dotfiles-actualizar` sincroniza una máquina en un paso.
   - Negativas: depende de que el repo esté en `~/dotfiles`; `nixos-rebuild switch` en `actualizar` tarda aunque no haya cambios de sistema.
+
+## ADR-022: Tareas en un tablero kanban de Notion
+- **Fecha**: 2026-10-04
+- **Contexto**: Los cambios grandes (reorganización, arranque, sesión) tienen varios pasos, algunos solo los puede hacer el usuario (sudo, reiniciar), y no quedaba registro de qué estaba hecho y qué faltaba revisar.
+- **Decisión**: Cada tarea es una tarjeta en el tablero de Notion "nixos" con diagnóstico, pasos y verificación. El agente las pasa por Not started → In progress → In revision; el usuario las revisa y las pasa a Done. La regla `.cursor/rules/kanban-notion.mdc` lo hace obligatorio.
+- **Consecuencias**:
+  - Positivas: el estado del proyecto se ve de un vistazo y lo pendiente del usuario queda escrito en cada tarjeta.
+  - Negativas: depende del conector de Notion en Cursor; el historial técnico sigue en git y los dos pueden desincronizarse.

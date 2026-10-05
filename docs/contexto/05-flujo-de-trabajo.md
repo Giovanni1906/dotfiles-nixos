@@ -8,6 +8,10 @@
 - Cuenta de Tailscale (el login se hace con GitHub durante `init.sh`).
 - Celular con Valent/KDE Connect si se quieren los comandos remotos.
 
+## Gestión de tareas (tablero kanban)
+
+Las tareas del proyecto viven en el tablero de Notion [nixos](https://app.notion.com/p/nixos-3f0bf08bb2f880849364ea3f4cb40c2d), con los estados Not started → In progress → In revision → Done. Cada tarjeta lleva diagnóstico, pasos y verificación. El agente mueve las tarjetas hasta In revision; el usuario las revisa y las pasa a Done. La regla `.cursor/rules/kanban-notion.mdc` lo aplica en cada sesión de Cursor.
+
 ## Instalación en una máquina nueva
 
 1. Clonar y ejecutar:
