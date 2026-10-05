@@ -84,6 +84,12 @@ Comprueba que funciona con `git ls-remote origin HEAD` (debe responder sin pedir
 | Ajustar monitores o touchpad de esta máquina | `config/hypr/local.conf` (no se versiona) |
 | Cambiar el tema | `SUPER + F2` |
 
+### Si una generación no arranca
+
+Cada `nix-switch` crea una generación nueva y GRUB guarda las 10 últimas en su submenú ("NixOS - All configurations"). Si la nueva falla (por ejemplo, queda en modo de emergencia), reinicia, entra al submenú y elige la anterior; una vez dentro, corrige el problema y vuelve a ejecutar `nix-switch`. Cuando la nueva funcione, `nix-clean` borra las generaciones viejas.
+
+El login y GRUB nuevos se ven **después de reiniciar**: NixOS no reinicia la pantalla de inicio de sesión durante un switch para no cerrar tu sesión, así que hasta entonces cerrar sesión muestra la anterior. `init.sh` avisa cuando pasa.
+
 Cada paso de `init.sh` se puede ejecutar por separado (`./init.sh usuario`, `./init.sh sistema`, `./init.sh apps`...) y repetir sin romper nada. `./init.sh sistema --simular` muestra lo que haría con `sudo` sin ejecutarlo.
 
 ## Tema: colores, tipografía, cursor y fondo

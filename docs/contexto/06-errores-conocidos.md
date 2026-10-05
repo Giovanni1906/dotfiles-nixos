@@ -34,7 +34,9 @@
 - **Escapado incompleto en `valent-clipboard.sh`**: solo escapa `"`; textos con `\` o saltos de línea pueden romper el GVariant que recibe `gdbus`.
 - **Rutas hardcodeadas a `/home/nova`** en `applications/thorium.desktop` y `config/gtkrc-2.0`: fallan con otro usuario.
 - **Thorium fijado a la versión M128 AVX2** en `init.sh`: sin actualizaciones; falla en CPUs sin AVX2. Para actualizarlo, cambiar la URL y borrar `~/.local/bin/appimages/Thorium.AppImage`.
-- **`hardware-configuration.nix` sin respaldo en git**: si se pierde, `init.sh sistema` lo regenera con `nixos-generate-config`, que sin root montado en USB puede omitir módulos como `uas`/`sd_mod` (irrelevante si el disco raíz es interno).
+- **`hardware-configuration.nix` sin respaldo en git**: si se pierde, `init.sh sistema` lo regenera con `nixos-generate-config`, que puede omitir módulos como `uas`/`sd_mod` (irrelevante si el disco raíz es interno) y copia todo lo montado en ese momento (`init.sh` filtra Docker, overlay, fuse, `/run` y `/tmp`; revisar si hay otros montajes temporales).
+- **Entrada antigua de systemd-boot en el firmware** (`Linux Boot Manager`, `\EFI\systemd\systemd-bootx64.efi`): queda como respaldo detrás de GRUB en el orden de arranque; sus entradas apuntan a generaciones viejas.
+- **`hypridle` avisa "No rules configured"** al iniciar: no hay temporizadores de inactividad (solo bloquea al suspender). Es inofensivo.
 - **Rutas absolutas a `/home/nova/dotfiles`** en el `configuration.nix` que genera `init.sh`, en los alias y en Hyprland: el repo debe clonarse ahí.
 - **Comentarios de Kitty dicen "SUPER"** pero los atajos usan `ctrl`.
 - **La clase `long` del Pomodoro no tiene estilo** en `style.css` (solo `work`, `break`, `idle`).
@@ -44,6 +46,9 @@
 
 ## Resueltos
 
+- **2026-10-04** — La generación 7 entraba en modo de emergencia al arrancar: `init.sh sistema` regeneró `hardware-configuration.nix` con contenedores de Docker corriendo y `nixos-generate-config` copió sus montajes `overlay` (`/var/lib/docker/rootfs/overlayfs/…`), que fallan al arrancar. `init.sh` ahora quita los montajes temporales (Docker, overlay, fuse, `/run`, `/tmp`) al regenerar o al encontrarlos en el archivo existente, y antes de activar revisa el `fstab` construido.
+- **2026-10-04** — Suspender no bloqueaba si `hypridle` no corría (la sesión empezó antes de instalarlo): Hyprland lo arranca con `exec` en cada recarga si falta, el menú de apagado bloquea con hyprlock en ese caso, y `inhibit_sleep = 3` retiene la suspensión hasta que la pantalla está bloqueada.
+- **2026-10-04** — Tras `nix-switch`, cerrar sesión mostraba el login anterior: NixOS no reinicia greetd en un switch. No es un fallo, pero `init.sh` ahora avisa que hay que reiniciar cuando cambia la pantalla de inicio de sesión.
 - **2026-10-04** — Otras PCs se bloqueaban al arrancar con esta configuración: `/etc/nixos` enlazaba el `hardware-configuration.nix` de la ASUS (UUID de discos ajenos). El hardware ya no está en el repo; cada máquina conserva el suyo y `init.sh` escribe un `configuration.nix` que lo importa junto al equipo.
 - **2026-10-04** — Cada cambio de tema lanzaba un `swaybg` nuevo sin cerrar el anterior (llegó a haber 11) y Waybar no recargaba el CSS: `pkill -x swaybg`/`waybar` nunca coincidía porque en NixOS los procesos se llaman `.swaybg-wrapped`/`.waybar-wrapped`. Ahora se buscan por línea de comandos (`pkill -f '^swaybg( |$)'`).
 - **2026-10-04** — Hyprland mostraba errores al cambiar de tema porque leía `config/hypr/tema.conf` a medio escribir: `aplicar-tema.sh` escribe en un temporal y lo mueve.
