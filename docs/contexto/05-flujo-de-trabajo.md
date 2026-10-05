@@ -76,7 +76,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | Alias | Comando | Módulo |
 | --- | --- | --- |
 | `nix-switch` | `sudo nixos-rebuild switch` | base |
-| `nix-clean` | Borra generaciones viejas, `nixos-rebuild boot` y `nix-store --gc` | base |
+| `nix-clean` | Borra las generaciones viejas y los paquetes sin uso (`nix-collect-garbage -d`) y rehace el menú de GRUB (`nixos-rebuild boot`) | base |
 | `nix-config` | Abre `nixos/equipos/<equipo actual>/default.nix` | base |
 | `dotfiles-actualizar` | `~/dotfiles/init.sh actualizar` | base |
 | `ll` | `ls -lha` | base |

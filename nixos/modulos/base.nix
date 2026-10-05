@@ -92,7 +92,9 @@
     environment.shellAliases = {
       # Mantenimiento de NixOS
       nix-switch = "sudo nixos-rebuild switch";
-      nix-clean  = "sudo nix-env --delete-generations old && sudo nixos-rebuild boot && sudo nix-store --gc";
+      # Como root borra las generaciones viejas de todos los perfiles, también la del sistema;
+      # "boot" rehace el menú de GRUB sin ellas
+      nix-clean  = "sudo nix-collect-garbage -d && sudo nixos-rebuild boot";
       nix-config = "micro ~/dotfiles/nixos/equipos/${config.dotfiles.equipo}/default.nix";
       # git pull + enlaces y tema + nixos-rebuild switch
       dotfiles-actualizar = "~/dotfiles/init.sh actualizar";
