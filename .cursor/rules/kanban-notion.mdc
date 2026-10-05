@@ -17,7 +17,7 @@ Cada vez que se pida un cambio en el proyecto:
 2. Al empezar una tarjeta, pasarla a `In progress`. Trabajar una a la vez.
 3. Al terminarla, marcar los pasos hechos, añadir lo verificado y lo que debe revisar el usuario (por ejemplo, comandos con `sudo` o reiniciar), y pasarla a `In revision`.
 4. Nunca pasar una tarjeta a `Done`: lo hace el usuario tras revisarla.
-5. Si una tarea queda bloqueada por algo que solo puede hacer el usuario, dejarla en `In progress` y escribir en la tarjeta qué falta.
+5. Si lo único que falta es que el usuario pruebe o active el cambio (ejecutar algo con `sudo`, reiniciar), pasarla a `In revision` con esas instrucciones. Si falta información del usuario para seguir trabajando (por ejemplo, la salida de un comando con `sudo`), dejarla en `In progress` y escribir en la tarjeta qué falta.
 6. En el resumen final al usuario, enlazar las tarjetas tocadas y su estado.
 
 Los commits siguen siendo por función (ver `docs/contexto/02-convenciones.md`); una tarjeta puede tener uno o varios commits.
