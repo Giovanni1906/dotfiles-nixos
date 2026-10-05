@@ -22,7 +22,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Bloqueo de pantalla | `swaylock-effects` (PAM habilitado en `security.pam.services.swaylock`) |
 | Temas | GTK `Adwaita-dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
-| Audio | PipeWire (ALSA + Pulse), `pulsemixer` |
+| Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (gestor de volumen gráfico, clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), WayVNC en `0.0.0.0:5900`, Remmina (cliente) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Cursor, Postman, Navicat, FileZilla |
@@ -78,7 +78,7 @@ flowchart TD
 ## Capas y responsabilidades
 
 - **Capa de sistema (`nixos-pc-asus/`)**: única fuente de verdad de paquetes, servicios, usuarios, grupos (`networkmanager wheel docker input libvirtd kvm`), firewall y aliases de shell. Se aplica con `nix-switch`. En este equipo `/etc/nixos/configuration.nix` y `hardware-configuration.nix` son **symlinks** a esta carpeta.
-- **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes (`pomo-mixer`).
+- **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes (`com.saivert.pwvucontrol`).
 - **Capa de presentación (Waybar, Rofi, Kitty, GTK)**: archivos de configuración puros; Waybar delega lógica a scripts Bash que devuelven JSON (`return-type: json`).
 - **Utilidades (`config/waybar/scripts/`, `utils/`)**: scripts Bash sin dependencias externas más allá de los paquetes del sistema. Estado efímero en `/tmp` (`/tmp/pomo_status`, `/tmp/pomo_pid`).
 - **Secretos (`.env`)**: archivo local no versionado (`chmod 600`) con `PASS_SWAYLOCK`, consumido por comandos remotos de Valent para desbloquear la pantalla con `wtype`.

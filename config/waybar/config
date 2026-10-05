@@ -123,7 +123,8 @@
             "headphone": "",
             "default": ["", "", ""]
         },
-        "on-click": "hyprctl clients | grep -q 'class: pomo-mixer' && hyprctl dispatch closewindow class:pomo-mixer || kitty -o background=#133e7c -o background_opacity=0.9 --class pomo-mixer -e pulsemixer"
+        // Abre o cierra el gestor de volumen (pwvucontrol)
+        "on-click": "hyprctl clients | grep -q 'class: com.saivert.pwvucontrol' && hyprctl dispatch closewindow class:com.saivert.pwvucontrol || pwvucontrol"
     },
     "custom/media": {
         "format": " {icon}",

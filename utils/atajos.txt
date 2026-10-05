@@ -20,6 +20,7 @@ Hyprland | SUPER + Arrastrar clic izq. | Mover ventana con el ratón
 Hyprland | SUPER + Arrastrar clic der. | Redimensionar ventana con el ratón
 Hyprland | Impr Pant                   | Captura completa (portapapeles + ~/Imágenes/CapturasPantalla)
 Hyprland | SUPER + SHIFT + S           | Captura de un área (portapapeles + archivo)
+Hyprland | Escape (gestor de volumen)  | Cerrar el gestor de volumen
 
 Kitty    | CTRL + Rueda del ratón      | Aumentar / reducir el tamaño de la fuente
 Kitty    | CTRL + Enter                | Nuevo panel a la derecha
@@ -34,7 +35,7 @@ Kitty    | CTRL + SHIFT + F5           | Recargar la configuración de Kitty
 Waybar   | Clic en un workspace        | Ir a ese workspace
 Waybar   | Clic en Pomodoro            | Iniciar Pomodoro
 Waybar   | Clic derecho en Pomodoro    | Detener Pomodoro
-Waybar   | Clic en volumen             | Abrir / cerrar el mezclador (pulsemixer)
+Waybar   | Clic en volumen             | Abrir / cerrar el gestor de volumen (pwvucontrol)
 Waybar   | Clic en red                 | Abrir el editor de conexiones
 Waybar   | Clic en multimedia          | Reproducir / pausar
 Waybar   | Clic en el teclado          | Mostrar esta lista de atajos

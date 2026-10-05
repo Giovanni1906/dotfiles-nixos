@@ -211,7 +211,7 @@
     appimage-run     	    # Para ejecutar programas en formato AppImage sin problemas
     grim          		    # El capturador
     slurp  		            # El selector de área
-    pulsemixer 			    # Mezclador interactivo ultra ligero
+    pwvucontrol 		    # Gestor de volumen gráfico de PipeWire (clic en el volumen de Waybar)
     catppuccin-cursors.mochaSky     # paquete de cursor catppuccin
     glib                      # Provee el comando gsettings
 	swaybg					# fondo de pantalla

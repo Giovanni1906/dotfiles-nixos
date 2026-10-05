@@ -84,3 +84,9 @@
 - **Consecuencias**:
   - Positivas: en otras apps `CTRL + rueda` sigue funcionando igual; el socket solo es accesible por el usuario y no se acepta control por secuencias de escape.
   - Negativas: cualquier proceso del usuario puede controlar Kitty por el socket; como el evento no se consume, Kitty también recibe la rueda (puede desplazar el historial o llegar a programas con ratón como `nvim`); las ventanas de Kitty abiertas antes del cambio no tienen socket hasta reiniciarlas.
+
+## ADR-014: pwvucontrol en lugar de pulsemixer como gestor de volumen
+- **Fecha**: 2026-10-04
+- **Contexto**: `pulsemixer` (TUI en Kitty, clase `pomo-mixer`) no encajaba con el flujo visual del escritorio.
+- **Decisión**: `pwvucontrol` (GTK4, nativo de PipeWire) se abre/cierra con clic en el módulo `pulseaudio` de Waybar; Hyprland lo hace flotante (760×450) debajo de la barra, a la derecha, con opacidad 0.9/0.8.
+- **Consecuencias**: interfaz gráfica que sigue el modo oscuro (libadwaita + `prefer-dark`) y gestiona dispositivos y apps por separado; la posición está fijada en píxeles para un monitor de 1920 px de ancho.

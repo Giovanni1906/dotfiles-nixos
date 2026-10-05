@@ -30,7 +30,7 @@
   - **Descanso corto** (`BREAK`): 5 min tras las rondas 1–3.
   - **Descanso largo** (`LONG`): 15 min tras la ronda 4; reinicia el contador.
   - **Idle**: sin temporizador activo.
-- **`pomo-mixer`**: clase de ventana de Kitty que abre `pulsemixer` flotante al hacer clic en el volumen de Waybar. A pesar del nombre, no tiene relación con el Pomodoro.
+- **Gestor de volumen / `pwvucontrol`**: ventana flotante (clase `com.saivert.pwvucontrol`) que se abre o cierra al hacer clic en el volumen de Waybar; también se cierra con `Escape` si tiene el foco (`bindn` en `hyprland.conf`). Sustituyó a `pulsemixer` en Kitty (clase `pomo-mixer`, que no tenía relación con el Pomodoro).
 - **greetd / tuigreet**: pantalla de login en modo texto que lanza Hyprland.
 - **Mako**: demonio de notificaciones (`notify-send`).
 - **swaylock**: bloqueo de pantalla (con efectos de blur y reloj).

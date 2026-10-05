@@ -91,7 +91,7 @@ Para que el cursor y el tema visual funcionen correctamente, asegúrate de inclu
 environment.systemPackages = with pkgs; [
   kitty
   waybar
-  pulsemixer              # Mezclador interactivo ultra ligero
+  pwvucontrol             # Gestor de volumen gráfico de PipeWire
   catppuccin-cursors.mochaSky
   glib                    # Provee el comando gsettings
   kdePackages.breeze      # Tema nativo de Dolphin
