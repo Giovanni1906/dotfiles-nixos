@@ -11,7 +11,8 @@
   # programs.kdeconnect.enable = true;
 
   networking.firewall = {
-    allowedTCPPorts = [ 5900 ];                                  # WayVNC
+    # allowedTCPPorts = [ 5900 ];                                # WayVNC en todas las redes (sin contraseña)
+    interfaces.tailscale0.allowedTCPPorts = [ 5900 ];            # WayVNC solo por Tailscale
     allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];      # Valent (KDE Connect)
     allowedUDPPortRanges = [ { from = 1714; to = 1764; } ];
   };
@@ -24,6 +25,6 @@
   ];
 
   environment.shellAliases = {
-    remote-conexion = "wayvnc 0.0.0.0";
+    remote-conexion = "~/dotfiles/utils/wayvnc-tailscale.sh";   # WayVNC solo en la IP de Tailscale
   };
 }
