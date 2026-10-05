@@ -1,5 +1,6 @@
-# Lista de atajos que muestra utils/atajos.sh (SUPER + F1).
-# Formato: Sección | Atajo | Descripción
+# Lista de atajos que muestra utils/atajos.sh (SUPER + F1); Enter ejecuta el elegido.
+# Formato: Sección | Atajo | Descripción [| Comando]
+# Hyprland y Kitty no llevan comando: se ejecutan con sus teclas. Waybar lleva el mismo comando que su on-click.
 # Mantener sincronizado con config/hypr/hyprland.conf, config/kitty/kitty.conf y config/waybar/config.
 
 Hyprland | SUPER + F1                  | Mostrar esta lista de atajos
@@ -34,9 +35,9 @@ Kitty    | CTRL + F                    | Maximizar / restaurar el panel activo
 Kitty    | CTRL + SHIFT + F5           | Recargar la configuración de Kitty
 
 Waybar   | Clic en un workspace        | Ir a ese workspace
-Waybar   | Clic en Pomodoro            | Iniciar Pomodoro
-Waybar   | Clic derecho en Pomodoro    | Detener Pomodoro
-Waybar   | Clic en volumen             | Abrir / cerrar el gestor de volumen (pwvucontrol)
-Waybar   | Clic en red                 | Abrir el editor de conexiones
-Waybar   | Clic en multimedia          | Reproducir / pausar
+Waybar   | Clic en Pomodoro            | Iniciar Pomodoro | ~/.config/waybar/scripts/pomo.sh start
+Waybar   | Clic derecho en Pomodoro    | Detener Pomodoro | ~/.config/waybar/scripts/pomo.sh stop
+Waybar   | Clic en volumen             | Abrir / cerrar el gestor de volumen (pwvucontrol) | hyprctl clients | grep -q 'class: com.saivert.pwvucontrol' && hyprctl dispatch closewindow class:com.saivert.pwvucontrol || pwvucontrol
+Waybar   | Clic en red                 | Abrir el editor de conexiones | nm-connection-editor
+Waybar   | Clic en multimedia          | Reproducir / pausar | playerctl play-pause
 Waybar   | Clic en el teclado          | Mostrar esta lista de atajos

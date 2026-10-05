@@ -27,7 +27,7 @@
 - **Waybar**: barra superior. **Módulo** = cada bloque de la barra (`clock`, `cpu`, `custom/pomo`…).
 - **Módulo custom**: bloque de Waybar alimentado por un script que imprime JSON `{text, tooltip, class}`.
 - **Rofi**: lanzador de aplicaciones (`SUPER + R`, modo `drun`) y menús de selección (modo `dmenu`).
-- **Lista de atajos**: menú Rofi que abre `SUPER + F1` o el botón del teclado en Waybar (`utils/atajos.sh`) con el contenido de `utils/atajos.txt`, la única fuente de atajos del proyecto.
+- **Lista de atajos**: menú Rofi que abre `SUPER + F1` o el botón del teclado en Waybar (`utils/atajos.sh`) con el contenido de `utils/atajos.txt`, la única fuente de atajos del proyecto. Enter ejecuta el atajo elegido (los de Kitty, si la ventana enfocada es Kitty); los grupos como `SUPER + 0-9` preguntan el número o la dirección.
 - **Menú de apagado / powermenu**: `config/waybar/scripts/powermenu.sh`; opciones Apagar, Reiniciar, Suspender, Cerrar Sesión. Se abre con `SUPER + X` (ya no tiene botón en Waybar).
 - **Pomodoro / pomo**: temporizador en Waybar (`pomo.sh`). Clic izquierdo inicia, clic derecho detiene.
   - **Ronda**: bloque de trabajo de 25 min (`WORK`). Hay 4 por ciclo.

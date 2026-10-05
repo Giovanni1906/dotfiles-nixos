@@ -42,7 +42,7 @@
 - Reglas de ventana con sintaxis nueva: `windowrule = <efecto>, match:class ^(clase)$`.
 - Rutas a scripts absolutas vía `~/dotfiles/...` (no `~/.config/...`).
 
-- Todo atajo nuevo, borrado o modificado se refleja en `utils/atajos.txt` (formato `Sección | Atajo | Descripción`) en el mismo cambio. Aplica también a `map` de Kitty y `on-click` de Waybar.
+- Todo atajo nuevo, borrado o modificado se refleja en `utils/atajos.txt` (formato `Sección | Atajo | Descripción [| Comando]`) en el mismo cambio. Aplica también a `map` de Kitty y `on-click` de Waybar; las filas de Waybar repiten su comando en la 4.ª columna para que la lista pueda ejecutarlas.
 
 ### Waybar
 - `config` en JSONC con comentarios `//`; módulos no usados se dejan comentados en `modules-*`.

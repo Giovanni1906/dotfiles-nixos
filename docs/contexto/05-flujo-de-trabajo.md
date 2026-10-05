@@ -87,7 +87,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 
 ## Atajos
 
-La lista completa (Hyprland, Kitty y Waybar) está en `utils/atajos.txt` y se ve con **`SUPER + F1`** o con el botón del teclado en Waybar (módulo `custom/atajos`); ambos ejecutan `utils/atajos.sh` (Rofi; escribir filtra). Es la única fuente: no duplicarla aquí. Al añadir, quitar o cambiar un atajo, actualizar ese archivo en el mismo cambio (ver `.cursor/rules/docs-y-filosofia.mdc`).
+La lista completa (Hyprland, Kitty y Waybar) está en `utils/atajos.txt` y se ve con **`SUPER + F1`** o con el botón del teclado en Waybar (módulo `custom/atajos`); ambos ejecutan `utils/atajos.sh` (Rofi; escribir filtra y Enter ejecuta el atajo). Es la única fuente: no duplicarla aquí. Al añadir, quitar o cambiar un atajo, actualizar ese archivo en el mismo cambio (ver `.cursor/rules/docs-y-filosofia.mdc`).
 
 ## Comandos de Valent (comandos remotos desde el celular)
 

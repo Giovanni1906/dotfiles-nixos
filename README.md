@@ -125,4 +125,4 @@ systemctl suspend
 
 ## Atajos
 
-La lista completa está en `utils/atajos.txt` y se ve con `SUPER + F1` o con el botón del teclado en Waybar.
+La lista completa está en `utils/atajos.txt` y se ve con `SUPER + F1` o con el botón del teclado en Waybar. Al elegir un atajo con Enter se ejecuta: los de Hyprland y Waybar siempre, los de Kitty si la lista se abrió desde una ventana de Kitty. Los grupos (`SUPER + 0-9`, `Flechas`) preguntan después el número o la dirección; los de ratón aparecen atenuados.
