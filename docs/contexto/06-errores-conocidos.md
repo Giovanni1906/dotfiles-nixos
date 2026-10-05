@@ -46,6 +46,7 @@
 
 ## Resueltos
 
+- **2026-10-04** — El login tardaba ~15 s en aparecer después de GRUB: greetd es `Type=idle` en NixOS y esperaba a `NetworkManager-wait-online` (~6 s), y el montaje del NVMe raíz esperaba el sondeo uno a uno de los 6 puertos SATA vacíos (~2,8 s, bandera de arranque escalonado). Ahora greetd es `Type=simple` (`tema.nix`) y pc-asus arranca con `libahci.ignore_sss=1`.
 - **2026-10-04** — La generación 7 entraba en modo de emergencia al arrancar: `init.sh sistema` regeneró `hardware-configuration.nix` con contenedores de Docker corriendo y `nixos-generate-config` copió sus montajes `overlay` (`/var/lib/docker/rootfs/overlayfs/…`), que fallan al arrancar. `init.sh` ahora quita los montajes temporales (Docker, overlay, fuse, `/run`, `/tmp`) al regenerar o al encontrarlos en el archivo existente, y antes de activar revisa el `fstab` construido.
 - **2026-10-04** — Suspender no bloqueaba si `hypridle` no corría (la sesión empezó antes de instalarlo): Hyprland lo arranca con `exec` en cada recarga si falta, el menú de apagado bloquea con hyprlock en ese caso, y `inhibit_sleep = 3` retiene la suspensión hasta que la pantalla está bloqueada.
 - **2026-10-04** — `nix-clean` no borraba generaciones del sistema: `sudo nix-env --delete-generations old` sin `-p` actúa sobre el perfil de root, así que el menú de GRUB acumulaba todas las generaciones. Ahora usa `sudo nix-collect-garbage -d`.

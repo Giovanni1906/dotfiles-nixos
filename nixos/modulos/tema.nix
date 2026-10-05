@@ -467,6 +467,9 @@ in
       user = "greeter";
     };
   };
+  # "idle" (el de NixOS) retrasa el login hasta que terminan los demás servicios (hasta 5 s,
+  # por NetworkManager-wait-online); con el arranque silencioso no hay texto que se mezcle.
+  systemd.services.greetd.serviceConfig.Type = lib.mkForce "simple";
 
   # nwg-hello solo busca plantillas propias en /etc/nwg-hello/
   environment.etc."nwg-hello/tema.glade".source = plantillaGreeter;

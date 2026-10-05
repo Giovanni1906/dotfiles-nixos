@@ -29,6 +29,10 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # La controladora SATA pide arranque escalonado y el kernel revisa sus 6 puertos (vacíos)
+  # uno a uno: el montaje del NVMe raíz espera ~3 s. Así los revisa en paralelo.
+  boot.kernelParams = [ "libahci.ignore_sss=1" ];
+
   # Versión de NixOS con la que se instaló esta PC. No cambiarla al actualizar.
   system.stateVersion = "26.05";
 }
