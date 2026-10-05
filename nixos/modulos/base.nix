@@ -94,6 +94,8 @@
       nix-switch = "sudo nixos-rebuild switch";
       nix-clean  = "sudo nix-env --delete-generations old && sudo nixos-rebuild boot && sudo nix-store --gc";
       nix-config = "micro ~/dotfiles/nixos/equipos/${config.dotfiles.equipo}/default.nix";
+      # git pull + enlaces y tema + nixos-rebuild switch
+      dotfiles-actualizar = "~/dotfiles/init.sh actualizar";
 
       ll = "ls -lha";
       ip-public = "curl -s ipinfo.io/ip";
