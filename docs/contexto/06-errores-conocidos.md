@@ -4,10 +4,6 @@
 
 ## Bugs activos
 
-- **Error**: WayVNC no arranca al iniciar sesión (no hay proceso `wayvnc`).
-  - **Causa**: `config/hypr/hyprland.conf` tiene la directiva duplicada: `exec-once = exec-once = wayvnc 0.0.0.0`. Hyprland intenta ejecutar el comando literal `exec-once = wayvnc …`.
-  - **Solución definitiva**: dejar `exec-once = wayvnc 0.0.0.0` (y revisar antes el problema de seguridad de WayVNC, más abajo).
-
 - **Error**: No hay agente polkit gráfico; las apps que piden contraseña de administrador (Thunar al montar, virt-manager, etc.) fallan o no muestran diálogo.
   - **Causa**: `exec-once = ${pkgs.polkit_gnome}/libexec/…` usa interpolación de Nix dentro de `hyprland.conf`, que es un archivo plano y no pasa por Nix. Además `polkit_gnome` no está en `systemPackages`.
   - **Solución**: añadir `polkit_gnome` a `environment.systemPackages` y usar `exec-once = /run/current-system/sw/libexec/polkit-gnome-authentication-agent-1`, o declarar un servicio de usuario en `configuration.nix` (`systemd.user.services.polkit-gnome-authentication-agent-1`).
@@ -18,8 +14,7 @@
 
 ## Riesgos de seguridad
 
-- **WayVNC expuesto sin autenticación**: escucha en `0.0.0.0` con el puerto 5900 abierto en el firewall y sin `~/.config/wayvnc/config`. Cualquiera en la misma red puede ver y controlar el escritorio.
-  - **Solución**: escuchar solo en la interfaz de Tailscale (`wayvnc 100.x.y.z`, o `networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 5900 ]` en lugar del puerto global) y/o configurar `enable_auth`, usuario/contraseña y TLS en la configuración de WayVNC.
+- **WayVNC sin contraseña dentro de la tailnet**: cualquier dispositivo de la cuenta de Tailscale puede ver y controlar el escritorio (decisión del usuario, ver ADR-010). Si se comparte la tailnet, configurar `enable_auth` en `~/.config/wayvnc/config`.
 - **Contraseña de sesión en texto plano** (`.env` → `PASS_SWAYLOCK`): cualquier celular emparejado con Valent puede desbloquear la PC. Mitigación: limitar el desbloqueo remoto a dispositivos de confianza o retirar ese comando.
 - **Todo el portapapeles se envía al celular** (`valent-clipboard.sh` vía `wl-paste --watch`), incluidas contraseñas copiadas desde Bitwarden. Mitigación: filtrar por tipo MIME/origen o activar el envío solo manualmente.
 - `utils/reset-trial-navicat.sh` es un script de terceros que reinicia el periodo de prueba de Navicat: puede incumplir la licencia y modifica `dconf` y `preferences.json` (hace backup antes).
@@ -41,6 +36,9 @@
 - **Bloques comentados abundantes** en los módulos de `nixos/` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).
 
 ## Resueltos
+
+- **2026-10-04** — WayVNC no arrancaba al iniciar sesión (`exec-once = exec-once = wayvnc 0.0.0.0` en `hyprland.conf`) y, lanzado a mano, quedaba expuesto sin contraseña en toda la red local. Ahora `utils/wayvnc-tailscale.sh` espera la IP de Tailscale y escucha solo en ella, y el firewall abre el 5900 solo en `tailscale0`.
+- **2026-10-04** — Las carpetas siempre eran azules: el tema genera `dotfiles-iconos` (Papirus con las carpetas de `COLOR_CARPETAS`, ver ADR-024).
 
 - **2026-10-04** — Thunar no cambiaba de color con el tema (`Adwaita-dark` tiene los colores compilados): ahora el tema GTK es `dotfiles-tema` (adw-gtk3 con la paleta del tema, ver ADR-023). Quitada también la segunda línea de `nm-applet` con `GTK_THEME` fijo.
 

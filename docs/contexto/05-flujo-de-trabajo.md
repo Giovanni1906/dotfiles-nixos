@@ -87,7 +87,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | `d`, `dc-up`, `dc-down` | Docker / `docker compose up -d` / `down` | desarrollo |
 | `k` | `kubectl` (no instalado actualmente) | desarrollo |
 | `reset-trial-navicat` | `utils/reset-trial-navicat.sh` | desarrollo |
-| `remote-conexion` | `wayvnc 0.0.0.0` | remoto |
+| `remote-conexion` | `utils/wayvnc-tailscale.sh` (WayVNC solo en la IP de Tailscale; ya arranca al iniciar sesión) | remoto |
 
 ## Atajos
 

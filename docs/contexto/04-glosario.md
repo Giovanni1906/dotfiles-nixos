@@ -35,7 +35,7 @@
   - **Descanso largo** (`LONG`): 15 min tras la ronda 4; reinicia el contador.
   - **Idle**: sin temporizador activo.
 - **Gestor de volumen / `pwvucontrol`**: ventana flotante (clase `com.saivert.pwvucontrol`) que se abre o cierra al hacer clic en el volumen de Waybar; también se cierra con `Escape` si tiene el foco (`bindn` en `hyprland.conf`). Sustituyó a `pulsemixer` en Kitty (clase `pomo-mixer`, que no tenía relación con el Pomodoro).
-- **Tema**: archivo de `tema/temas/` con la paleta, la fuente, el radio, el fondo, el cursor y los iconos de todo el proyecto (Nova, Carmesí, Violeta, Noche, Neón, Relámpago). **Tema activo** = `tema/tema.conf`, enlace local al elegido. **Aplicar el tema** (`tema-aplicar [nombre]`) regenera los archivos `tema.*` de `config/` y recarga el escritorio.
+- **Tema**: archivo de `tema/temas/` con la paleta, la fuente, el radio, el fondo, el cursor, los iconos y el color de las carpetas de todo el proyecto (Nova, Carmesí, Violeta, Noche, Neón, Relámpago). **Tema activo** = `tema/tema.conf`, enlace local al elegido. **Aplicar el tema** (`tema-aplicar [nombre]`) regenera los archivos `tema.*` de `config/` y recarga el escritorio.
 - **Selector de temas**: menú Rofi con vista previa de cada tema (`SUPER + F2`, `utils/elegir-tema.sh`).
 - **Acento / secundario / fondo / superficie**: nombres de los colores del tema: acento (azul principal), secundario (morado del degradado), fondo (azul marino oscuro), superficie (azul de los paneles).
 - **GRUB**: menú de arranque; su tema (fondo, fuentes, iconos) lo genera `nixos/modulos/tema.nix`.
@@ -53,7 +53,7 @@
 - **Puente de portapapeles**: `wl-paste -t text --watch utils/valent-clipboard.sh`; envía cada texto copiado al celular por D-Bus (`share.text`).
 - **Desbloqueo remoto**: comando de Valent que escribe `PASS_SWAYLOCK` con `wtype` sobre hyprlock (la variable conserva el nombre antiguo).
 - **Tailscale / tailnet**: VPN mesh para alcanzar el PC desde fuera de la LAN.
-- **WayVNC**: servidor VNC para Wayland; "compartir pantalla" o "conexión remota" en los comentarios (puerto 5900). Alias `remote-conexion`.
+- **WayVNC**: servidor VNC para Wayland; "compartir pantalla" o "conexión remota" en los comentarios (puerto 5900, solo por Tailscale). Alias `remote-conexion`.
 - **AppImage**: binario portable; en NixOS se ejecuta con `appimage-run`. Se guardan en `~/.local/bin/appimages/`.
 - **Flatpak / Flathub**: sistema de paquetes sandbox; de ahí viene Zen Browser (`app.zen_browser.zen`).
 

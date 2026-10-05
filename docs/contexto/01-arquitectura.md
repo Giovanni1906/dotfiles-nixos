@@ -21,11 +21,11 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Terminal | Kitty (layouts `splits` y `stack`) |
 | Notificaciones | Mako + `libnotify` (`notify-send`) + `paplay` para sonidos |
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
-| Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `Papirus-Dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
+| Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
 | Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
-| Acceso remoto | Tailscale (VPN), WayVNC en `0.0.0.0:5900`, Remmina (cliente) |
+| Acceso remoto | Tailscale (VPN), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular), Remmina (cliente) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Cursor, Postman, Navicat, FileZilla |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
@@ -64,6 +64,7 @@ dotfiles/
 │   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)
 │   ├── elegir-tema.sh           # Selector Rofi con vista previa (SUPER + F2)
 │   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
+│   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   └── kitty-zoom.sh, valent-clipboard.sh, reset-trial-navicat.sh
 └── public/                      # Fondos de pantalla y PNG para el logo de fastfetch
 ```
@@ -115,7 +116,7 @@ flowchart TD
 - **Hardware fuera del repo**: el `hardware-configuration.nix` de cada máquina queda en `/etc/nixos`, así una configuración nunca arranca con los UUID de discos de otra PC.
 - **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza con `ln -sfn` para que editar el repo tenga efecto sin reconstruir.
 - **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`.
-- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023).
+- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023), y el tema de iconos `~/.local/share/icons/dotfiles-iconos` con las carpetas del color del tema (ver ADR-024).
 - **Sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
 
 ## Configuración que NO está en el repo

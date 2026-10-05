@@ -64,8 +64,8 @@
 
 ## ADR-010: Acceso remoto con Tailscale + WayVNC
 - **Fecha**: 2026-07-28 (Tailscale); 2026-10-04 (WayVNC al arranque)
-- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`; WayVNC escuchando en `0.0.0.0` con el puerto 5900 abierto en el firewall; alias `remote-conexion`.
-- **Consecuencias**: control remoto desde LAN o la tailnet; WayVNC no tiene autenticación configurada y escucha en todas las interfaces (ver `06-errores-conocidos.md`).
+- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`. WayVNC (cliente AVNC en el celular) solo por Tailscale y sin contraseña: `utils/wayvnc-tailscale.sh` (al iniciar sesión y alias `remote-conexion`) espera la IP de Tailscale y escucha solo en ella; el firewall abre el 5900 solo en `tailscale0`. (Antes: `0.0.0.0` con el puerto abierto en todas las redes, sin contraseña.)
+- **Consecuencias**: control remoto desde cualquier lugar con Tailscale activo en el celular, cifrado por la VPN; desde el wifi sin Tailscale no conecta. Cualquier dispositivo de la tailnet puede controlar el escritorio (ver `06-errores-conocidos.md`).
 
 ## ADR-011: Lógica de escritorio en scripts Bash conectados a Waybar/Rofi
 - **Fecha**: 2026-06-24 (powermenu), Pomodoro desde el primer commit
@@ -162,3 +162,11 @@
 - **Consecuencias**:
   - Positivas: Thunar y las apps GTK3 cambian de color al momento con `SUPER + F2`; las GTK4/libadwaita (pwvucontrol) al reabrirlas.
   - Negativas: el tema GTK vive fuera del repo y depende de que exista `adw-gtk3` (si falta, cae a Adwaita oscuro sin colores y avisa); nwg-look puede sobrescribir `gtk-theme-name`.
+
+## ADR-024: Color de las carpetas en cada tema
+- **Fecha**: 2026-10-04
+- **Contexto**: Papirus trae las carpetas en ~25 colores y elige uno con enlaces (`folder.svg -> folder-blue.svg`) fijados al instalar. `papirus-folders` los cambia escribiendo en el tema, que en NixOS es de solo lectura; un `override` del paquete obligaría a `nix-switch` en cada cambio de tema.
+- **Decisión**: Variable `COLOR_CARPETAS` en cada tema. `utils/aplicar-tema.sh` genera `~/.local/share/icons/dotfiles-iconos`, que hereda de `ICONOS` y solo contiene enlaces a las carpetas del color elegido (sigue las cadenas de alias, como `folder-downloads`); GTK usa ese tema de iconos y Rofi/Mako siguen con `ICONOS`. Se regenera solo si cambian el color o la versión de Papirus.
+- **Consecuencias**:
+  - Positivas: las carpetas cambian con `SUPER + F2`, en vivo en Thunar.
+  - Negativas: solo funciona con temas de iconos Papirus (con otros avisa y deja las carpetas como están); el tema de iconos vive fuera del repo.
