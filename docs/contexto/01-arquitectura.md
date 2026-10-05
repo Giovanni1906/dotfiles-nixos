@@ -21,7 +21,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Terminal | Kitty (layouts `splits` y `stack`) |
 | Notificaciones | Mako + `libnotify` (`notify-send`) + `paplay` para sonidos |
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
-| Temas | Presets en `tema/temas/*.conf`; GTK `Adwaita-dark`, iconos `Papirus-Dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
+| Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `Papirus-Dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
 | Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
@@ -58,7 +58,7 @@ dotfiles/
 │   ├── rofi/{config.rasi,themes/nova.rasi}
 │   ├── fastfetch/config.jsonc
 │   ├── gtk-3.0/, gtk-4.0/, gtkrc-2.0   # Escritos originalmente por nwg-look; aplicar-tema.sh ajusta tema, iconos y cursor
-│   └── */tema.*, mako/config    # GENERADOS (gitignored) por utils/aplicar-tema.sh
+│   └── */tema.*, mako/config, gtk-4.0/gtk.css   # GENERADOS (gitignored) por utils/aplicar-tema.sh
 ├── applications/thorium.desktop # Acceso directo para Rofi drun
 ├── utils/
 │   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)
@@ -115,7 +115,7 @@ flowchart TD
 - **Hardware fuera del repo**: el `hardware-configuration.nix` de cada máquina queda en `/etc/nixos`, así una configuración nunca arranca con los UUID de discos de otra PC.
 - **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza con `ln -sfn` para que editar el repo tenga efecto sin reconstruir.
 - **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`.
-- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020).
+- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023).
 - **Sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
 
 ## Configuración que NO está en el repo

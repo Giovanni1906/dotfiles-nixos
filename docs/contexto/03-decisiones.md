@@ -154,3 +154,11 @@
 - **Consecuencias**:
   - Positivas: el estado del proyecto se ve de un vistazo y lo pendiente del usuario queda escrito en cada tarjeta.
   - Negativas: depende del conector de Notion en Cursor; el historial técnico sigue en git y los dos pueden desincronizarse.
+
+## ADR-023: GTK con adw-gtk3 y la paleta del tema
+- **Fecha**: 2026-10-04
+- **Contexto**: Thunar (y el resto de apps GTK) no cambiaba de color con el tema: `Adwaita-dark` trae los colores compilados y no se pueden redefinir. Se evaluó cambiar a Dolphin (esquema de color de KDE generado), pero suma dependencias de KDE/Qt y una configuración de Qt aparte, sin ganar nada en miniaturas ni en "Abrir con".
+- **Decisión**: Mantener Thunar y usar `adw-gtk3-dark`, que define sus colores como variables. `utils/aplicar-tema.sh` genera el tema GTK `~/.local/share/themes/dotfiles-tema` (importa `adw-gtk3-dark` y redefine la paleta) y `config/gtk-4.0/gtk.css` para las apps de libadwaita. Al aplicar un tema cambia el nombre del tema GTK en dconf y vuelve, para que las ventanas abiertas lo relean. GTK2 sigue con `Adwaita-dark`.
+- **Consecuencias**:
+  - Positivas: Thunar y las apps GTK3 cambian de color al momento con `SUPER + F2`; las GTK4/libadwaita (pwvucontrol) al reabrirlas.
+  - Negativas: el tema GTK vive fuera del repo y depende de que exista `adw-gtk3` (si falta, cae a Adwaita oscuro sin colores y avisa); nwg-look puede sobrescribir `gtk-theme-name`.

@@ -12,10 +12,6 @@
   - **Causa**: `exec-once = ${pkgs.polkit_gnome}/libexec/…` usa interpolación de Nix dentro de `hyprland.conf`, que es un archivo plano y no pasa por Nix. Además `polkit_gnome` no está en `systemPackages`.
   - **Solución**: añadir `polkit_gnome` a `environment.systemPackages` y usar `exec-once = /run/current-system/sw/libexec/polkit-gnome-authentication-agent-1`, o declarar un servicio de usuario en `configuration.nix` (`systemd.user.services.polkit-gnome-authentication-agent-1`).
 
-- **Error**: `nm-applet` se lanza dos veces (líneas 39 y 41 de `hyprland.conf`).
-  - **Causa**: quedó la línea original y la variante con `GTK_THEME="Adwaita-dark"`.
-  - **Solución**: borrar `exec-once = nm-applet --indicator` y conservar solo la versión con `GTK_THEME`.
-
 - **Error**: Alias `k` falla con "command not found".
   - **Causa**: `kubectl` no está en `systemPackages`.
   - **Solución**: instalar `kubectl` o eliminar el alias.
@@ -45,6 +41,8 @@
 - **Bloques comentados abundantes** en los módulos de `nixos/` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).
 
 ## Resueltos
+
+- **2026-10-04** — Thunar no cambiaba de color con el tema (`Adwaita-dark` tiene los colores compilados): ahora el tema GTK es `dotfiles-tema` (adw-gtk3 con la paleta del tema, ver ADR-023). Quitada también la segunda línea de `nm-applet` con `GTK_THEME` fijo.
 
 - **2026-10-04** — El login tardaba ~15 s en aparecer después de GRUB: greetd es `Type=idle` en NixOS y esperaba a `NetworkManager-wait-online` (~6 s), y el montaje del NVMe raíz esperaba el sondeo uno a uno de los 6 puertos SATA vacíos (~2,8 s, bandera de arranque escalonado). Ahora greetd es `Type=simple` (`tema.nix`) y pc-asus arranca con `libahci.ignore_sss=1`.
 - **2026-10-04** — La generación 7 entraba en modo de emergencia al arrancar: `init.sh sistema` regeneró `hardware-configuration.nix` con contenedores de Docker corriendo y `nixos-generate-config` copió sus montajes `overlay` (`/var/lib/docker/rootfs/overlayfs/…`), que fallan al arrancar. `init.sh` ahora quita los montajes temporales (Docker, overlay, fuse, `/run`, `/tmp`) al regenerar o al encontrarlos en el archivo existente, y antes de activar revisa el `fstab` construido.
