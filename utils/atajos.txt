@@ -3,6 +3,7 @@
 # Mantener sincronizado con config/hypr/hyprland.conf, config/kitty/kitty.conf y config/waybar/config.
 
 Hyprland | SUPER + F1                  | Mostrar esta lista de atajos
+Hyprland | SUPER + F2                  | Elegir el tema (colores y fondo de pantalla)
 Hyprland | SUPER + Q                   | Abrir terminal (Kitty)
 Hyprland | SUPER + E                   | Abrir gestor de archivos (Thunar)
 Hyprland | SUPER + R                   | Abrir lanzador de aplicaciones (Rofi)

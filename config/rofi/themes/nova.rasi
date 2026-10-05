@@ -91,6 +91,11 @@ element selected.active {
     text-color: @exito;
 }
 
+element selected.active {
+    background-color: @superficie;
+    border-color: @acento;
+}
+
 element-icon {
     size: 24px;
 }

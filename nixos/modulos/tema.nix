@@ -9,7 +9,12 @@
 
 let
   raiz = ../..;
-  tema = builtins.fromTOML (builtins.readFile (raiz + "/tema/tema.conf"));
+  # tema/tema.conf es el enlace local al tema elegido (SUPER + F2); sin elegir, el tema nova
+  archivoTema =
+    if builtins.pathExists (raiz + "/tema/tema.conf")
+    then raiz + "/tema/tema.conf"
+    else raiz + "/tema/temas/nova.conf";
+  tema = builtins.fromTOML (builtins.readFile archivoTema);
 
   # "0.70" -> "b3" (canal alfa en hexadecimal para colores #RRGGBBAA)
   alfa = opacidad:

@@ -1,1 +1,12 @@
 .env
+
+# Locales de cada máquina (los crea init.sh)
+tema/tema.conf
+config/hypr/local.conf
+
+# Generados por utils/aplicar-tema.sh desde el tema activo
+config/hypr/tema.conf
+config/waybar/tema.css
+config/kitty/tema.conf
+config/rofi/tema.rasi
+config/mako/config

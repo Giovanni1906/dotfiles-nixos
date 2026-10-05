@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Aplica tema/tema.conf a la capa de usuario (alias: tema-aplicar).
-# Escribe los archivos tema.* de config/ y recarga las apps abiertas.
+# Aplica el tema activo a la capa de usuario (alias: tema-aplicar).
+#   aplicar-tema.sh           -> vuelve a aplicar tema/tema.conf
+#   aplicar-tema.sh <nombre>  -> elige tema/temas/<nombre>.conf y lo aplica
+# Escribe los archivos tema.* de config/ (no versionados) y recarga las apps abiertas.
 # GRUB y la pantalla de inicio de sesión los genera Nix: aplicar con nix-switch.
 set -euo pipefail
 
@@ -8,7 +10,15 @@ DOTFILES="$HOME/dotfiles"
 TEMA="$DOTFILES/tema/tema.conf"
 CABECERA="Generado por utils/aplicar-tema.sh desde tema/tema.conf. No editar: cambiar el tema allí."
 
-# shellcheck source=../tema/tema.conf
+# tema/tema.conf es un enlace local al tema elegido; sin elegir, el tema nova
+if [ -n "${1:-}" ]; then
+    [ -f "$DOTFILES/tema/temas/$1.conf" ] || { echo "No existe el tema: tema/temas/$1.conf" >&2; exit 1; }
+    ln -sfn "temas/$1.conf" "$TEMA"
+elif [ ! -e "$TEMA" ]; then
+    ln -sfn "temas/nova.conf" "$TEMA"
+fi
+
+# shellcheck source=../tema/temas/nova.conf
 source "$TEMA"
 
 # --- VALIDACIÓN ---
@@ -165,7 +175,7 @@ border-color=$TEXTO_TENUE
 border-color=$URGENTE
 EOF
 
-# --- GTK, CURSOR Y FASTFETCH (solo las claves del tema; el resto lo gestiona nwg-look) ---
+# --- GTK Y CURSOR (solo las claves del tema; el resto lo gestiona nwg-look) ---
 sed -i -E \
     -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS|" \
     -e "s|^(gtk-cursor-theme-name=).*|\1$CURSOR|" \
@@ -176,10 +186,16 @@ sed -i -E \
     -e "s|^(gtk-cursor-theme-name=).*|\1\"$CURSOR\"|" \
     -e "s|^(gtk-cursor-theme-size=).*|\1$CURSOR_TAMANO|" \
     "$DOTFILES/config/gtkrc-2.0"
-sed -i -E "s|^(Inherits=).*|\1$CURSOR|" "$DOTFILES/icons/default/index.theme"
-sed -i -E "s|(\"keys\": )\"[^\"]*\"|\1\"$ACENTO\"|" "$DOTFILES/config/fastfetch/config.jsonc"
+# Cursor por defecto para Xwayland y apps que no leen GTK ni las variables XCURSOR_*
+for dir in "$HOME/.icons" "$HOME/.local/share/icons"; do
+    mkdir -p "$dir/default"
+    printf '[Icon Theme]\nInherits=%s\n' "$CURSOR" > "$dir/default/index.theme"
+    if [ -d "/run/current-system/sw/share/icons/$CURSOR" ]; then
+        ln -sfn "/run/current-system/sw/share/icons/$CURSOR" "$dir/$CURSOR"
+    fi
+done
 
-echo "Tema escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, Rofi, Mako, GTK, fastfetch)."
+echo "Tema \"$NOMBRE\" escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, Rofi, Mako, GTK, cursor)."
 
 # --- RECARGAR LO QUE ESTÉ ABIERTO ---
 if command -v dconf > /dev/null; then
@@ -188,12 +204,13 @@ if command -v dconf > /dev/null; then
     dconf write /org/gnome/desktop/interface/cursor-size "$CURSOR_TAMANO" || true
 fi
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-    hyprctl reload > /dev/null
-    hyprctl setcursor "$CURSOR" "$CURSOR_TAMANO" > /dev/null
-    pkill -x swaybg || true
+    hyprctl reload > /dev/null || echo "Aviso: no se pudo recargar Hyprland (hyprctl reload)" >&2
+    hyprctl setcursor "$CURSOR" "$CURSOR_TAMANO" > /dev/null || true
+    # Por línea de comandos: en NixOS el proceso se llama .swaybg-wrapped
+    pkill -f '^swaybg( |$)' || true
     hyprctl dispatch exec "swaybg -i '$WALLPAPER' -m fill" > /dev/null
 fi
-pkill -USR2 -x waybar || true
+pkill -USR2 -f '^waybar( |$)' || true
 # Kitty se recarga por su socket de control remoto (listen_on en kitty.conf)
 for socket in "${XDG_RUNTIME_DIR:-/run/user/$UID}"/kitty-*; do
     [ -S "$socket" ] && kitty @ --to "unix:$socket" load-config > /dev/null 2>&1 || true
