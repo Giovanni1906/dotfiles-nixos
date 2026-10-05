@@ -64,8 +64,7 @@ window#waybar {
 #battery,
 #keyboard-state,
 #clock,
-#custom-atajos,
-#custom-power {
+#custom-atajos {
     margin: 2px 5px;
     padding: 0 8px;
     background: @fondo_modulos;
@@ -91,8 +90,7 @@ window#waybar {
 #memory:hover,
 #battery:hover,
 #clock:hover,
-#custom-atajos:hover,
-#custom-power:hover {
+#custom-atajos:hover {
     background: @fondo_hover; /* Aplica la opacidad menor (40%) */
     border: 1px solid @texto_principal;
 }

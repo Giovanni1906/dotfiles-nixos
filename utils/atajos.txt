@@ -40,4 +40,3 @@ Waybar   | Clic en volumen             | Abrir / cerrar el gestor de volumen (pw
 Waybar   | Clic en red                 | Abrir el editor de conexiones
 Waybar   | Clic en multimedia          | Reproducir / pausar
 Waybar   | Clic en el teclado          | Mostrar esta lista de atajos
-Waybar   | Clic en ⏻                   | Menú de apagado

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Menú de apagado (SUPER + X o botón ⏻ de Waybar).
+# Menú de apagado (SUPER + X).
 # Colores y forma vienen del tema de Rofi (tema/tema.conf); aquí solo se ajusta el tamaño.
 
 # Sin barra de búsqueda: solo la lista

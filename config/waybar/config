@@ -24,8 +24,7 @@
         // "keyboard-state",
         "clock",
         "tray",
-        "custom/atajos",
-        "custom/power"
+        "custom/atajos"
     ],
     // Modules configuration
     "hyprland/workspaces": {
@@ -155,11 +154,5 @@
         "format": " \uf11c ", // Icono de teclado (Nerd Font)
         "tooltip-format": "Atajos de teclado (SUPER + F1)",
         "on-click": "~/dotfiles/utils/atajos.sh"
-    },
-
-    "custom/power": {
-        "format": " ⏻ ",
-        "on-click": "~/.config/waybar/scripts/powermenu.sh",
-        "tooltip": false
     }
 }
