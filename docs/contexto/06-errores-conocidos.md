@@ -16,18 +16,6 @@
   - **Causa**: quedó la línea original y la variante con `GTK_THEME="Adwaita-dark"`.
   - **Solución**: borrar `exec-once = nm-applet --indicator` y conservar solo la versión con `GTK_THEME`.
 
-- **Error**: La fuente de Kitty no es la configurada.
-  - **Causa**: `kitty.conf` pide `FiraCode Nerd Font`, pero solo está instalada `nerd-fonts.jetbrains-mono` (`fc-list | grep -i firacode` devuelve 0).
-  - **Solución**: cambiar a `font_family JetBrainsMono Nerd Font` o añadir `nerd-fonts.fira-code` a `fonts.packages`.
-
-- **Error**: El tema de Rofi desaparece tras actualizar Rofi + GC.
-  - **Causa**: `config/rofi/config.rasi` apunta a una ruta con hash `/nix/store/f6jj0h6…-rofi-2.0.0/share/rofi/themes/material.rasi`. Ya ocurrió una vez (hay otra ruta de store comentada).
-  - **Solución definitiva**: usar la copia local que ya existe: `@theme "themes/material.rasi"`.
-
-- **Error**: Iconos genéricos o faltantes en apps GTK.
-  - **Causa**: GTK (`gtk-3.0`, `gtk-4.0`, `gtkrc-2.0`) usa `breeze-dark`, pero `kdePackages.breeze-icons` está comentado; Hyprland además fija `icon-theme 'Adwaita-dark'`, que no es un tema de iconos. Lo instalado es `papirus-icon-theme` y `adwaita-icon-theme`.
-  - **Solución**: unificar en un solo tema instalado (p. ej. `Papirus-Dark`) en los tres archivos GTK y en el `dconf write … icon-theme`.
-
 - **Error**: `XCURSOR_PATH` en `~/.bash_profile` no incluye realmente `~/.icons` ni `~/.local/share/icons`.
   - **Causa**: `init.sh` escribe `export XCURSOR_PATH="…:~/.icons:~/.local/share/icons"`; dentro de comillas dobles `~` no se expande.
   - **Solución**: usar `$HOME/.icons:$HOME/.local/share/icons` en `init.sh` y corregir la línea ya escrita en `~/.bash_profile`.
@@ -47,7 +35,7 @@
 
 ## Fragilidades (funcionan hoy, pero se pueden romper)
 
-- **Scripts sin shebang** (`init.sh`, `pomo.sh`, `powermenu.sh`, `valent-clipboard.sh`, `reset-trial-navicat.sh`) que usan bash-ismos: funcionan porque `/bin/sh` es bash en NixOS. Añadir `#!/usr/bin/env bash`.
+- **Scripts sin shebang** (`init.sh`, `pomo.sh`, `valent-clipboard.sh`, `reset-trial-navicat.sh`) que usan bash-ismos: funcionan porque `/bin/sh` es bash en NixOS. Añadir `#!/usr/bin/env bash`.
 - **ID de dispositivo Valent hardcodeado** en `valent-clipboard.sh` (`9f91b45437b94e139957b9d336079ea0`): si se vuelve a emparejar el celular o se cambia de teléfono, el puente deja de funcionar en silencio (la salida va a `/dev/null`). Mover el ID a `.env`.
 - **Escapado incompleto en `valent-clipboard.sh`**: solo escapa `"`; textos con `\` o saltos de línea pueden romper el GVariant que recibe `gdbus`.
 - **Rutas hardcodeadas a `/home/nova`** en `applications/thorium.desktop` y `config/gtkrc-2.0`: fallan con otro usuario.
@@ -60,13 +48,18 @@
 - **Desajuste entre README y realidad**:
   - El README recomienda **copiar** `configuration.nix` a `/etc/nixos`; en este equipo son **symlinks** al repo.
   - El README usa la URL placeholder `tu_usuario/tu_repositorio` y `ruta_de_tu_carpeta`; la real es `Giovanni1906/dotfiles-nixos` y `nixos-pc-asus`.
-  - El README lista `kdePackages.breeze` y `breeze-icons` como requeridos, pero están comentados en `configuration.nix`.
 - **Comentarios de Kitty dicen "SUPER"** pero los atajos usan `ctrl`.
 - **La clase `long` del Pomodoro no tiene estilo** en `style.css` (solo `work`, `break`, `idle`).
-- **Configuraciones no versionadas** (Mako, swaylock, WayVNC, Valent): se pierden al reinstalar.
+- **Configuraciones no versionadas** (WayVNC, Valent): se pierden al reinstalar.
+- **Archivos del tema desfasados**: si se edita `tema/tema.conf` sin ejecutar `tema-aplicar`, los `tema.*` versionados siguen con los valores anteriores (GRUB y el login sí se actualizan con `nix-switch`, porque Nix lee `tema.conf` directamente).
 - **Bloques comentados abundantes** en `configuration.nix` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).
 
 ## Resueltos
+
+- **2026-10-04** — La fuente de Kitty no era la configurada (`FiraCode Nerd Font` no estaba instalada): Kitty toma la fuente del tema (`JetBrainsMono Nerd Font`) desde `config/kitty/tema.conf`.
+- **2026-10-04** — El tema de Rofi apuntaba a una ruta con hash de `/nix/store` que desaparecía tras actualizar + GC: ahora usa el tema local `config/rofi/themes/nova.rasi` y `@theme "/dev/null"` para descartar el de por defecto.
+- **2026-10-04** — Iconos genéricos en apps GTK (`breeze-dark` no instalado y `icon-theme 'Adwaita-dark'` en Hyprland): GTK, dconf, Rofi y Mako usan `ICONOS` del tema (`Papirus-Dark`).
+- **2026-10-04** — Mako y swaylock no estaban versionados: `config/mako/config` y `config/swaylock/config` se generan desde el tema y `init.sh` los enlaza.
 
 - **2026-09-03** — Cursor invisible en inactividad: `cursor { inactive_timeout = 0; no_hardware_cursors = true }` + `WLR_NO_HARDWARE_CURSORS=1` en `hyprland.conf`.
 - **2026-09-26** — Capturas de pantalla se guardaban sueltas en `~/Imágenes`: ahora van a `~/Imágenes/CapturasPantalla/`, carpeta que crea `init.sh`.

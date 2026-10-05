@@ -1,26 +1,18 @@
-# Configuración de colores y estilo
-MORADO="#3399cc" 
-FONDO="rgba(19, 62, 124, 0.4)"
-BORDE="rgba(19, 62, 124, 0.2)"
-TEXTO="#3399cc"
-FONDO_SELECT="rgba(10, 30, 60, 0.95)" 
-TEXTO_SELECT="#cdd6f4" 
+#!/usr/bin/env bash
+# Menú de apagado (SUPER + X o botón ⏻ de Waybar).
+# Colores y forma vienen del tema de Rofi (tema/tema.conf); aquí solo se ajusta el tamaño.
 
-# Quitamos el -p "Sistema:" y apagamos el inputbar
+# Sin barra de búsqueda: solo la lista
 chosen=$(printf " Apagar\n Reiniciar\n Suspender\n Cerrar Sesión" | rofi -dmenu -i \
--theme-str "window { location: center; anchor: center; width: 20%; border: 2px; border-color: $BORDE; border-radius: 10px; background-color: $FONDO; padding: 15px; }" \
--theme-str "inputbar { enabled: false; }" \
--theme-str "listview { lines: 4; scrollbar: false; background-color: transparent; margin: 0; }" \
--theme-str "element { padding: 15px 10px; border-radius: 5px; background-color: transparent; }" \
--theme-str "element normal.normal, element alternate.normal { background-color: transparent; }" \
--theme-str "element selected.normal { background-color: $FONDO_SELECT; border: 1px; border-color: $MORADO; }" \
--theme-str "element-text { text-color: $TEXTO; background-color: transparent; }" \
--theme-str "element-text selected { text-color: $TEXTO; background-color: transparent; }"
+-theme-str "window { width: 20%; }" \
+-theme-str "mainbox { children: [listview]; }" \
+-theme-str "listview { lines: 4; }" \
+-theme-str "element { padding: 15px 10px; }"
 )
 
 case "$chosen" in
     " Apagar") poweroff ;;
     " Reiniciar") reboot ;;
-    " Suspender") swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend ;;
+    " Suspender") swaylock -f && sleep 1 && systemctl suspend ;;
     " Cerrar Sesión") hyprctl dispatch exit ;;
 esac

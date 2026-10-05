@@ -18,7 +18,7 @@
   - Positivas: el repo versiona la configuración real del sistema.
   - Negativas: el contenido de `configuration.nix` se duplica entre equipos (no hay módulo común); la recomendación del README y la práctica actual no coinciden.
 
-## ADR-003: Hyprland + greetd/tuigreet en lugar de KDE Plasma + SDDM
+## ADR-003: Hyprland + greetd/tuigreet en lugar de KDE Plasma + SDDM (tuigreet reemplazado en ADR-017)
 - **Fecha**: 2026-06-22 (Plasma/SDDM quedan comentados en `configuration.nix`)
 - **Contexto**: Se busca un escritorio ligero, por teclado y muy personalizable sobre Wayland.
 - **Decisión**: `programs.hyprland.enable`, login en TTY con `tuigreet` que ejecuta `start-hyprland`. Las piezas del escritorio se ensamblan a mano (Waybar, Rofi, Mako, swaybg, swaylock, nm-applet).
@@ -34,7 +34,7 @@
   - Positivas: cursor consistente.
   - Negativas: la misma configuración está en 5–6 sitios; difícil saber cuál es la que realmente funciona.
 
-## ADR-005: Tema oscuro unificado Adwaita-dark + paleta azul/Catppuccin
+## ADR-005: Tema oscuro unificado Adwaita-dark + paleta azul/Catppuccin (paleta centralizada en ADR-015)
 - **Fecha**: 2026-07-06
 - **Decisión**: GTK 2/3/4 con `Adwaita-dark` (generados con `nwg-look`), `color-scheme prefer-dark` vía dconf al inicio, Waybar/Rofi/Kitty con acento `#3399cc` y bordes Catppuccin.
 - **Consecuencias**: apariencia coherente; las apps Qt no están tematizadas (el bloque `qt` está comentado) y el tema de iconos `breeze-dark` referenciado en GTK no está instalado.
@@ -90,3 +90,27 @@
 - **Contexto**: `pulsemixer` (TUI en Kitty, clase `pomo-mixer`) no encajaba con el flujo visual del escritorio.
 - **Decisión**: `pwvucontrol` (GTK4, nativo de PipeWire) se abre/cierra con clic en el módulo `pulseaudio` de Waybar; Hyprland lo hace flotante (760×450) debajo de la barra, a la derecha, con opacidad 0.9/0.8.
 - **Consecuencias**: interfaz gráfica que sigue el modo oscuro (libadwaita + `prefer-dark`) y gestiona dispositivos y apps por separado; la posición está fijada en píxeles para un monitor de 1920 px de ancho.
+
+## ADR-015: Tema único en `tema/tema.conf` con generador
+- **Fecha**: 2026-10-04
+- **Contexto**: Los colores, la fuente y los radios estaban repetidos en Hyprland, Waybar, Kitty, Rofi, `powermenu.sh` y `atajos.sh`, con valores que ya no coincidían (Kitty usaba una fuente no instalada, GTK un tema de iconos inexistente). Cambiar el aspecto obligaba a tocar 6+ archivos.
+- **Decisión**: `tema/tema.conf` con líneas `NOMBRE="valor"`, formato válido a la vez para bash (`source`) y TOML (`builtins.fromTOML`). `utils/aplicar-tema.sh` genera un archivo `tema.*` por app en el formato que cada una entiende y recarga lo que está corriendo; las configs lo incluyen y solo conservan el diseño. Rofi pasa a un único tema propio (`themes/nova.rasi`) que usan el lanzador, el menú de apagado y la lista de atajos. Mako y swaylock se versionan como archivos generados.
+- **Consecuencias**:
+  - Positivas: cambiar un color o la fuente es editar una línea y ejecutar `tema-aplicar`; GRUB y el login usan los mismos valores.
+  - Negativas: los archivos generados se versionan y pueden quedar desfasados si se edita `tema.conf` sin ejecutar el generador; el formato compartido no admite `$` ni comillas simples.
+
+## ADR-016: GRUB con tema propio en lugar de systemd-boot
+- **Fecha**: 2026-10-04
+- **Contexto**: systemd-boot no admite temas; el arranque mostraba un menú de texto y mensajes del kernel que no encajaban con el escritorio.
+- **Decisión**: `boot.loader.grub` EFI (`device = "nodev"`). `tema/tema.nix` construye el tema en Nix: fondo de pantalla desenfocado y teñido con `FONDO`, fuentes `.pf2` generadas desde la fuente del tema, cajas redondeadas e iconos Nerd Font en `ACENTO`, textos en español y entradas extra (firmware UEFI, reiniciar, apagar). Arranque silencioso con `quiet`, `udev.log_level=3` y `initrd.verbose = false`.
+- **Consecuencias**:
+  - Positivas: el menú de arranque sigue la paleta y se regenera solo con `nix-switch` al cambiar el tema.
+  - Negativas: la entrada de systemd-boot queda en la partición EFI como respaldo; el diseño está pensado para 1920×1080 (`gfxmodeEfi`).
+
+## ADR-017: nwg-hello en lugar de tuigreet
+- **Fecha**: 2026-10-04
+- **Contexto**: `tuigreet` es de texto y no podía seguir los colores ni el fondo del escritorio.
+- **Decisión**: greetd ejecuta un Hyprland mínimo (`start-hyprland -- --config` generado en `tema/tema.nix`) que pone el fondo de pantalla con `swaybg` y abre `nwg-hello` con desenfoque (`layerrule … match:namespace nwg-hello`). El CSS, la plantilla (con `message-label` para los errores) y los textos en español (`es_MX`) se generan desde el tema; al cerrar el greeter, `hyprctl dispatch exit` termina su Hyprland.
+- **Consecuencias**:
+  - Positivas: login gráfico con la misma paleta, fuente, cursor y fondo que la sesión.
+  - Negativas: arranca un compositor más antes de la sesión (≈1 s); el paquete `nwg-hello` se sobrescribe (`overrideAttrs`) para añadir el idioma.

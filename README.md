@@ -20,10 +20,11 @@ sudo cp ~/dotfiles/ruta_de_tu_carpeta/configuration.nix /etc/nixos/configuration
 ```
 
 **3. Verifica las importaciones**
-Abre el archivo recién copiado y asegúrate de que la línea de `imports` solo llame al hardware local y no a configuraciones de otras PCs:
+Abre el archivo recién copiado y asegúrate de que la línea de `imports` solo llame al hardware local y no a configuraciones de otras PCs. El módulo del tema (GRUB, login y cursor) se importa con ruta absoluta, porque la ruta relativa `../tema/tema.nix` solo funciona dentro del repo:
 ```bash
 sudo nano /etc/nixos/configuration.nix
-# Debe decir: imports = [ ./hardware-configuration.nix ];
+# Debe decir:
+# imports = [ ./hardware-configuration.nix /home/<tu_usuario>/dotfiles/tema/tema.nix ];
 ```
 
 **4. Aplica los cambios del sistema base**
@@ -83,55 +84,29 @@ Luego edita `.env` con tus valores reales.
 - mantén `.env.example` con valores de referencia o placeholders
 - si agregas una nueva variable, documenta su uso en este archivo
 
-## Cursor y temas visuales
+## Tema: colores, tipografía, cursor y fondo
 
-Para que el cursor y el tema visual funcionen correctamente, asegúrate de incluir los paquetes necesarios en tu `configuration.nix`:
+Todo el aspecto visual sale de un solo archivo, `tema/tema.conf`: colores, transparencias, radio de las esquinas, grosor del borde, fuente, fondo de pantalla, cursor e iconos. Al cambiarlo se actualizan juntos Hyprland, Waybar, Kitty, Rofi, Mako (notificaciones), swaylock, GTK, fastfetch, el menú de GRUB y la pantalla de inicio de sesión.
 
-```nix
-environment.systemPackages = with pkgs; [
-  kitty
-  waybar
-  pwvucontrol             # Gestor de volumen gráfico de PipeWire
-  catppuccin-cursors.mochaSky
-  glib                    # Provee el comando gsettings
-  kdePackages.breeze      # Tema nativo de Dolphin
-  kdePackages.breeze-icons
-  gsettings-desktop-schemas
-  adwaita-icon-theme
-];
+```bash
+tema-config    # Abre tema/tema.conf
+tema-aplicar   # Regenera los archivos tema.* de config/ y recarga el escritorio al instante
+nix-switch     # Reconstruye GRUB y la pantalla de inicio de sesión (se ven en el próximo arranque)
 ```
 
-Y revisa también estas rutas:
-
-- `~/dotfiles/icons/default/index.theme`
-- `~/dotfiles/config/hypr/hyprland.conf`
-
-Ejemplo de variables para Hyprland:
-
-```ini
-env = HYPRCURSOR_THEME,catppuccin-mocha-sky-cursors
-env = XCURSOR_THEME,catppuccin-mocha-sky-cursors
-env = HYPRCURSOR_SIZE,24
-env = XCURSOR_SIZE,24
-```
-
-## Preferencias del sistema
-
-En Hyprland también se aplican preferencias visuales por defecto:
-
-```ini
-exec-once = gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-exec-once = gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-exec-once = gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-sky-cursors'
-```
+- `utils/aplicar-tema.sh` (alias `tema-aplicar`) escribe `config/hypr/tema.conf`, `config/waybar/tema.css`, `config/kitty/tema.conf`, `config/rofi/tema.rasi`, `config/mako/config` y `config/swaylock/config`, y ajusta los ajustes de GTK y fastfetch. Esos archivos son generados: no se editan a mano.
+- `tema/tema.nix` es un módulo de NixOS que lee el mismo archivo y construye el tema de GRUB (fondo, fuentes, iconos y cajas redondeadas) y el inicio de sesión (greetd + nwg-hello sobre un Hyprland mínimo con el fondo de pantalla desenfocado).
+- El cursor y los iconos deben estar instalados en `environment.systemPackages` de `configuration.nix` (por defecto `catppuccin-cursors.mochaSky` y `papirus-icon-theme`), y la fuente en `fonts.packages`.
 
 ## Comandos para valent
 
 ### Bloquear pantalla
 
 ```bash
-swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2
+swaylock
 ```
+
+Las opciones (reloj, desenfoque y colores) están en `config/swaylock/config`, generado desde el tema.
 
 ### Desbloquear pantalla
 
@@ -148,5 +123,5 @@ systemctl poweroff
 ### Suspender PC
 
 ```bash
-swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend
+swaylock -f && sleep 1 && systemctl suspend
 ```

@@ -6,7 +6,7 @@
 
 - Comentarios, mensajes de commit, README y notificaciones al usuario: **español**.
 - Identificadores técnicos (nombres de módulos Waybar, clases CSS, opciones Nix): en inglés, tal como los exige cada herramienta.
-- Variables de color propias en español: `texto_principal`, `fondo_modulos`, `fondo_hover`, `MORADO`, `FONDO_SELECT`.
+- Variables del tema en español: `ACENTO`, `FONDO`, `SUPERFICIE` en `tema/tema.conf`; `$acento`, `@acento`, `@fondo`, `@superficie` en los archivos generados.
 
 ## Estructura y nomenclatura de archivos
 
@@ -43,7 +43,7 @@
 - `config` en JSONC con comentarios `//`; módulos no usados se dejan comentados en `modules-*`.
 - Módulos propios: `custom/<nombre>`; script en `scripts/<nombre>.sh` con `"return-type": "json"`.
 - Contrato JSON de scripts: `{"text": "<icono>", "tooltip": "<detalle>", "class": "<estado>"}`. El texto visible es un icono Nerd Font; el detalle va al tooltip.
-- `style.css`: colores solo vía `@define-color`; estilos por ID (`#custom-pomo`, `#clock`) y estados por clase (`.work`, `.break`, `.idle`).
+- `style.css`: colores solo vía las variables de `tema.css` (`@import "tema.css"`); estilos por ID (`#custom-pomo`, `#clock`) y estados por clase (`.work`, `.break`, `.idle`).
 
 ### Kitty
 - Atajos con `ctrl` (los comentarios dicen "SUPER", pero el código usa `ctrl`; el código es la verdad).
@@ -58,10 +58,10 @@
 
 ## Paleta y apariencia
 
-- Color de texto/acento: `#3399cc`; fondo de módulos `rgba(19, 62, 124, 0.7)`.
-- Bordes Catppuccin Mocha: activo `#cba6f7 → #89b4fa` (Hyprland), `#cba6f7` (Kitty); inactivo `#595959`.
-- Estados: urgente `#f38ba8`, break `#a6e3a1`, idle `#6c7086`.
-- Esquinas redondeadas 8–10 px, transparencias 0.7–0.9, tema oscuro en todo.
+- **Ningún color, radio, fuente ni ruta de fondo se escribe a mano en una config**: se define en `tema/tema.conf` y se usa como variable (`$acento` en Hyprland, `@acento` en Waybar/Rofi, `include tema.conf` en Kitty). Si una app necesita un valor nuevo, se añade a `tema.conf` y a `utils/aplicar-tema.sh` (y a `tema/tema.nix` si lo usan GRUB o el login).
+- Los archivos `tema.*`, `config/mako/config` y `config/swaylock/config` son **generados**: se versionan, pero no se editan a mano.
+- Valores actuales: acento `#3399cc`, secundario `#cba6f7` (degradado secundario → acento en el borde de ventanas), fondo `#0a1e3c`, superficie `#133e7c`; estados urgente `#f38ba8`, éxito `#a6e3a1`, tenue `#6c7086`.
+- Esquinas de 10 px, borde de 2 px, transparencias 0.70 (paneles), 0.85 (terminal) y 0.95 (menús); tema oscuro en todo.
 
 ## Secretos
 

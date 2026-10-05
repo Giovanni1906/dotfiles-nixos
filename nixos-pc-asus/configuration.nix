@@ -8,10 +8,16 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      # Tema de GRUB, pantalla de inicio de sesión y cursor (lee ../tema/tema.conf)
+      ../tema/tema.nix
     ];
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+  # Bootloader: GRUB en modo EFI (el aspecto lo define ../tema/tema.nix)
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    device = "nodev";
+  };
   boot.loader.efi.canTouchEfiVariables = true;
   #libvirtd y virt-manager
   virtualisation.libvirtd = {
@@ -32,12 +38,7 @@
   # -- Variables del sistema y limpieza automática ---
   # --------------------------------------------------
 
-  environment.variables = {
-    XCURSOR_THEME = "catppuccin-mocha-sky-cursors";
-    XCURSOR_SIZE = "24";
-    HYPRCURSOR_THEME = "catppuccin-mocha-sky-cursors";
-    HYPRCURSOR_SIZE = "24";
-  };
+  # Las variables del cursor (XCURSOR_*, HYPRCURSOR_*) las define ../tema/tema.nix
 
   nixpkgs.config.allowUnfree = true;		# Habilitar software privativo
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -99,16 +100,7 @@
   # };
   # services.desktopManager.plasma6.enable = true;
 
-  # Gestor de inicio de sesión Greetd
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --asterisks --greeting 'Iniciando Sistema...' --theme 'prompt=cyan;text=cyan;input=white' --cmd start-hyprland";
-        user = "greeter";
-      };
-    };
-  };
+  # Gestor de inicio de sesión: greetd + nwg-hello, definido en ../tema/tema.nix
   
   # --- Descarga de hyperland ---
   programs.hyprland.enable = true;
@@ -292,6 +284,10 @@
     nix-switch = "sudo nixos-rebuild switch";
     nix-clean  = "sudo nix-env --delete-generations old && sudo nixos-rebuild boot && sudo nix-store --gc";
     nix-config = "sudo micro /etc/nixos/configuration.nix";
+
+    # Tema global (colores, fuente, fondo): editar y aplicar al escritorio
+    tema-config = "micro ~/dotfiles/tema/tema.conf";
+    tema-aplicar = "~/dotfiles/utils/aplicar-tema.sh";
 
 	hypr-config = "sudo micro ~/dotfiles/config/hypr/hyprland.conf";
 	kitty-config = "sudo micro ~/dotfiles/config/kitty/kitty.conf";

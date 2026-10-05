@@ -20,8 +20,8 @@
    cp /etc/nixos/hardware-configuration.nix ~/dotfiles/nixos-<equipo>/
    cp ~/dotfiles/nixos-pc-asus/configuration.nix ~/dotfiles/nixos-<equipo>/
    ```
-   Revisar en `configuration.nix`: `imports = [ ./hardware-configuration.nix ];`, `networking.hostName`, usuario y `system.stateVersion`.
-3. Hacer que `/etc/nixos` apunte al repo (así está el equipo actual) **o** copiar los archivos (lo que recomienda el README):
+   Revisar en `configuration.nix`: `imports = [ ./hardware-configuration.nix ../tema/tema.nix ];`, `networking.hostName`, usuario y `system.stateVersion`.
+3. Hacer que `/etc/nixos` apunte al repo (así está el equipo actual) **o** copiar los archivos (lo que recomienda el README; en ese caso importar el tema con ruta absoluta, `/home/<usuario>/dotfiles/tema/tema.nix`):
    ```bash
    sudo ln -sfn ~/dotfiles/nixos-<equipo>/configuration.nix /etc/nixos/configuration.nix
    sudo ln -sfn ~/dotfiles/nixos-<equipo>/hardware-configuration.nix /etc/nixos/hardware-configuration.nix
@@ -30,18 +30,20 @@
 5. Secretos: `cp ~/dotfiles/.env.example ~/dotfiles/.env && micro ~/dotfiles/.env`
 6. Capa de usuario: `cd ~/dotfiles && bash init.sh` (pide `sudo` al inicio y lo mantiene vivo; al final abre el login de Tailscale).
 7. Acceso a GitHub para `git push`: `gh auth login` + `gh auth setup-git`, y cambiar en `~/.gitconfig` la ruta de `/nix/store/…/gh` por `!gh auth git-credential` (ver README, paso 7; si no, deja de funcionar tras actualizar `gh` + GC).
-8. Reiniciar. Entrar desde `tuigreet`.
+8. Reiniciar. Entrar desde la pantalla de login (`nwg-hello`).
 9. Pasos manuales que el repo no automatiza: emparejar el celular en Valent, configurar sus comandos remotos (ver README) y actualizar el ID de dispositivo en `utils/valent-clipboard.sh`.
 
 ## Ciclo de cambios diario
 
 | Qué cambias | Dónde | Cómo se aplica |
 | --- | --- | --- |
+| Colores, fuente, radio, fondo, cursor, iconos | `tema/tema.conf` (alias `tema-config`) | `tema-aplicar` (escritorio al instante) y `nix-switch` (GRUB y login) |
+| Diseño de GRUB o del login | `tema/tema.nix` | `nix-switch`; se ve en el próximo arranque |
 | Paquetes, servicios, firewall, aliases | `nixos-pc-asus/configuration.nix` | `nix-switch` (abre una nueva generación) |
 | Atajos, autoarranque, reglas de ventanas | `config/hypr/hyprland.conf` | Hyprland recarga solo al guardar; `exec-once` requiere cerrar sesión (`SUPER + M`) |
 | Barra | `config/waybar/{config,style.css}` | `pkill waybar && waybar &` (o `pkill -SIGUSR2 waybar`) |
 | Terminal | `config/kitty/kitty.conf` | `ctrl+shift+F5` en Kitty o abrir una ventana nueva |
-| Lanzador / menú de apagado | `config/rofi/`, `config/waybar/scripts/powermenu.sh` | Inmediato en la siguiente apertura |
+| Lanzador / menú de apagado | `config/rofi/` (diseño en `themes/nova.rasi`), `config/waybar/scripts/powermenu.sh` | Inmediato en la siguiente apertura |
 | Temas GTK | `nwg-look` (reescribe `config/gtk-*`) | Reiniciar la app |
 | Secretos | `.env` | Inmediato (se lee con `source` en cada uso) |
 
@@ -55,6 +57,8 @@ Después de cada cambio que funcione: `git add -A && git commit -m "feat|fix|doc
 | `nix-clean` | Borra generaciones viejas, `nixos-rebuild boot` y `nix-store --gc` |
 | `nix-config` | `sudo micro /etc/nixos/configuration.nix` (en este equipo es el mismo archivo del repo) |
 | `hypr-config`, `kitty-config`, `waybar-config` | Abren la config correspondiente con `sudo micro` |
+| `tema-config` | `micro ~/dotfiles/tema/tema.conf` |
+| `tema-aplicar` | `~/dotfiles/utils/aplicar-tema.sh` (genera los `tema.*` y recarga el escritorio) |
 | `ll` | `ls -lha` |
 | `d`, `dc-up`, `dc-down` | Docker / `docker compose up -d` / `down` |
 | `k` | `kubectl` (no instalado actualmente) |
@@ -69,14 +73,14 @@ La lista completa (Hyprland, Kitty y Waybar) está en `utils/atajos.txt` y se ve
 ## Comandos de Valent (comandos remotos desde el celular)
 
 ```bash
-# Bloquear
-swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2
+# Bloquear (las opciones están en config/swaylock/config)
+swaylock
 # Desbloquear
 source ~/dotfiles/.env && wtype "$PASS_SWAYLOCK" && wtype -k Return
 # Apagar
 systemctl poweroff
 # Suspender
-swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend
+swaylock -f && sleep 1 && systemctl suspend
 ```
 
 ## Diagnóstico rápido
@@ -95,4 +99,4 @@ sudo nixos-rebuild switch --rollback # volver a la generación anterior
 
 - **Tests**: no existen. La validación es manual: `nixos-rebuild dry-build` para Nix, `hyprctl configerrors` para Hyprland y probar en la sesión.
 - **CI/CD**: no hay pipeline (no existe `.github/workflows/`). El "despliegue" es `git pull` en la máquina + `nix-switch` y/o volver a ejecutar `init.sh`.
-- **Rollback**: a nivel de sistema, las generaciones de NixOS (menú de systemd-boot o `--rollback`); a nivel de usuario, `git revert`/`git checkout` del archivo (los symlinks aplican el cambio al instante).
+- **Rollback**: a nivel de sistema, las generaciones de NixOS (submenú de GRUB o `--rollback`); a nivel de usuario, `git revert`/`git checkout` del archivo (los symlinks aplican el cambio al instante).

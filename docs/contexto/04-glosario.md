@@ -31,9 +31,12 @@
   - **Descanso largo** (`LONG`): 15 min tras la ronda 4; reinicia el contador.
   - **Idle**: sin temporizador activo.
 - **Gestor de volumen / `pwvucontrol`**: ventana flotante (clase `com.saivert.pwvucontrol`) que se abre o cierra al hacer clic en el volumen de Waybar; también se cierra con `Escape` si tiene el foco (`bindn` en `hyprland.conf`). Sustituyó a `pulsemixer` en Kitty (clase `pomo-mixer`, que no tenía relación con el Pomodoro).
-- **greetd / tuigreet**: pantalla de login en modo texto que lanza Hyprland.
+- **Tema / `tema.conf`**: archivo `tema/tema.conf` con la paleta, la fuente, el radio, el fondo, el cursor y los iconos de todo el proyecto. **Aplicar el tema** (`tema-aplicar`) regenera los archivos `tema.*` de `config/` y recarga el escritorio.
+- **Acento / secundario / fondo / superficie**: nombres de los colores del tema: acento (azul principal), secundario (morado del degradado), fondo (azul marino oscuro), superficie (azul de los paneles).
+- **GRUB**: menú de arranque; su tema (fondo, fuentes, iconos) lo genera `tema/tema.nix`.
+- **greetd / nwg-hello**: gestor de inicio de sesión. greetd abre un Hyprland mínimo en el que `nwg-hello` muestra la pantalla de login (reloj, sesión, usuario, contraseña y botones de apagado). Sustituyó a `tuigreet` (login en modo texto).
 - **Mako**: demonio de notificaciones (`notify-send`).
-- **swaylock**: bloqueo de pantalla (con efectos de blur y reloj).
+- **swaylock**: bloqueo de pantalla (con efectos de blur y reloj); sus opciones están en `config/swaylock/config`.
 - **swaybg**: pone el fondo de pantalla (hoy `public/background/gojo2.png`).
 - **nwg-look**: herramienta gráfica que generó `gtk-3.0/`, `gtk-4.0/`, `gtkrc-2.0` e `index.theme`.
 
@@ -53,7 +56,7 @@
 - **`configuration.nix`**: archivo declarativo del sistema.
 - **`hardware-configuration.nix`**: generado por `nixos-generate-config`; contiene UUIDs de discos. Es específico de cada equipo.
 - **Rebuild / switch**: `sudo nixos-rebuild switch` (alias `nix-switch`); construye y activa la nueva generación.
-- **Generación**: versión del sistema tras cada rebuild; permite volver atrás desde el menú de arranque.
+- **Generación**: versión del sistema tras cada rebuild; permite volver atrás desde el menú de arranque (submenú de GRUB).
 - **Store (`/nix/store`)**: donde viven los paquetes; las rutas incluyen un hash y cambian con cada versión.
 - **GC (recolector de basura)**: borra generaciones y paquetes no usados (automático semanal, o `nix-clean`).
 - **`/run/current-system/sw`**: perfil del sistema activo; ruta estable a binarios, iconos y sonidos instalados.
