@@ -1,0 +1,117 @@
+/*
+ * Tema de Rofi del proyecto. No define colores: usa las variables de
+ * ../tema.rasi (@acento, @fondo, @superficie, @texto, @radio...), que se
+ * generan desde tema/tema.conf. Mismo estilo que los módulos de Waybar.
+ */
+
+* {
+    background-color: transparent;
+    text-color: @texto;
+    spacing: 0;
+}
+
+window {
+    location: center;
+    anchor: center;
+    width: 40%;
+    padding: 18px;
+    background-color: @fondo;
+    border: @borde;
+    border-color: @acento;
+    border-radius: @radio;
+}
+
+mainbox {
+    spacing: 14px;
+    children: [inputbar, message, listview, mode-switcher];
+}
+
+inputbar {
+    padding: 10px 14px;
+    spacing: 10px;
+    border-radius: @radio;
+    background-color: @superficie;
+    children: [prompt, entry];
+}
+
+prompt {
+    text-color: @acento;
+}
+
+entry {
+    placeholder: "Buscar...";
+    placeholder-color: @texto-tenue;
+    cursor: text;
+}
+
+message {
+    padding: 8px 12px;
+    border-radius: @radio;
+    background-color: @superficie;
+}
+
+textbox {
+    text-color: @texto;
+}
+
+listview {
+    lines: 8;
+    spacing: 4px;
+    scrollbar: false;
+    fixed-height: true;
+}
+
+element {
+    padding: 8px 12px;
+    spacing: 12px;
+    border: 1px;
+    border-color: transparent;
+    border-radius: @radio;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+}
+
+element selected.normal {
+    background-color: @superficie;
+    border-color: @acento;
+}
+
+element normal.urgent,
+element alternate.urgent,
+element selected.urgent {
+    text-color: @urgente;
+}
+
+element normal.active,
+element alternate.active,
+element selected.active {
+    text-color: @exito;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text {
+    text-color: inherit;
+    vertical-align: 0.5;
+    highlight: bold;
+}
+
+mode-switcher {
+    spacing: 8px;
+}
+
+button {
+    padding: 6px;
+    border-radius: @radio;
+    text-color: @texto-tenue;
+}
+
+button selected {
+    background-color: @superficie;
+    text-color: @acento;
+}

@@ -19,12 +19,14 @@ touch ~/dotfiles/.env
 chmod 600 ~/dotfiles/.env
 
 # 3. Enlaces simbólicos de aplicaciones (Usamos -sfn para forzar y evitar anidaciones)
-rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi  ~/.local/share/icons/icons
+rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi ~/.config/mako ~/.config/swaylock ~/.local/share/icons/icons
 ln -sfn ~/dotfiles/config/hypr ~/.config/hypr
 ln -sfn ~/dotfiles/config/waybar ~/.config/waybar
 ln -sfn ~/dotfiles/config/kitty ~/.config/kitty
 ln -sfn ~/dotfiles/config/fastfetch ~/.config/fastfetch
 ln -sfn ~/dotfiles/config/rofi ~/.config/rofi
+ln -sfn ~/dotfiles/config/mako ~/.config/mako
+ln -sfn ~/dotfiles/config/swaylock ~/.config/swaylock
 ln -sfn ~/dotfiles/icons ~/.local/share/icons
 
 # 4. Enlaces simbólicos de GTK (Unificando todas las versiones)
@@ -41,23 +43,28 @@ chmod +x ~/dotfiles/utils/reset-trial-navicat.sh
 chmod +x ~/dotfiles/utils/valent-clipboard.sh
 chmod +x ~/dotfiles/utils/kitty-zoom.sh
 chmod +x ~/dotfiles/utils/atajos.sh
+chmod +x ~/dotfiles/utils/aplicar-tema.sh
 
-# 6. Forzar enlaces del cursor Catppuccin directo desde NixOS
-rm -rf ~/.icons/catppuccin-mocha-sky-cursors ~/.local/share/icons/catppuccin-mocha-sky-cursors
-ln -sfn /run/current-system/sw/share/icons/catppuccin-mocha-sky-cursors ~/.icons/catppuccin-mocha-sky-cursors
-ln -sfn /run/current-system/sw/share/icons/catppuccin-mocha-sky-cursors ~/.local/share/icons/catppuccin-mocha-sky-cursors
+# Tema global: genera los archivos tema.* de config/ desde tema/tema.conf
+~/dotfiles/utils/aplicar-tema.sh
+source ~/dotfiles/tema/tema.conf
+
+# 6. Forzar enlaces del cursor del tema directo desde NixOS
+rm -rf ~/.icons/"$CURSOR" ~/.local/share/icons/"$CURSOR"
+ln -sfn /run/current-system/sw/share/icons/"$CURSOR" ~/.icons/"$CURSOR"
+ln -sfn /run/current-system/sw/share/icons/"$CURSOR" ~/.local/share/icons/"$CURSOR"
 
 # 7. Variables de entorno en .bash_profile (Con un candado de seguridad)
 # Este 'if' verifica que no se dupliquen las líneas si ejecutas el script 2 veces
 if ! grep -q "XCURSOR_PATH" ~/.bash_profile 2>/dev/null; then
     echo 'export XCURSOR_PATH="/run/current-system/sw/share/icons:~/.icons:~/.local/share/icons"' >> ~/.bash_profile
-    echo 'export XCURSOR_THEME="catppuccin-mocha-sky-cursors"' >> ~/.bash_profile
+    echo "export XCURSOR_THEME=\"$CURSOR\"" >> ~/.bash_profile
     echo "Agregadas variables de entorno al .bash_profile"
 fi
 
 # 8. Forzar archivo index.theme por defecto a fuego
-echo -e "[Icon Theme]\nInherits=catppuccin-mocha-sky-cursors" > ~/.icons/default/index.theme
-echo -e "[Icon Theme]\nInherits=catppuccin-mocha-sky-cursors" > ~/.local/share/icons/default/index.theme
+echo -e "[Icon Theme]\nInherits=$CURSOR" > ~/.icons/default/index.theme
+echo -e "[Icon Theme]\nInherits=$CURSOR" > ~/.local/share/icons/default/index.theme
 
 echo "✅ ¡Dotfiles instalados correctamente! Reinicia la sesión o aplica nix-switch."
 

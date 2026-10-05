@@ -1,0 +1,21 @@
+/* Generado por utils/aplicar-tema.sh desde tema/tema.conf. No editar: cambiar el tema allí. */
+@define-color acento #3399cc;
+@define-color secundario #cba6f7;
+@define-color fondo #0a1e3c;
+@define-color superficie #133e7c;
+@define-color texto #cdd6f4;
+@define-color texto_tenue #6c7086;
+@define-color urgente #f38ba8;
+@define-color exito #a6e3a1;
+@define-color aviso #f9e2af;
+@define-color panel alpha(@superficie, 0.70);
+
+* {
+    font-family: "JetBrainsMono Nerd Font", FontAwesome, sans-serif;
+}
+
+.module,
+#tray,
+#workspaces button {
+    border-radius: 10px;
+}

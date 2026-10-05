@@ -3,7 +3,7 @@
 
 include "/home/nova/.gtkrc-2.0.mine"
 gtk-theme-name="Adwaita-dark"
-gtk-icon-theme-name="breeze-dark"
+gtk-icon-theme-name="Papirus-Dark"
 gtk-font-name="Adwaita Sans 11"
 gtk-cursor-theme-name="catppuccin-mocha-sky-cursors"
 gtk-cursor-theme-size=24

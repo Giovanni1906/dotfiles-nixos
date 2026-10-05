@@ -1,21 +1,21 @@
 /* ==========================================================================
-   VARIABLES DE COLOR (Cambia el color aquí y se aplicará a toda la barra)
+   VARIABLES DE COLOR
+   Los colores, la fuente y el radio vienen de tema/tema.conf (tema-aplicar
+   escribe tema.css). Aquí solo se derivan los usos propios de la barra.
    ========================================================================== */
-@define-color texto_principal #3399cc;  /* Tu morado favorito */
-@define-color fondo_total rgba(0, 0, 0, 0) ;
-@define-color fondo_modulos rgba(19, 62, 124, 0.7);
-@define-color fondo_hover rgba(19, 62, 124, 0.4);   /* El azul/oscuro base */
-@define-color borde_hover rgba(19, 62, 124, 0.2);
-@define-color fondo_focus rgba(19, 62, 124, 0.8);
-@define-color urgente #f38ba8;  /* Rojo/Rosa para alertas */
-@define-color pomo_break #a6e3a1;  /* Verde para el break */
-@define-color pomo_idle #6c7086;  /* Gris para inactivo */
+@import "tema.css";
+
+@define-color texto_principal @acento;
+@define-color fondo_total rgba(0, 0, 0, 0);
+@define-color fondo_modulos @panel;
+@define-color fondo_hover alpha(@superficie, 0.4);
+@define-color pomo_break @exito;
+@define-color pomo_idle @texto_tenue;
 
 /* ==========================================================================
    ESTILOS GENERALES
    ========================================================================== */
 * {
-    font-family: "JetBrainsMono Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 13px;
     border: none;
     border-radius: 0;
@@ -68,8 +68,7 @@ window#waybar {
 #custom-power {
     margin: 2px 5px;
     padding: 0 8px;
-    border-radius: 8px;
-    background: @fondo_modulos; /* Tu azul base al 70% */
+    background: @fondo_modulos;
     border: 1px solid transparent;
     color: @texto_principal; 
     transition: all 0.25s ease;
@@ -125,7 +124,6 @@ window#waybar {
     color: @texto_principal; 
     padding: 0;          
     margin: 0 2px; /* Un pequeñísimo margen para que no se peguen si tienen borde */
-    border-radius: 8px; /* Igualamos el borde redondeado al resto de la barra */
     border: 1px solid transparent;
     
     /* ¡AQUÍ ESTÁ LA MAGIA QUE MATA LO BLANCO! */
@@ -153,5 +151,5 @@ window#waybar {
 /* Estado urgente (ej. ventana que requiere atención) */
 #workspaces button.urgent {
     background: @urgente;
-    color: #1e1e2e; /* Letra oscura para contrastar con el fondo rojo */
+    color: @fondo; /* Letra oscura para contrastar con el fondo rojo */
 }
