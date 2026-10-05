@@ -30,6 +30,9 @@ for var in OPACIDAD_PANEL OPACIDAD_MENU OPACIDAD_TERMINAL; do
 done
 WALLPAPER="$DOTFILES/$FONDO_PANTALLA"
 [ -f "$WALLPAPER" ] || { echo "tema.conf: no existe FONDO_PANTALLA ($WALLPAPER)" >&2; exit 1; }
+COLORES_PAPIRUS="adwaita black blue bluegrey breeze brown carmine cyan darkcyan deeporange green grey indigo magenta nordic orange palebrown paleorange pink red teal violet white yaru yellow"
+COLOR_CARPETAS="${COLOR_CARPETAS:-blue}"
+[[ " $COLORES_PAPIRUS " == *" $COLOR_CARPETAS "* ]] || { echo "tema.conf: COLOR_CARPETAS debe ser uno de: $COLORES_PAPIRUS" >&2; exit 1; }
 
 # --- CONVERSIONES ---
 # "#3399cc" -> "3399cc"
@@ -39,6 +42,57 @@ alfa() { awk -v o="$1" 'BEGIN { printf "%02x", int(o * 255 + 0.5) }'; }
 # Escribe stdin en $1 de una sola vez: Hyprland recarga al detectar cambios y no
 # debe leer el archivo a medio escribir (vería las variables sin definir).
 escribir() { cat > "$1.tmp" && mv -f "$1.tmp" "$1"; }
+
+# --- ICONOS: color de las carpetas ---
+# Papirus trae las carpetas en varios colores y elige uno con enlaces (folder.svg -> folder-blue.svg).
+# El tema de iconos "dotfiles-iconos" hereda de ICONOS y reapunta esos enlaces a COLOR_CARPETAS.
+# Lo usa GTK (Thunar); Rofi y Mako siguen con ICONOS.
+TEMA_ICONOS="$HOME/.local/share/icons/dotfiles-iconos"
+DIR_ICONOS="/run/current-system/sw/share/icons/$ICONOS"
+ICONOS_GTK="$ICONOS"
+# Se regenera solo si cambian los iconos, el color o la versión instalada del tema
+firma="$(readlink -f "$DIR_ICONOS" 2> /dev/null) $COLOR_CARPETAS"
+if [ -f "$TEMA_ICONOS/index.theme" ] && [ "$(cat "$TEMA_ICONOS/.firma" 2> /dev/null)" = "$firma" ]; then
+    ICONOS_GTK="dotfiles-iconos"
+elif [ -f "$DIR_ICONOS/48x48/places/folder-$COLOR_CARPETAS.svg" ]; then
+    rm -rf "$TEMA_ICONOS"
+    patron="^(folder|user)-(${COLORES_PAPIRUS// /|})(-.*)?\.svg$"
+    directorios=()
+    for dir in "$DIR_ICONOS"/*/places; do
+        tamano=$(basename "$(dirname "$dir")")
+        declare -A enlaces=()
+        while read -r nombre objetivo; do
+            enlaces[$nombre]=$objetivo
+        done < <(find "$dir/" -maxdepth 1 -type l -printf '%f %l\n')
+        lista=""
+        for nombre in "${!enlaces[@]}"; do
+            # Sigue la cadena dentro del directorio (folder-downloads -> folder-download -> folder-blue-download)
+            objetivo=${enlaces[$nombre]}
+            for _ in 1 2 3 4; do [ -n "${enlaces[$objetivo]:-}" ] && objetivo=${enlaces[$objetivo]}; done
+            [[ "$objetivo" =~ $patron ]] || continue
+            nuevo="${BASH_REMATCH[1]}-$COLOR_CARPETAS${BASH_REMATCH[3]}.svg"
+            [ -e "$dir/$nuevo" ] && lista+="$dir/$nuevo $TEMA_ICONOS/$tamano/places/$nombre"$'\n'
+        done
+        unset enlaces
+        [ -n "$lista" ] || continue
+        mkdir -p "$TEMA_ICONOS/$tamano/places"
+        # Miles de enlaces: con un solo proceso en lugar de un ln por enlace
+        printf '%s' "$lista" | perl -ne 'chomp; my ($o, $e) = split / /; symlink($o, $e) or die "$e: $!\n"'
+        directorios+=("$tamano/places")
+    done
+    {
+        printf '[Icon Theme]\nName=dotfiles-iconos\nComment=%s con carpetas %s (generado por utils/aplicar-tema.sh)\n' "$ICONOS" "$COLOR_CARPETAS"
+        printf 'Inherits=%s\nDirectories=%s\n' "$ICONOS" "$(IFS=,; echo "${directorios[*]}")"
+        for d in "${directorios[@]}"; do
+            echo
+            awk -v s="[$d]" '$0 == s { p = 1 } p && /^$/ { exit } p' "$DIR_ICONOS/index.theme"
+        done
+    } > "$TEMA_ICONOS/index.theme"
+    echo "$firma" > "$TEMA_ICONOS/.firma"
+    ICONOS_GTK="dotfiles-iconos"
+else
+    echo "Aviso: $ICONOS no tiene carpetas de color $COLOR_CARPETAS (solo Papirus): se dejan como están" >&2
+fi
 
 # --- HYPRLAND ---
 escribir "$DOTFILES/config/hypr/tema.conf" <<EOF
@@ -60,7 +114,7 @@ escribir "$DOTFILES/config/hypr/tema.conf" <<EOF
 \$fondo_pantalla = $WALLPAPER
 \$cursor = $CURSOR
 \$tamano_cursor = $CURSOR_TAMANO
-\$iconos = $ICONOS
+\$iconos = $ICONOS_GTK
 EOF
 
 # --- WAYBAR ---
@@ -240,12 +294,12 @@ fi
 
 # --- GTK Y CURSOR (solo las claves del tema; el resto lo gestiona nwg-look) ---
 sed -i -E \
-    -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS|" \
+    -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS_GTK|" \
     -e "s|^(gtk-cursor-theme-name=).*|\1$CURSOR|" \
     -e "s|^(gtk-cursor-theme-size=).*|\1$CURSOR_TAMANO|" \
     "$DOTFILES/config/gtk-3.0/settings.ini" "$DOTFILES/config/gtk-4.0/settings.ini"
 sed -i -E \
-    -e "s|^(gtk-icon-theme-name=).*|\1\"$ICONOS\"|" \
+    -e "s|^(gtk-icon-theme-name=).*|\1\"$ICONOS_GTK\"|" \
     -e "s|^(gtk-cursor-theme-name=).*|\1\"$CURSOR\"|" \
     -e "s|^(gtk-cursor-theme-size=).*|\1$CURSOR_TAMANO|" \
     "$DOTFILES/config/gtkrc-2.0"
@@ -262,13 +316,14 @@ echo "Tema \"$NOMBRE\" escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, R
 
 # --- RECARGAR LO QUE ESTÉ ABIERTO ---
 if command -v dconf > /dev/null; then
-    dconf write /org/gnome/desktop/interface/icon-theme "'$ICONOS'" || true
     dconf write /org/gnome/desktop/interface/cursor-theme "'$CURSOR'" || true
     dconf write /org/gnome/desktop/interface/cursor-size "$CURSOR_TAMANO" || true
-    # Cambiar el nombre del tema GTK y volver hace que las apps abiertas lo relean
+    # Cambiar el nombre de los temas GTK y de iconos y volver hace que las apps abiertas los relean
     dconf write /org/gnome/desktop/interface/gtk-theme "'adw-gtk3-dark'" || true
+    dconf write /org/gnome/desktop/interface/icon-theme "'$ICONOS'" || true
     sleep 0.3
     dconf write /org/gnome/desktop/interface/gtk-theme "'dotfiles-tema'" || true
+    dconf write /org/gnome/desktop/interface/icon-theme "'$ICONOS_GTK'" || true
 fi
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     hyprctl reload > /dev/null || echo "Aviso: no se pudo recargar Hyprland (hyprctl reload)" >&2
