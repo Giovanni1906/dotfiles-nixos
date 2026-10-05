@@ -19,9 +19,16 @@
   # --------------------------------------------------
   # ---     Kubernetes local (Kind + Skaffold)     ---
   # --------------------------------------------------
-  # Dominios locales de la capa k8s/ (Ingress de Kind en 127.0.0.1)
+  # Dominios locales de la capa k8s/ (Ingress de Kind en 127.0.0.1); los mismos hosts
+  # que k8s/ingress.yaml de siad.inscripciones
   networking.extraHosts = ''
-    127.0.0.1 postula.admision.dev panel.postula.admision.dev credential.postula.admision.dev valida.postula.admision.dev asisto.admision.dev
+    127.0.0.1 postula.admision.dev
+    127.0.0.1 panel.postula.admision.dev
+    127.0.0.1 credential.postula.admision.dev
+    127.0.0.1 valida.postula.admision.dev
+    127.0.0.1 puntaje.postula.admision.dev
+    127.0.0.1 imagen.postula.admision.dev
+    127.0.0.1 asisto.admision.dev
   '';
 
   # Kind y la sincronización de archivos de Skaffold necesitan más inotify
