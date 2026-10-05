@@ -2,65 +2,88 @@
 
 ## Requisitos Previos
 
-- PC x86_64 con NixOS instalado con la opción **"No Desktop"** y **"Allow unfree software"** marcados.
+- PC x86_64 con NixOS instalado con la opción **"No Desktop"** y **"Allow unfree software"** marcados, y usuario `nova`.
+- Repo clonado en `~/dotfiles` (las rutas son absolutas).
 - Conexión a internet (Nix, Flathub, descarga de Thorium desde GitHub, Tailscale).
 - Cuenta de Tailscale (el login se hace con GitHub durante `init.sh`).
 - Celular con Valent/KDE Connect si se quieren los comandos remotos.
 
 ## Instalación en una máquina nueva
 
-1. Clonar el repositorio:
+1. Clonar y ejecutar:
    ```bash
    nix-shell -p git
    git clone https://github.com/Giovanni1906/dotfiles-nixos.git ~/dotfiles
+   cd ~/dotfiles && ./init.sh
    ```
-2. Crear la carpeta del equipo con el hardware **de la máquina nueva** (no reutilizar el `hardware-configuration.nix` de otro equipo):
-   ```bash
-   mkdir ~/dotfiles/nixos-<equipo>
-   cp /etc/nixos/hardware-configuration.nix ~/dotfiles/nixos-<equipo>/
-   cp ~/dotfiles/nixos-pc-asus/configuration.nix ~/dotfiles/nixos-<equipo>/
-   ```
-   Revisar en `configuration.nix`: `imports = [ ./hardware-configuration.nix ];`, `networking.hostName`, usuario y `system.stateVersion`.
-3. Hacer que `/etc/nixos` apunte al repo (así está el equipo actual) **o** copiar los archivos (lo que recomienda el README):
-   ```bash
-   sudo ln -sfn ~/dotfiles/nixos-<equipo>/configuration.nix /etc/nixos/configuration.nix
-   sudo ln -sfn ~/dotfiles/nixos-<equipo>/hardware-configuration.nix /etc/nixos/hardware-configuration.nix
-   ```
-4. Aplicar el sistema: `sudo nixos-rebuild switch`
-5. Secretos: `cp ~/dotfiles/.env.example ~/dotfiles/.env && micro ~/dotfiles/.env`
-6. Capa de usuario: `cd ~/dotfiles && bash init.sh` (pide `sudo` al inicio y lo mantiene vivo; al final abre el login de Tailscale).
-7. Acceso a GitHub para `git push`: `gh auth login` + `gh auth setup-git`, y cambiar en `~/.gitconfig` la ruta de `/nix/store/…/gh` por `!gh auth git-credential` (ver README, paso 7; si no, deja de funcionar tras actualizar `gh` + GC).
-8. Reiniciar. Entrar desde `tuigreet`.
-9. Pasos manuales que el repo no automatiza: emparejar el celular en Valent, configurar sus comandos remotos (ver README) y actualizar el ID de dispositivo en `utils/valent-clipboard.sh`.
+2. `init.sh` pregunta el equipo. Para una máquina que aún no existe en el repo, elegir "Nuevo equipo": copia `nixos/equipos/plantilla` con el nombre y la `stateVersion` de la instalación. Si la máquina arranca en BIOS (sin `/sys/firmware/efi`), avisa para cambiar el cargador de arranque.
+3. El script enlaza `config/`, aplica el tema, escribe `/etc/nixos/configuration.nix` (importa el `hardware-configuration.nix` que generó el instalador y el equipo), ejecuta `nixos-rebuild switch`, instala Zen y Thorium y abre el login de Tailscale. Al final resume los avisos.
+4. Equipo nuevo: revisar qué módulos importa (`nix-config`), `nix-switch` si se cambió algo, y subirlo (`git add nixos/equipos/<equipo>`).
+5. Completar `.env` (lo crea `init.sh` desde `.env.example`).
+6. Acceso a GitHub para `git push`: `gh auth login` + `gh auth setup-git`, y cambiar en `~/.gitconfig` la ruta de `/nix/store/…/gh` por `!gh auth git-credential` (ver README; si no, deja de funcionar tras actualizar `gh` + GC).
+7. Reiniciar. Entrar desde la pantalla de login (`nwg-hello`).
+8. Pasos manuales que el repo no automatiza: emparejar el celular en Valent, configurar sus comandos remotos (ver README) y actualizar el ID de dispositivo en `utils/valent-clipboard.sh`.
+
+## Llevar cambios de una máquina a otra
+
+1. En la máquina donde se hizo el cambio: `git add … && git commit -m "…" && git push`.
+2. En las demás: `dotfiles-actualizar` (= `./init.sh actualizar`): `git pull --rebase --autostash`, vuelve a enlazar y aplicar el tema y ejecuta `nixos-rebuild switch` con el equipo de esa máquina.
+
+Lo que cambia en `config/` se aplica en cuanto llega el `pull` (las carpetas están enlazadas); lo de `nixos/` necesita el `switch`. Cada máquina solo recibe lo que importa su equipo: un paquete añadido a `juegos.nix` no llega a un equipo que no importa ese módulo.
 
 ## Ciclo de cambios diario
 
 | Qué cambias | Dónde | Cómo se aplica |
 | --- | --- | --- |
-| Paquetes, servicios, firewall, aliases | `nixos-pc-asus/configuration.nix` | `nix-switch` (abre una nueva generación) |
-| Atajos, autoarranque, reglas de ventanas | `config/hypr/hyprland.conf` | Hyprland recarga solo al guardar; `exec-once` requiere cerrar sesión (`SUPER + M`) |
-| Barra | `config/waybar/{config,style.css}` | `pkill waybar && waybar &` (o `pkill -SIGUSR2 waybar`) |
+| Tema completo | `SUPER + F2` o `tema-aplicar <nombre>` | Escritorio al instante; `nix-switch` para GRUB y login |
+| Valores del tema activo | `tema-config` (o "Editar el tema activo" en el selector) | `tema-aplicar` (el selector lo hace solo) |
+| Nuevo tema | Copiar `tema/temas/nova.conf` a `tema/temas/<nombre>.conf` | Aparece en el selector |
+| Diseño de GRUB o del login | `nixos/modulos/tema.nix` | `nix-switch`; se ve en el próximo arranque |
+| Paquete o servicio común | El módulo de `nixos/modulos/` que corresponda | `nix-switch` (y `dotfiles-actualizar` en las demás) |
+| Paquete o servicio de una máquina | `nixos/equipos/<equipo>/default.nix` (`nix-config`) | `nix-switch` |
+| Activar o quitar un grupo de funciones | Comentar o descomentar el módulo en `imports` del equipo | `nix-switch` |
+| Atajos, autoarranque, reglas de ventanas | `config/hypr/hyprland.conf` (+ `utils/atajos.txt`) | Hyprland recarga solo al guardar; `exec-once` requiere cerrar sesión (`SUPER + M`) |
+| Monitores, touchpad u otro ajuste de una máquina | `config/hypr/local.conf` (no se versiona) | Hyprland recarga solo |
+| Barra | `config/waybar/{config,style.css}` | `pkill -USR2 -f '^waybar( \|$)'` |
 | Terminal | `config/kitty/kitty.conf` | `ctrl+shift+F5` en Kitty o abrir una ventana nueva |
-| Lanzador / menú de apagado | `config/rofi/`, `config/waybar/scripts/powermenu.sh` | Inmediato en la siguiente apertura |
-| Temas GTK | `nwg-look` (reescribe `config/gtk-*`) | Reiniciar la app |
+| Lanzador y menús | `config/rofi/` (diseño en `themes/nova.rasi`), `config/waybar/scripts/powermenu.sh` | Inmediato en la siguiente apertura |
+| Temas GTK | `nwg-look` (reescribe `config/gtk-*`; `tema-aplicar` vuelve a poner tema, iconos y cursor) | Reiniciar la app |
 | Secretos | `.env` | Inmediato (se lee con `source` en cada uso) |
 
 Después de cada cambio que funcione: `git add -A && git commit -m "feat|fix|docs: …" && git push`. Si el cambio altera la arquitectura, actualizar `docs/contexto/`.
 
-## Aliases disponibles (definidos en `configuration.nix`)
+## `init.sh`
 
-| Alias | Comando |
+| Comando | Qué hace |
 | --- | --- |
-| `nix-switch` | `sudo nixos-rebuild switch` |
-| `nix-clean` | Borra generaciones viejas, `nixos-rebuild boot` y `nix-store --gc` |
-| `nix-config` | `sudo micro /etc/nixos/configuration.nix` (en este equipo es el mismo archivo del repo) |
-| `hypr-config`, `kitty-config`, `waybar-config` | Abren la config correspondiente con `sudo micro` |
-| `ll` | `ls -lha` |
-| `d`, `dc-up`, `dc-down` | Docker / `docker compose up -d` / `down` |
-| `k` | `kubectl` (no instalado actualmente) |
-| `remote-conexion` | `wayvnc 0.0.0.0` |
-| `reset-trial-navicat` | `~/dotfiles/utils/reset-trial-navicat.sh` |
-| `ip-public` | `curl -s ipinfo.io/ip` |
+| `./init.sh` | Todo: usuario, sistema, apps y red (pregunta el equipo si no lo sabe) |
+| `./init.sh usuario` | Enlaces en `~/.config`, `.env` y `local.conf`, permisos, tema. Sin `sudo` |
+| `./init.sh sistema [equipo]` | Escribe `/etc/nixos/configuration.nix`, migra symlinks antiguos, conserva o regenera el hardware y `nixos-rebuild switch` |
+| `./init.sh apps` | Flathub + Zen Browser y Thorium, si faltan |
+| `./init.sh red` | `tailscale up` si no hay sesión |
+| `./init.sh actualizar` | `git pull` + usuario + sistema |
+| `./init.sh nuevo-equipo <nombre>` | Crea `nixos/equipos/<nombre>` desde la plantilla |
+| `--simular` | Muestra los comandos con `sudo` sin ejecutarlos |
+
+Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se respalda en `~/.local/state/dotfiles/respaldo/` o `/etc/nixos/*.respaldo-<fecha>`.
+
+## Aliases disponibles
+
+| Alias | Comando | Módulo |
+| --- | --- | --- |
+| `nix-switch` | `sudo nixos-rebuild switch` | base |
+| `nix-clean` | Borra generaciones viejas, `nixos-rebuild boot` y `nix-store --gc` | base |
+| `nix-config` | Abre `nixos/equipos/<equipo actual>/default.nix` | base |
+| `dotfiles-actualizar` | `~/dotfiles/init.sh actualizar` | base |
+| `ll` | `ls -lha` | base |
+| `ip-public` | `curl -s ipinfo.io/ip` | base |
+| `tema-config` | Abre el tema activo (`tema/tema.conf`) | escritorio |
+| `tema-aplicar [nombre]` | `utils/aplicar-tema.sh` (genera los `tema.*` y recarga el escritorio) | escritorio |
+| `hypr-config`, `kitty-config`, `waybar-config` | Abren la config correspondiente con `micro` | escritorio |
+| `d`, `dc-up`, `dc-down` | Docker / `docker compose up -d` / `down` | desarrollo |
+| `k` | `kubectl` (no instalado actualmente) | desarrollo |
+| `reset-trial-navicat` | `utils/reset-trial-navicat.sh` | desarrollo |
+| `remote-conexion` | `wayvnc 0.0.0.0` | remoto |
 
 ## Atajos
 
@@ -69,30 +92,31 @@ La lista completa (Hyprland, Kitty y Waybar) está en `utils/atajos.txt` y se ve
 ## Comandos de Valent (comandos remotos desde el celular)
 
 ```bash
-# Bloquear
-swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2
+# Bloquear (hypridle abre hyprlock; diseño en config/hypr/hyprlock.conf)
+loginctl lock-session
 # Desbloquear
 source ~/dotfiles/.env && wtype "$PASS_SWAYLOCK" && wtype -k Return
 # Apagar
 systemctl poweroff
 # Suspender
-swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend
+systemctl suspend   # hypridle bloquea antes de dormir
 ```
 
 ## Diagnóstico rápido
 
 ```bash
 hyprctl configerrors                 # errores de sintaxis en hyprland.conf
-hyprctl version
-pgrep -a wayvnc; pgrep -a polkit     # verificar que el autoarranque funcionó
+./init.sh sistema --simular          # qué haría init.sh con /etc/nixos
+cat /etc/nixos/configuration.nix     # qué equipo usa esta máquina
+pgrep -af wayvnc; pgrep -af waybar   # verificar el autoarranque (los procesos se llaman .x-wrapped)
 journalctl --user -b | grep -i <app> # logs de la sesión
-sudo nixos-rebuild dry-build         # validar configuration.nix sin activar
+sudo nixos-rebuild dry-build         # validar la configuración sin activar
 nixos-rebuild list-generations       # ver generaciones para hacer rollback
 sudo nixos-rebuild switch --rollback # volver a la generación anterior
 ```
 
 ## Testing y Despliegue
 
-- **Tests**: no existen. La validación es manual: `nixos-rebuild dry-build` para Nix, `hyprctl configerrors` para Hyprland y probar en la sesión.
-- **CI/CD**: no hay pipeline (no existe `.github/workflows/`). El "despliegue" es `git pull` en la máquina + `nix-switch` y/o volver a ejecutar `init.sh`.
-- **Rollback**: a nivel de sistema, las generaciones de NixOS (menú de systemd-boot o `--rollback`); a nivel de usuario, `git revert`/`git checkout` del archivo (los symlinks aplican el cambio al instante).
+- **Tests**: no existen. La validación es manual: `nixos-rebuild dry-build` para Nix, `hyprctl configerrors` para Hyprland, `bash -n`/`shellcheck` para scripts y probar en la sesión.
+- **CI/CD**: no hay pipeline. El "despliegue" es `dotfiles-actualizar` en cada máquina.
+- **Rollback**: a nivel de sistema, las generaciones de NixOS (submenú de GRUB o `--rollback`); a nivel de usuario, `git revert`/`git checkout` del archivo (los symlinks aplican el cambio al instante).

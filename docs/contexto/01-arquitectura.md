@@ -2,54 +2,69 @@
 
 ## Descripción General
 
-Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (Wayland). Existe para poder reconstruir el mismo entorno de trabajo en cualquier PC con dos pasos: aplicar la configuración declarativa de NixOS y ejecutar `init.sh`, que enlaza las configuraciones de usuario.
+Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (Wayland) en varias máquinas. Existe para reconstruir el mismo entorno en cualquier PC con un solo comando (`./init.sh`) y para que los cambios hechos en una máquina lleguen a las demás con `git pull` (`dotfiles-actualizar`).
 
-- **Alcance**: sistema operativo (paquetes, servicios, firewall, usuarios), sesión gráfica (compositor, barra, lanzador, terminal, temas), utilidades propias (Pomodoro, menú de apagado, puente de portapapeles con el celular) y acceso remoto.
+- **Alcance**: sistema operativo (paquetes, servicios, firewall, usuarios), sesión gráfica (compositor, barra, lanzador, terminal, temas), utilidades propias (Pomodoro, menú de apagado, selector de temas, puente de portapapeles con el celular) y acceso remoto.
 - **Fuera de alcance**: no hay aplicación, API ni base de datos. No se usa Home Manager ni flakes (aunque `flakes` está habilitado en Nix).
-- **Equipo actual**: `nixos-pc-asus` (CPU AMD, disco NVMe, ext4, systemd-boot). Usuario `nova`. Remoto: `github.com/Giovanni1906/dotfiles-nixos`.
+- **Equipos**: `pc-asus` (CPU AMD, disco NVMe, ext4, GRUB EFI). La laptop se añadirá como otro equipo. Usuario `nova`. Remoto: `github.com/Giovanni1906/dotfiles-nixos`.
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 | --- | --- |
-| Sistema operativo | NixOS 26.05 (`system.stateVersion = "26.05"`), canal estable, `allowUnfree = true` |
-| Login | `greetd` + `tuigreet` → lanza `start-hyprland` |
+| Sistema operativo | NixOS 26.05, canal estable, sin flakes, `allowUnfree = true` |
+| Arranque | GRUB con tema propio generado por Nix (`nixos/modulos/tema.nix`), arranque silencioso (`quiet`) |
+| Login | `greetd` + `nwg-hello` (GTK) dentro de un Hyprland mínimo con el fondo desenfocado → lanza `start-hyprland` |
 | Compositor | Hyprland 0.55 (layout `dwindle`, sintaxis nueva de `windowrule … match:class`) |
 | Barra | Waybar (JSONC + CSS) con módulos `custom/*` en Bash |
-| Lanzador / menús | Rofi 2.0 (`drun` y `dmenu` para el menú de apagado) |
+| Lanzador / menús | Rofi 2.0 (`drun`, y `dmenu` para apagado, atajos y temas) |
 | Terminal | Kitty (layouts `splits` y `stack`) |
 | Notificaciones | Mako + `libnotify` (`notify-send`) + `paplay` para sonidos |
-| Bloqueo de pantalla | `swaylock-effects` (PAM habilitado en `security.pam.services.swaylock`) |
-| Temas | GTK `Adwaita-dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
+| Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
+| Temas | Presets en `tema/temas/*.conf`; GTK `Adwaita-dark`, iconos `Papirus-Dark`, cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
-| Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (gestor de volumen gráfico, clic en el volumen de Waybar) |
+| Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), WayVNC en `0.0.0.0:5900`, Remmina (cliente) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Cursor, Postman, Navicat, FileZilla |
+| Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
 
 ## Estructura del Repositorio
 
 ```
 dotfiles/
-├── init.sh                      # Instalador de la capa de usuario (symlinks, flatpak, appimage, tailscale)
+├── init.sh                      # Instala y actualiza por pasos: usuario, sistema, apps, red, actualizar, nuevo-equipo
 ├── .env.example                 # Plantilla de secretos (PASS_SWAYLOCK)
-├── nixos-pc-asus/               # Configuración de sistema de UN equipo concreto
-│   ├── configuration.nix        # Paquetes, servicios, firewall, aliases, usuario
-│   └── hardware-configuration.nix  # Generado por nixos-generate-config (UUIDs de discos)
+├── nixos/
+│   ├── modulos/                 # Configuración de sistema por función (compartida)
+│   │   ├── base.nix             # Nix, idioma, red, audio, usuario nova, CLI, aliases; opción dotfiles.equipo
+│   │   ├── escritorio.nix       # Hyprland, hyprlock, portales, fuentes, apps gráficas, cursor e iconos
+│   │   ├── tema.nix             # GRUB, login greetd/nwg-hello y cursor, leídos del tema activo
+│   │   ├── desarrollo.nix       # Docker, virtualización, editores y clientes de BD/API
+│   │   ├── remoto.nix           # Tailscale, Valent, WayVNC, Remmina y sus puertos
+│   │   └── juegos.nix           # Steam, Heroic, Lutris
+│   └── equipos/                 # Una carpeta por máquina (sin hardware)
+│       ├── pc-asus/default.nix  # Módulos que usa, hostname, cargador de arranque, stateVersion
+│       └── plantilla/default.nix  # Base que copia `init.sh nuevo-equipo`
+├── tema/
+│   ├── temas/*.conf             # Temas completos: nova (por defecto), carmesi, violeta, noche, neon, relampago
+│   └── tema.conf                # LOCAL (gitignored): symlink al tema elegido en esta máquina
 ├── config/                      # Se enlaza a ~/.config/<app>
-│   ├── hypr/hyprland.conf       # Autoarranque, atajos, reglas de ventanas
+│   ├── hypr/{hyprland.conf,hyprlock.conf,hypridle.conf}
+│   ├── hypr/local.conf          # LOCAL: monitores, touchpad y ajustes de esta máquina
 │   ├── waybar/{config,style.css,scripts/{pomo.sh,powermenu.sh}}
 │   ├── kitty/kitty.conf
-│   ├── rofi/{config.rasi,themes/material.rasi}
+│   ├── rofi/{config.rasi,themes/nova.rasi}
 │   ├── fastfetch/config.jsonc
-│   ├── gtk-3.0/, gtk-4.0/, gtkrc-2.0   # Escritos originalmente por nwg-look
-├── icons/                       # Se enlaza a ~/.local/share/icons/icons
-│   ├── default/index.theme      # Hereda el cursor Catppuccin
-│   └── catppuccin-mocha-sky-cursors -> /run/current-system/sw/share/icons/...  (symlink versionado)
+│   ├── gtk-3.0/, gtk-4.0/, gtkrc-2.0   # Escritos originalmente por nwg-look; aplicar-tema.sh ajusta tema, iconos y cursor
+│   └── */tema.*, mako/config    # GENERADOS (gitignored) por utils/aplicar-tema.sh
 ├── applications/thorium.desktop # Acceso directo para Rofi drun
-├── utils/                       # Scripts sueltos (valent-clipboard.sh, reset-trial-navicat.sh, kitty-zoom.sh, atajos.sh)
-│   └── atajos.txt               # Lista única de atajos que muestra SUPER + F1
+├── utils/
+│   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)
+│   ├── elegir-tema.sh           # Selector Rofi con vista previa (SUPER + F2)
+│   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
+│   └── kitty-zoom.sh, valent-clipboard.sh, reset-trial-navicat.sh
 └── public/                      # Fondos de pantalla y PNG para el logo de fastfetch
 ```
 
@@ -57,40 +72,52 @@ dotfiles/
 
 ```mermaid
 flowchart TD
-    subgraph Sistema["Capa de sistema (root, declarativa)"]
-        NIX["/etc/nixos/configuration.nix<br/>(symlink → nixos-pc-asus/)"] -->|nixos-rebuild switch| PKGS[Paquetes + servicios + firewall]
+    subgraph Repo["Repo (compartido por git)"]
+        EQ["nixos/equipos/&lt;equipo&gt;"] -->|imports| MOD["nixos/modulos/*.nix"]
+        TEMAS["tema/temas/*.conf"]
     end
-    subgraph Usuario["Capa de usuario (init.sh, imperativa)"]
-        INIT[init.sh] -->|ln -sfn| CFG["~/.config/{hypr,waybar,kitty,rofi,fastfetch,gtk-*}"]
-        INIT --> FLAT[Flatpak: Zen]
-        INIT --> APPI[AppImage: Thorium]
-        INIT --> TS[tailscale up]
+    subgraph Local["Local de cada máquina"]
+        CONF["/etc/nixos/configuration.nix<br/>(lo escribe init.sh)"] --> HW["/etc/nixos/hardware-configuration.nix"]
+        TEMA["tema/tema.conf → temas/x.conf"]
     end
-    PKGS --> GREETD[greetd/tuigreet] --> HYPR[Hyprland]
+    CONF -->|imports| EQ
+    TEMAS -.-> TEMA
+    TEMA -->|builtins.fromTOML| TNIX[modulos/tema.nix] --> GRUB[Tema de GRUB] & GREETD[greetd + nwg-hello]
+    TEMA -->|source| APLICAR[utils/aplicar-tema.sh] -->|escribe tema.*| CFG
+    INIT[init.sh] -->|ln -sfn| CFG["~/.config/{hypr,waybar,kitty,rofi,mako,fastfetch,gtk-*}"]
+    INIT -->|escribe + nixos-rebuild switch| CONF
+    INIT --> FLAT[Flatpak: Zen] & APPI[AppImage: Thorium] & TS[tailscale up]
+    GRUB --> GREETD --> HYPR[Hyprland]
     CFG --> HYPR
-    HYPR -->|exec-once| WAYBAR[Waybar] & MAKO[Mako] & VALENT[Valent] & NMA[nm-applet] & SWAYBG[swaybg] & VNC[WayVNC]
-    WAYBAR --> POMO[pomo.sh] & POWER[powermenu.sh] & ATAJOS[atajos.sh]
+    HYPR -->|exec-once| WAYBAR[Waybar] & MAKO[Mako] & VALENT[Valent] & NMA[nm-applet] & SWAYBG[swaybg] & VNC[WayVNC] & IDLE[hypridle]
+    IDLE -->|antes de suspender| LOCK[hyprlock]
+    WAYBAR --> POMO[pomo.sh] & ATAJOS[atajos.sh]
     HYPR -->|SUPER + F1| ATAJOS
+    HYPR -->|SUPER + F2| ELEGIR[elegir-tema.sh] --> APLICAR
+    HYPR -->|SUPER + X| POWER[powermenu.sh]
     HYPR -->|wl-paste --watch| CLIP[valent-clipboard.sh] -->|gdbus| VALENT
     VALENT <-->|LAN / Tailscale| PHONE[Celular]
 ```
 
 ## Capas y responsabilidades
 
-- **Capa de sistema (`nixos-pc-asus/`)**: única fuente de verdad de paquetes, servicios, usuarios, grupos (`networkmanager wheel docker input libvirtd kvm`), firewall y aliases de shell. Se aplica con `nix-switch`. En este equipo `/etc/nixos/configuration.nix` y `hardware-configuration.nix` son **symlinks** a esta carpeta.
-- **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes (`com.saivert.pwvucontrol`).
-- **Capa de presentación (Waybar, Rofi, Kitty, GTK)**: archivos de configuración puros; Waybar delega lógica a scripts Bash que devuelven JSON (`return-type: json`).
-- **Utilidades (`config/waybar/scripts/`, `utils/`)**: scripts Bash sin dependencias externas más allá de los paquetes del sistema. Estado efímero en `/tmp` (`/tmp/pomo_status`, `/tmp/pomo_pid`).
-- **Secretos (`.env`)**: archivo local no versionado (`chmod 600`) con `PASS_SWAYLOCK`, consumido por comandos remotos de Valent para desbloquear la pantalla con `wtype`.
+- **Módulos de sistema (`nixos/modulos/`)**: única fuente de verdad de paquetes, servicios, firewall y aliases, agrupados por función. Cada módulo añade sus grupos al usuario `nova` (las listas de Nix se fusionan).
+- **Equipos (`nixos/equipos/<equipo>/`)**: deciden qué módulos usa cada máquina y lo que es propio de ella (hostname, cargador de arranque, `stateVersion`, paquetes sueltos). No contienen hardware.
+- **Capa local de cada máquina**: `/etc/nixos/configuration.nix` (solo importa el hardware local y el equipo), `hardware-configuration.nix`, `tema/tema.conf`, `config/hypr/local.conf` y `.env`. `init.sh` los crea; ninguno se versiona.
+- **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes. Al final incluye `local.conf`.
+- **Capa de presentación (Waybar, Rofi, Kitty, GTK)**: archivos de configuración puros que usan las variables del tema; Waybar delega lógica a scripts Bash que devuelven JSON (`return-type: json`).
+- **Utilidades (`config/waybar/scripts/`, `utils/`)**: scripts Bash sin dependencias más allá de los paquetes del sistema. Estado efímero en `/tmp` (Pomodoro) y vistas previas de temas en `~/.cache/dotfiles/temas`.
+- **Secretos (`.env`)**: archivo local (`chmod 600`) con `PASS_SWAYLOCK`, consumido por comandos remotos de Valent para desbloquear la pantalla con `wtype`.
 
 ## Patrones Arquitectónicos
 
-- **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza por symlinks (`ln -sfn`) para que editar el repo tenga efecto inmediato sin reconstruir.
-- **Una carpeta por equipo** (`nixos-<equipo>/`): el hardware cambia entre máquinas, la capa `config/` es compartida. Hoy solo existe `nixos-pc-asus` (la de `nixos-laptop-hp` se eliminó el 2026-09-26).
+- **Módulos por función + equipos**: lo común se escribe una vez en `nixos/modulos/`; cada equipo elige qué módulos importa. Quitar algo de una máquina es comentar una línea de `imports` (ver ADR-019).
+- **Hardware fuera del repo**: el `hardware-configuration.nix` de cada máquina queda en `/etc/nixos`, así una configuración nunca arranca con los UUID de discos de otra PC.
+- **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza con `ln -sfn` para que editar el repo tenga efecto sin reconstruir.
 - **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`.
-- **Paleta centralizada en Waybar**: variables `@define-color` en `style.css`; `powermenu.sh` replica la misma paleta en variables Bash.
-- **Sin caché, sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
+- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020).
+- **Sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
 
 ## Configuración que NO está en el repo
 
-Estas piezas usan valores por defecto o viven solo en la máquina: `~/.config/mako`, `~/.config/swaylock`, `~/.config/wayvnc` (sin autenticación configurada), configuración de Valent (emparejamiento y comandos remotos), `~/.gtkrc-2.0.mine`, `~/.bash_profile` (lo modifica `init.sh`).
+Además de la capa local descrita arriba: `~/.config/wayvnc` (sin autenticación configurada), configuración de Valent (emparejamiento y comandos remotos), `~/.gtkrc-2.0.mine`. Los respaldos de `init.sh` quedan en `~/.local/state/dotfiles/respaldo/` y `/etc/nixos/*.respaldo-<fecha>`.

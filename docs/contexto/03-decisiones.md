@@ -10,7 +10,7 @@
   - Positivas: editar un archivo del repo aplica el cambio al instante (recargar la app); curva de aprendizaje baja.
   - Negativas: la capa de usuario no es declarativa (no hay rollback); `init.sh` hace `rm -rf` de carpetas existentes; rutas como `/home/nova` quedan hardcodeadas.
 
-## ADR-002: Una carpeta de configuración NixOS por equipo
+## ADR-002: Una carpeta de configuración NixOS por equipo (reemplazada por ADR-019)
 - **Fecha**: 2026-06-22 (`nixos/` → `nixos-laptop-hp/`); `nixos-pc-asus/` el 2026-09-03; `nixos-laptop-hp/` eliminado el 2026-09-26.
 - **Contexto**: `hardware-configuration.nix` contiene UUIDs de disco; usarlo en otra máquina deja el sistema sin arrancar.
 - **Decisión**: Cada equipo tiene su `nixos-<equipo>/`. En el equipo actual, `/etc/nixos/*.nix` son **symlinks** a `nixos-pc-asus/`. El README recomienda **copiar** (no enlazar) en máquinas nuevas.
@@ -18,7 +18,7 @@
   - Positivas: el repo versiona la configuración real del sistema.
   - Negativas: el contenido de `configuration.nix` se duplica entre equipos (no hay módulo común); la recomendación del README y la práctica actual no coinciden.
 
-## ADR-003: Hyprland + greetd/tuigreet en lugar de KDE Plasma + SDDM
+## ADR-003: Hyprland + greetd/tuigreet en lugar de KDE Plasma + SDDM (tuigreet reemplazado en ADR-017)
 - **Fecha**: 2026-06-22 (Plasma/SDDM quedan comentados en `configuration.nix`)
 - **Contexto**: Se busca un escritorio ligero, por teclado y muy personalizable sobre Wayland.
 - **Decisión**: `programs.hyprland.enable`, login en TTY con `tuigreet` que ejecuta `start-hyprland`. Las piezas del escritorio se ensamblan a mano (Waybar, Rofi, Mako, swaybg, swaylock, nm-applet).
@@ -34,7 +34,7 @@
   - Positivas: cursor consistente.
   - Negativas: la misma configuración está en 5–6 sitios; difícil saber cuál es la que realmente funciona.
 
-## ADR-005: Tema oscuro unificado Adwaita-dark + paleta azul/Catppuccin
+## ADR-005: Tema oscuro unificado Adwaita-dark + paleta azul/Catppuccin (paleta centralizada en ADR-015)
 - **Fecha**: 2026-07-06
 - **Decisión**: GTK 2/3/4 con `Adwaita-dark` (generados con `nwg-look`), `color-scheme prefer-dark` vía dconf al inicio, Waybar/Rofi/Kitty con acento `#3399cc` y bordes Catppuccin.
 - **Consecuencias**: apariencia coherente; las apps Qt no están tematizadas (el bloque `qt` está comentado) y el tema de iconos `breeze-dark` referenciado en GTK no está instalado.
@@ -90,3 +90,59 @@
 - **Contexto**: `pulsemixer` (TUI en Kitty, clase `pomo-mixer`) no encajaba con el flujo visual del escritorio.
 - **Decisión**: `pwvucontrol` (GTK4, nativo de PipeWire) se abre/cierra con clic en el módulo `pulseaudio` de Waybar; Hyprland lo hace flotante (760×450) debajo de la barra, a la derecha, con opacidad 0.9/0.8.
 - **Consecuencias**: interfaz gráfica que sigue el modo oscuro (libadwaita + `prefer-dark`) y gestiona dispositivos y apps por separado; la posición está fijada en píxeles para un monitor de 1920 px de ancho.
+
+## ADR-015: Tema único en `tema/tema.conf` con generador (presets y archivos sin versionar en ADR-020)
+- **Fecha**: 2026-10-04
+- **Contexto**: Los colores, la fuente y los radios estaban repetidos en Hyprland, Waybar, Kitty, Rofi, `powermenu.sh` y `atajos.sh`, con valores que ya no coincidían (Kitty usaba una fuente no instalada, GTK un tema de iconos inexistente). Cambiar el aspecto obligaba a tocar 6+ archivos.
+- **Decisión**: `tema/tema.conf` con líneas `NOMBRE="valor"`, formato válido a la vez para bash (`source`) y TOML (`builtins.fromTOML`). `utils/aplicar-tema.sh` genera un archivo `tema.*` por app en el formato que cada una entiende y recarga lo que está corriendo; las configs lo incluyen y solo conservan el diseño. Rofi pasa a un único tema propio (`themes/nova.rasi`) que usan el lanzador, el menú de apagado y la lista de atajos. Mako se versiona como archivo generado.
+- **Consecuencias**:
+  - Positivas: cambiar un color o la fuente es editar una línea y ejecutar `tema-aplicar`; GRUB y el login usan los mismos valores.
+  - Negativas: los archivos generados se versionan y pueden quedar desfasados si se edita `tema.conf` sin ejecutar el generador; el formato compartido no admite `$` ni comillas simples.
+
+## ADR-016: GRUB con tema propio en lugar de systemd-boot
+- **Fecha**: 2026-10-04
+- **Contexto**: systemd-boot no admite temas; el arranque mostraba un menú de texto y mensajes del kernel que no encajaban con el escritorio.
+- **Decisión**: `boot.loader.grub` EFI (`device = "nodev"`). `tema/tema.nix` construye el tema en Nix: fondo de pantalla desenfocado y teñido con `FONDO`, fuentes `.pf2` generadas desde la fuente del tema, cajas redondeadas e iconos Nerd Font en `ACENTO`, textos en español y entradas extra (firmware UEFI, reiniciar, apagar). Arranque silencioso con `quiet`, `udev.log_level=3` y `initrd.verbose = false`.
+- **Consecuencias**:
+  - Positivas: el menú de arranque sigue la paleta y se regenera solo con `nix-switch` al cambiar el tema.
+  - Negativas: la entrada de systemd-boot queda en la partición EFI como respaldo; el diseño está pensado para 1920×1080 (`gfxmodeEfi`).
+
+## ADR-017: nwg-hello en lugar de tuigreet
+- **Fecha**: 2026-10-04
+- **Contexto**: `tuigreet` es de texto y no podía seguir los colores ni el fondo del escritorio.
+- **Decisión**: greetd ejecuta un Hyprland mínimo (`start-hyprland -- --config` generado en `tema/tema.nix`) que pone el fondo de pantalla con `swaybg` y abre `nwg-hello` con desenfoque (`layerrule … match:namespace nwg-hello`). El CSS, la plantilla (con `message-label` para los errores) y los textos en español (`es_MX`) se generan desde el tema; al cerrar el greeter, `hyprctl dispatch exit` termina su Hyprland.
+- **Consecuencias**:
+  - Positivas: login gráfico con la misma paleta, fuente, cursor y fondo que la sesión.
+  - Negativas: arranca un compositor más antes de la sesión (≈1 s); el paquete `nwg-hello` se sobrescribe (`overrideAttrs`) para añadir el idioma.
+
+## ADR-018: hyprlock + hypridle en lugar de swaylock
+- **Fecha**: 2026-10-04
+- **Contexto**: El bloqueo al suspender era `swaylock-effects` (un anillo sobre una captura desenfocada) lanzado a mano desde el menú de apagado con `swaylock -f && sleep 1 && systemctl suspend`; no seguía el diseño del login y otras suspensiones (desde el login o `systemctl suspend`) no bloqueaban.
+- **Decisión**: `programs.hyprlock` (paquete + PAM) con `config/hypr/hyprlock.conf`, que repite el panel del login (reloj, fecha, avatar, campo de contraseña) sobre el fondo desenfocado y toma colores, fuente y radio de `config/hypr/tema.conf`. `hypridle` (arrancado con `exec-once`) bloquea en `before_sleep_cmd` y enciende la pantalla al volver; no tiene temporizadores de inactividad. El menú de apagado y Valent suspenden con `systemctl suspend` y bloquean con `loginctl lock-session`.
+- **Consecuencias**:
+  - Positivas: bloqueo y login se ven iguales; cualquier suspensión bloquea antes de dormir, sin `sleep` de espera.
+  - Negativas: si `hypridle` no está corriendo, suspender no bloquea; las posiciones del panel están en píxeles para 1920×1080.
+
+## ADR-019: Módulos por función + equipos, con el hardware fuera del repo
+- **Fecha**: 2026-10-04
+- **Contexto**: Cada máquina nueva se montaba copiando `nixos-pc-asus/` (con su `hardware-configuration.nix`) y editando la copia. Las copias divergían, un cambio común había que repetirlo en cada carpeta, y `/etc/nixos` enlazado al hardware de la ASUS hacía que otras PCs no arrancaran.
+- **Decisión**: La configuración de sistema se parte en `nixos/modulos/` (base, escritorio, tema, desarrollo, remoto, juegos). Cada máquina tiene `nixos/equipos/<equipo>/default.nix`, que solo elige módulos y define lo propio (hostname, arranque, `stateVersion`). `/etc/nixos/configuration.nix` es un archivo local que escribe `init.sh` e importa `./hardware-configuration.nix` (el de la máquina, nunca versionado) y el equipo. Los equipos nuevos salen de `nixos/equipos/plantilla` con `./init.sh nuevo-equipo <nombre>`. La opción `dotfiles.equipo` permite que el alias `nix-config` abra el archivo del equipo actual.
+- **Consecuencias**:
+  - Positivas: un cambio común se escribe una vez y llega a todas las máquinas con `git pull`; quitar Steam de la laptop es comentar `juegos.nix` en su equipo; una configuración ya no puede arrancar con los discos de otra PC.
+  - Negativas: `hardware-configuration.nix` no tiene respaldo en git (se regenera con `nixos-generate-config`); las rutas absolutas `/home/nova/dotfiles` obligan a clonar en esa ubicación.
+
+## ADR-020: Temas predefinidos con selector y archivos generados sin versionar
+- **Fecha**: 2026-10-04
+- **Contexto**: Con un solo `tema/tema.conf` versionado, cambiar de aspecto era editar valores a mano, y cada `tema-aplicar` ensuciaba git con los archivos generados (que además chocaban entre máquinas con temas distintos).
+- **Decisión**: Los temas viven en `tema/temas/<nombre>.conf` (con `NOMBRE` y `DESCRIPCION`). `tema/tema.conf` pasa a ser un symlink local al elegido; `nixos/modulos/tema.nix` cae a `nova.conf` si no existe. `utils/elegir-tema.sh` (`SUPER + F2`, sin botón en Waybar) muestra en Rofi una vista previa de cada tema (fondo + franjas de color generadas con ImageMagick y cacheadas) y aplica el elegido con `aplicar-tema.sh <nombre>`. Los archivos generados (`config/*/tema.*`, `config/mako/config`) salen de git.
+- **Consecuencias**:
+  - Positivas: cambiar de tema es un atajo; cada máquina puede tener el suyo; `git status` queda limpio.
+  - Negativas: tras clonar hay que ejecutar `init.sh usuario` (o `tema-aplicar`) antes de que Hyprland, Waybar y Kitty encuentren sus `tema.*`; GRUB y el login no cambian hasta `nix-switch`.
+
+## ADR-021: `init.sh` por pasos, idempotente y con respaldos
+- **Fecha**: 2026-10-04
+- **Contexto**: El `init.sh` anterior hacía `rm -rf` de las carpetas de `~/.config`, no se detenía ante errores, anidaba carpetas al repetirse (fastfetch, `icons/icons`), escribía rutas con `~` literal en `.bash_profile`, descargaba Thorium en cada ejecución y no tocaba la configuración del sistema.
+- **Decisión**: Script con `set -euo pipefail` y subcomandos: `usuario` (enlaces, archivos locales, tema), `sistema [equipo]` (escribe `/etc/nixos/configuration.nix`, migra symlinks antiguos, conserva o regenera el hardware y ejecuta `nixos-rebuild switch`), `apps`, `red`, `actualizar` (`git pull --rebase --autostash` + usuario + sistema), `nuevo-equipo` y `todo` (por defecto). Lo que reemplaza lo respalda; `--simular` muestra los comandos con `sudo` sin ejecutarlos; los avisos se resumen al final.
+- **Consecuencias**:
+  - Positivas: instalar y actualizar es el mismo script; se puede repetir sin efectos acumulados; el alias `dotfiles-actualizar` sincroniza una máquina en un paso.
+  - Negativas: depende de que el repo esté en `~/dotfiles`; `nixos-rebuild switch` en `actualizar` tarda aunque no haya cambios de sistema.

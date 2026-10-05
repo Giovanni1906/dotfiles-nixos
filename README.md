@@ -1,152 +1,128 @@
 # Dotfiles NixOS
 
-Este repositorio contiene mi configuración personal de NixOS, Hyprland y varias herramientas de escritorio. La instalación está pensada para simplificarse con `init.sh`, que crea enlaces simbólicos y deja listo el entorno base.
+Mi configuración personal de NixOS + Hyprland, pensada para varias máquinas (PC, laptop...) que comparten lo mismo y solo cambian en lo que cada una soporta. `init.sh` instala y actualiza todo.
 
-## Instalación rápida en una PC Nueva (NixOS)
+## Cómo está organizado
 
-> **Importante:** Instala NixOS usando la opción "No Desktop" y activa "Allow unfree software".
+```
+dotfiles/
+├── init.sh            # Instala y actualiza (./init.sh --help)
+├── nixos/             # Sistema (root): se aplica con nix-switch
+│   ├── modulos/       # Piezas por función: base, escritorio, tema, desarrollo, remoto, juegos
+│   └── equipos/       # Una carpeta por máquina: qué módulos usa, nombre, arranque
+│       ├── pc-asus/
+│       └── plantilla/ # Base para equipos nuevos (./init.sh nuevo-equipo <nombre>)
+├── config/            # Configuración de cada app, enlazada en ~/.config/<app>
+├── tema/temas/        # Temas completos (colores, fuente, fondo); se eligen con SUPER + F2
+├── utils/             # Scripts: tema, selector de temas, lista de atajos, Kitty, Valent
+├── applications/      # Accesos directos .desktop (Thorium)
+├── public/            # Fondos de pantalla y logos
+└── docs/contexto/     # Arquitectura, convenciones y decisiones del proyecto
+```
 
-**1. Clona el repositorio temporalmente**
-Inicia sesión en tu nuevo sistema y descarga los dotfiles:
+- **Lo compartido** entre máquinas son los módulos de `nixos/modulos/` y todo `config/`: un `git pull` lo lleva a todas.
+- **Lo propio de cada máquina** es su carpeta en `nixos/equipos/`. Ahí elige qué módulos importa: por ejemplo, la PC importa `juegos.nix` y la laptop no.
+- **El hardware nunca está en el repo.** Cada máquina usa el `/etc/nixos/hardware-configuration.nix` que generó su instalación; así una configuración no puede arrancar con los discos de otra PC.
+- **Lo local** no se versiona: el tema elegido (`tema/tema.conf`), los monitores o el touchpad (`config/hypr/local.conf`), `.env` y los archivos que genera el tema.
+
+`/etc/nixos/configuration.nix` lo escribe `init.sh` y solo contiene esto:
+
+```nix
+{ imports = [ ./hardware-configuration.nix /home/nova/dotfiles/nixos/equipos/pc-asus ]; }
+```
+
+## Instalación en una máquina nueva
+
+> Instala NixOS con la opción "No Desktop" y "Allow unfree software". Usa el usuario `nova` (lo definen los módulos).
+
 ```bash
 nix-shell -p git
-git clone [https://github.com/tu_usuario/tu_repositorio.git](https://github.com/tu_usuario/tu_repositorio.git) ~/dotfiles
-```
-
-**2. Copia la configuración del sistema (¡No uses enlaces simbólicos!)**
-Para evitar un pánico del kernel por incompatibilidad de discos, debes **copiar** tu configuración general respetando el hardware de la máquina nueva:
-```bash
-sudo cp ~/dotfiles/ruta_de_tu_carpeta/configuration.nix /etc/nixos/configuration.nix
-```
-
-**3. Verifica las importaciones**
-Abre el archivo recién copiado y asegúrate de que la línea de `imports` solo llame al hardware local y no a configuraciones de otras PCs:
-```bash
-sudo nano /etc/nixos/configuration.nix
-# Debe decir: imports = [ ./hardware-configuration.nix ];
-```
-
-**4. Aplica los cambios del sistema base**
-Este paso descargará todos los paquetes esenciales, gestores de ventanas y dependencias necesarias (asegúrate de que `appimage-run` esté en tus systemPackages):
-```bash
-sudo nixos-rebuild switch
-```
-
-**5. Configura tus secretos**
-Revisa y ajusta tu archivo `.env` a partir de `.env.example`:
-```bash
-cp ~/dotfiles/.env.example ~/dotfiles/.env
-nano ~/dotfiles/.env
-```
-
-**6. Ejecuta el script de personalización**
-Una vez que el sistema base está instalado, despliega tu entorno gráfico (Hyprland, Waybar, temas y AppImages):
-```bash
+git clone https://github.com/Giovanni1906/dotfiles-nixos.git ~/dotfiles
 cd ~/dotfiles
 ./init.sh
 ```
 
-**7. Configura el acceso a GitHub (para hacer `git push`)**
-`gh` ya viene instalado desde `configuration.nix`. Inicia sesión (elige GitHub.com, HTTPS y "Login with a web browser") y deja que git use esas credenciales:
+`init.sh` pregunta qué equipo es esta máquina. Si eliges "Nuevo equipo", crea `nixos/equipos/<nombre>` desde la plantilla, con la versión de NixOS de la instalación. Después:
+
+1. Enlaza `config/` en `~/.config`, aplica el tema y crea los archivos locales (`.env`, `config/hypr/local.conf`).
+2. Escribe `/etc/nixos/configuration.nix` apuntando al equipo, conserva el `hardware-configuration.nix` de la máquina y ejecuta `nixos-rebuild switch`. Lo que reemplaza lo deja en `/etc/nixos/*.respaldo-<fecha>`.
+3. Instala Zen Browser (Flatpak) y Thorium (AppImage) si faltan.
+4. Inicia sesión en Tailscale si no hay sesión.
+
+Si creaste un equipo nuevo, revisa qué módulos importa (`nix-config`), vuelve a ejecutar `nix-switch` si cambiaste algo y súbelo: `git add nixos/equipos/<nombre> && git commit -m "feat: equipo <nombre>" && git push`.
+
+Luego completa `.env` (ver más abajo), configura GitHub y reinicia.
+
+### Acceso a GitHub (para `git push`)
+
+`gh` viene instalado. Inicia sesión (GitHub.com, HTTPS, "Login with a web browser") y deja que git use esas credenciales:
+
 ```bash
 gh auth login
 gh auth setup-git
 ```
+
 `gh auth setup-git` guarda en `~/.gitconfig` la ruta de `gh` dentro de `/nix/store`, que desaparece al actualizar `gh` y limpiar el store. Cámbiala por el comando `gh` del sistema:
+
 ```bash
 for h in https://github.com https://gist.github.com; do
   git config --global --replace-all "credential.$h.helper" '!gh auth git-credential' '/nix/store/'
 done
 ```
+
 Comprueba que funciona con `git ls-remote origin HEAD` (debe responder sin pedir usuario).
 
-**8. Reinicia el sistema**
-Aplica todos los cambios y entra a tu nuevo entorno.
+## Día a día
+
+| Quiero... | Hago |
+| --- | --- |
+| Traer a esta máquina lo que cambié en otra | `dotfiles-actualizar` (`git pull` + enlaces y tema + `nixos-rebuild switch`) |
+| Cambiar la config de una app | Editar `config/<app>/` (se aplica al recargar la app) y hacer commit |
+| Un paquete o servicio para todas las máquinas | Añadirlo al módulo que corresponda en `nixos/modulos/` y `nix-switch` |
+| Un paquete solo para esta máquina | Añadirlo en `nixos/equipos/<equipo>/default.nix` (`nix-config`) y `nix-switch` |
+| Activar o quitar un grupo de cosas (juegos, desarrollo) | Comentar o descomentar su módulo en `imports` del equipo |
+| Ajustar monitores o touchpad de esta máquina | `config/hypr/local.conf` (no se versiona) |
+| Cambiar el tema | `SUPER + F2` |
+
+Cada paso de `init.sh` se puede ejecutar por separado (`./init.sh usuario`, `./init.sh sistema`, `./init.sh apps`...) y repetir sin romper nada. `./init.sh sistema --simular` muestra lo que haría con `sudo` sin ejecutarlo.
+
+## Tema: colores, tipografía, cursor y fondo
+
+Cada archivo de `tema/temas/` es un tema completo: colores, transparencias, radio de las esquinas, borde, fuente, fondo de pantalla, cursor e iconos. Al elegir uno se actualizan juntos Hyprland, la pantalla de bloqueo (hyprlock), Waybar, Kitty, Rofi, las notificaciones (Mako), GTK y, tras `nix-switch`, el menú de GRUB y la pantalla de inicio de sesión.
+
+- **`SUPER + F2`** abre el selector (`utils/elegir-tema.sh`): muestra cada tema con su fondo y su paleta, y aplica el elegido al instante. La última opción abre el tema activo en un editor y lo aplica al cerrarlo.
+- **Temas incluidos:** Nova (por defecto), Carmesí, Violeta, Noche, Neón y Relámpago.
+- **Crear un tema:** copiar `tema/temas/nova.conf` (tiene comentada cada variable) a `tema/temas/<nombre>.conf` y cambiar los valores. Aparece solo en el selector.
+- **Por terminal:** `tema-config` abre el tema activo, `tema-aplicar` lo vuelve a aplicar y `tema-aplicar <nombre>` cambia de tema.
+
+Cómo funciona:
+
+- `tema/tema.conf` es un enlace local al tema elegido en esta máquina, así cada máquina puede tener su tema sin chocar en `git pull`.
+- `utils/aplicar-tema.sh` genera desde el tema un archivo por app: `config/hypr/tema.conf`, `config/waybar/tema.css`, `config/kitty/tema.conf`, `config/rofi/tema.rasi` y `config/mako/config`. No se versionan ni se editan a mano.
+- `nixos/modulos/tema.nix` lee el mismo tema y construye GRUB (fondo, fuentes, iconos y cajas redondeadas) y el inicio de sesión (greetd + nwg-hello sobre un Hyprland mínimo con el fondo desenfocado).
+- La pantalla de bloqueo (`config/hypr/hyprlock.conf`) tiene el mismo diseño que el inicio de sesión. `hypridle` (`config/hypr/hypridle.conf`) la abre antes de cada suspensión.
+- El cursor y los iconos de un tema deben estar instalados (`nixos/modulos/escritorio.nix`); por defecto `catppuccin-cursors.mochaSky` y `papirus-icon-theme`.
 
 ## Variables de entorno y `.env`
 
-Este proyecto usa un `.env` para guardar valores sensibles o variables que pueden cambiar entre máquinas.
+`.env` guarda valores sensibles (hoy `PASS_SWAYLOCK`, la contraseña para el desbloqueo remoto). `init.sh` lo crea desde `.env.example` con permisos `600`; edítalo con tus valores.
 
-### Cómo configurarlo
+- No subas `.env` (está en `.gitignore`).
+- Mantén `.env.example` con placeholders y documenta aquí cada variable nueva.
 
-Copia el archivo de ejemplo y renómbralo:
-
-```bash
-cp .env.example .env
-```
-
-Luego edita `.env` con tus valores reales.
-
-### Buenas prácticas
-
-- no subas `.env` con credenciales reales al repositorio
-- mantén `.env.example` con valores de referencia o placeholders
-- si agregas una nueva variable, documenta su uso en este archivo
-
-## Cursor y temas visuales
-
-Para que el cursor y el tema visual funcionen correctamente, asegúrate de incluir los paquetes necesarios en tu `configuration.nix`:
-
-```nix
-environment.systemPackages = with pkgs; [
-  kitty
-  waybar
-  pwvucontrol             # Gestor de volumen gráfico de PipeWire
-  catppuccin-cursors.mochaSky
-  glib                    # Provee el comando gsettings
-  kdePackages.breeze      # Tema nativo de Dolphin
-  kdePackages.breeze-icons
-  gsettings-desktop-schemas
-  adwaita-icon-theme
-];
-```
-
-Y revisa también estas rutas:
-
-- `~/dotfiles/icons/default/index.theme`
-- `~/dotfiles/config/hypr/hyprland.conf`
-
-Ejemplo de variables para Hyprland:
-
-```ini
-env = HYPRCURSOR_THEME,catppuccin-mocha-sky-cursors
-env = XCURSOR_THEME,catppuccin-mocha-sky-cursors
-env = HYPRCURSOR_SIZE,24
-env = XCURSOR_SIZE,24
-```
-
-## Preferencias del sistema
-
-En Hyprland también se aplican preferencias visuales por defecto:
-
-```ini
-exec-once = gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-exec-once = gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-exec-once = gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-sky-cursors'
-```
-
-## Comandos para valent
-
-### Bloquear pantalla
+## Comandos para Valent
 
 ```bash
-swaylock --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2
-```
-
-### Desbloquear pantalla
-
-```bash
+# Bloquear (hypridle abre hyprlock)
+loginctl lock-session
+# Desbloquear
 source ~/dotfiles/.env && wtype "$PASS_SWAYLOCK" && wtype -k Return
-```
-
-### Apagar PC
-
-```bash
+# Apagar
 systemctl poweroff
+# Suspender (la pantalla se bloquea sola antes de dormir)
+systemctl suspend
 ```
 
-### Suspender PC
+## Atajos
 
-```bash
-swaylock -f --screenshots --clock --indicator --effect-blur 7x5 --effect-vignette 0.5:0.5 --fade-in 0.2 && sleep 1 && systemctl suspend
-```
+La lista completa está en `utils/atajos.txt` y se ve con `SUPER + F1` o con el botón del teclado en Waybar.
