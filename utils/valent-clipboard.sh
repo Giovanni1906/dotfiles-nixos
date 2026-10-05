@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Leer el texto que wl-paste nos envía
 texto="$(cat)"
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # --- CONFIGURACIÓN ---
 WORK_TIME=1500    # 25 min
 SHORT_BREAK=300   # 5 min

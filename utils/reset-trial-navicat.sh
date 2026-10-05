@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Author: NakamuraOS <https://github.com/nakamuraos>
 # Latest update: 03/19/2025
 # Tested on Navicat 15.x, 16.x, 17.x on Debian, Ubuntu.
