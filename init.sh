@@ -19,14 +19,13 @@ touch ~/dotfiles/.env
 chmod 600 ~/dotfiles/.env
 
 # 3. Enlaces simbólicos de aplicaciones (Usamos -sfn para forzar y evitar anidaciones)
-rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi ~/.config/mako ~/.config/swaylock ~/.local/share/icons/icons
+rm -rf ~/.config/hypr ~/.config/waybar ~/.config/kitty ~/.config/rofi ~/.config/mako ~/.local/share/icons/icons
 ln -sfn ~/dotfiles/config/hypr ~/.config/hypr
 ln -sfn ~/dotfiles/config/waybar ~/.config/waybar
 ln -sfn ~/dotfiles/config/kitty ~/.config/kitty
 ln -sfn ~/dotfiles/config/fastfetch ~/.config/fastfetch
 ln -sfn ~/dotfiles/config/rofi ~/.config/rofi
 ln -sfn ~/dotfiles/config/mako ~/.config/mako
-ln -sfn ~/dotfiles/config/swaylock ~/.config/swaylock
 ln -sfn ~/dotfiles/icons ~/.local/share/icons
 
 # 4. Enlaces simbólicos de GTK (Unificando todas las versiones)

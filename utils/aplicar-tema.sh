@@ -26,13 +26,25 @@ WALLPAPER="$DOTFILES/$FONDO_PANTALLA"
 hex() { printf '%s' "${1#\#}"; }
 # 0.70 -> "b3" (canal alfa en hexadecimal)
 alfa() { awk -v o="$1" 'BEGIN { printf "%02x", int(o * 255 + 0.5) }'; }
+# Escribe stdin en $1 de una sola vez: Hyprland recarga al detectar cambios y no
+# debe leer el archivo a medio escribir (vería las variables sin definir).
+escribir() { cat > "$1.tmp" && mv -f "$1.tmp" "$1"; }
 
 # --- HYPRLAND ---
-cat > "$DOTFILES/config/hypr/tema.conf" <<EOF
+escribir "$DOTFILES/config/hypr/tema.conf" <<EOF
 # $CABECERA
 \$acento = rgb($(hex "$ACENTO"))
 \$secundario = rgb($(hex "$SECUNDARIO"))
 \$inactivo = rgba($(hex "$INACTIVO")aa)
+\$fondo = rgb($(hex "$FONDO"))
+\$panel = rgba($(hex "$FONDO")$(alfa "$OPACIDAD_PANEL"))
+\$superficie = rgba($(hex "$SUPERFICIE")$(alfa "$OPACIDAD_PANEL"))
+\$texto = rgb($(hex "$TEXTO"))
+\$texto_tenue = rgb($(hex "$TEXTO_TENUE"))
+\$urgente = rgb($(hex "$URGENTE"))
+\$exito = rgb($(hex "$EXITO"))
+\$aviso = rgb($(hex "$AVISO"))
+\$fuente = $FUENTE
 \$radio = $RADIO
 \$borde = $BORDE
 \$fondo_pantalla = $WALLPAPER
@@ -42,7 +54,7 @@ cat > "$DOTFILES/config/hypr/tema.conf" <<EOF
 EOF
 
 # --- WAYBAR ---
-cat > "$DOTFILES/config/waybar/tema.css" <<EOF
+escribir "$DOTFILES/config/waybar/tema.css" <<EOF
 /* $CABECERA */
 @define-color acento $ACENTO;
 @define-color secundario $SECUNDARIO;
@@ -67,7 +79,7 @@ cat > "$DOTFILES/config/waybar/tema.css" <<EOF
 EOF
 
 # --- KITTY ---
-cat > "$DOTFILES/config/kitty/tema.conf" <<EOF
+escribir "$DOTFILES/config/kitty/tema.conf" <<EOF
 # $CABECERA
 font_family             $FUENTE
 font_size               $FUENTE_TAMANO
@@ -108,7 +120,7 @@ color15 $TEXTO
 EOF
 
 # --- ROFI ---
-cat > "$DOTFILES/config/rofi/tema.rasi" <<EOF
+escribir "$DOTFILES/config/rofi/tema.rasi" <<EOF
 /* $CABECERA */
 configuration {
     font: "$FUENTE $FUENTE_TAMANO";
@@ -131,7 +143,7 @@ EOF
 
 # --- MAKO (notificaciones) ---
 mkdir -p "$DOTFILES/config/mako"
-cat > "$DOTFILES/config/mako/config" <<EOF
+escribir "$DOTFILES/config/mako/config" <<EOF
 # $CABECERA
 font=$FUENTE $FUENTE_TAMANO
 background-color=$FONDO$(alfa "$OPACIDAD_MENU")
@@ -153,41 +165,6 @@ border-color=$TEXTO_TENUE
 border-color=$URGENTE
 EOF
 
-# --- SWAYLOCK (bloqueo de pantalla) ---
-mkdir -p "$DOTFILES/config/swaylock"
-A="$(alfa "$OPACIDAD_PANEL")"
-cat > "$DOTFILES/config/swaylock/config" <<EOF
-# $CABECERA
-screenshots
-clock
-indicator
-effect-blur=7x5
-effect-vignette=0.5:0.5
-fade-in=0.2
-font=$FUENTE
-indicator-radius=110
-indicator-thickness=8
-inside-color=$(hex "$FONDO")$A
-inside-clear-color=$(hex "$FONDO")$A
-inside-ver-color=$(hex "$FONDO")$A
-inside-wrong-color=$(hex "$FONDO")$A
-ring-color=$(hex "$ACENTO")
-ring-clear-color=$(hex "$EXITO")
-ring-ver-color=$(hex "$SECUNDARIO")
-ring-wrong-color=$(hex "$URGENTE")
-key-hl-color=$(hex "$SECUNDARIO")
-bs-hl-color=$(hex "$URGENTE")
-text-color=$(hex "$TEXTO")
-text-clear-color=$(hex "$EXITO")
-text-ver-color=$(hex "$SECUNDARIO")
-text-wrong-color=$(hex "$URGENTE")
-line-color=00000000
-line-clear-color=00000000
-line-ver-color=00000000
-line-wrong-color=00000000
-separator-color=00000000
-EOF
-
 # --- GTK, CURSOR Y FASTFETCH (solo las claves del tema; el resto lo gestiona nwg-look) ---
 sed -i -E \
     -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS|" \
@@ -202,7 +179,7 @@ sed -i -E \
 sed -i -E "s|^(Inherits=).*|\1$CURSOR|" "$DOTFILES/icons/default/index.theme"
 sed -i -E "s|(\"keys\": )\"[^\"]*\"|\1\"$ACENTO\"|" "$DOTFILES/config/fastfetch/config.jsonc"
 
-echo "Tema escrito en config/ (Hyprland, Waybar, Kitty, Rofi, Mako, swaylock, GTK, fastfetch)."
+echo "Tema escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, Rofi, Mako, GTK, fastfetch)."
 
 # --- RECARGAR LO QUE ESTÉ ABIERTO ---
 if command -v dconf > /dev/null; then

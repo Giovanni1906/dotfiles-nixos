@@ -215,8 +215,9 @@
     networkmanagerapplet      # Gestor de red
     gnome-themes-extra        # Aquí vive físicamente el código de Adwaita-dark
     nwg-look       		      # Gestor gráfico de apariencia exclusivo para Wayland/Hyprland
-	swaylock-effects		  # Bloqueo de wayland
-	wtype					# Desbloqueo para swaylock
+    # swaylock-effects        # Bloqueo de wayland (reemplazado por hyprlock, ver programs.hyprlock)
+    hypridle                  # Bloquea con hyprlock antes de suspender (config/hypr/hypridle.conf)
+    wtype                     # Desbloqueo remoto desde Valent (escribe la contraseña en hyprlock)
     # Herramientas básicas de terminal
     wget		 	        # Descarga de paginas web
     micro      		        # Un editor de texto para terminal mucho más cómodo que nano
@@ -323,8 +324,9 @@
       ];
     };
 
-  # Permiso de swaylock para verificacion
-  security.pam.services.swaylock = {};
+  # Pantalla de bloqueo: instala hyprlock y su servicio PAM (diseño en config/hypr/hyprlock.conf)
+  programs.hyprlock.enable = true;
+  # security.pam.services.swaylock = {};  # Permiso de swaylock (reemplazado por hyprlock)
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
