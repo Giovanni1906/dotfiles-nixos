@@ -3,12 +3,13 @@
 # =============================================================================
 # Lee tema/tema.conf (el mismo archivo que usa utils/aplicar-tema.sh para el
 # escritorio), así GRUB, el login y la sesión comparten colores, fuente y fondo.
-# Se importa desde nixos-<equipo>/configuration.nix y se aplica con nix-switch.
+# Se importa desde nixos/equipos/<equipo> y se aplica con nix-switch.
 
 { config, pkgs, lib, ... }:
 
 let
-  tema = builtins.fromTOML (builtins.readFile ./tema.conf);
+  raiz = ../..;
+  tema = builtins.fromTOML (builtins.readFile (raiz + "/tema/tema.conf"));
 
   # "0.70" -> "b3" (canal alfa en hexadecimal para colores #RRGGBBAA)
   alfa = opacidad:
@@ -18,7 +19,7 @@ let
   # Copia solo la imagen al store (con nombre seguro aunque el archivo tenga espacios o paréntesis)
   extension = lib.last (lib.splitString "." tema.FONDO_PANTALLA);
   fondoPantalla = builtins.path {
-    path = ../. + "/${tema.FONDO_PANTALLA}";
+    path = raiz + "/${tema.FONDO_PANTALLA}";
     name = "fondo-pantalla.${extension}";
   };
 
@@ -379,7 +380,7 @@ let
   '';
 
   hyprlandGreeter = pkgs.writeText "hyprland-greeter.conf" ''
-    # Hyprland mínimo que solo muestra nwg-hello. Generado por tema/tema.nix.
+    # Hyprland mínimo que solo muestra nwg-hello. Generado por nixos/modulos/tema.nix.
     monitor = , preferred, auto, 1
 
     env = XCURSOR_THEME,${tema.CURSOR}
