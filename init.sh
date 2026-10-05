@@ -57,6 +57,30 @@ escribir_root() {
     fi
 }
 
+# --- HARDWARE ---
+# Quita del hardware-configuration.nix los montajes temporales (contenedores de Docker,
+# overlay, fuse, /run): nixos-generate-config copia todo lo montado en ese momento y,
+# al arrancar, esos montajes fallan y el sistema entra en modo de emergencia.
+limpiar_hardware() {
+    awk '
+        /^[[:space:]]*fileSystems\."/ { bloque = $0 "\n"; abierto = 1; next }
+        abierto {
+            bloque = bloque $0 "\n"
+            if ($0 ~ /^[[:space:]]*};/) {
+                abierto = 0
+                if (bloque ~ /fileSystems\."\/(var\/lib\/(docker|containers)|run|var\/run|tmp)\// ||
+                    bloque ~ /fsType = "(overlay|fuse[^"]*)"/)
+                    saltar_vacia = 1
+                else
+                    printf "%s", bloque
+            }
+            next
+        }
+        saltar_vacia && /^[[:space:]]*$/ { saltar_vacia = 0; next }
+        { saltar_vacia = 0; print }
+    '
+}
+
 # --- ENLACES ---
 # Enlaza $1 en $2. Si $2 ya existe y no es el enlace correcto, lo mueve al respaldo.
 enlazar() {
@@ -220,13 +244,27 @@ paso_sistema() {
     elif [ ! -f "$hw" ]; then
         regenerar=1
     fi
-    if [ "$regenerar" = 0 ]; then
-        ok "hardware-configuration.nix local de esta máquina (se conserva)"
-    elif [ "$SIMULAR" = 1 ]; then
-        printf '  [simular] sudo nixos-generate-config --show-hardware-config > %s\n' "$hw"
+    if [ "$regenerar" = 1 ]; then
+        local generado
+        if [ "$SIMULAR" = 1 ]; then
+            generado=$(nixos-generate-config --show-hardware-config 2> /dev/null | limpiar_hardware)
+        else
+            generado=$(sudo nixos-generate-config --show-hardware-config | limpiar_hardware)
+        fi
+        grep -q 'fileSystems\."/"' <<< "$generado" || error "El hardware generado no tiene la partición raíz (fileSystems.\"/\")"
+        printf '%s\n' "$generado" | escribir_root "$hw"
+        ok "Generado $hw para esta máquina (sin montajes temporales)"
     else
-        sudo nixos-generate-config --show-hardware-config | escribir_root "$hw"
-        ok "Generado $hw para esta máquina"
+        local limpio
+        limpio=$(limpiar_hardware < "$hw")
+        if [ "$limpio" = "$(cat "$hw")" ]; then
+            ok "hardware-configuration.nix local de esta máquina (se conserva)"
+        else
+            grep -q 'fileSystems\."/"' <<< "$limpio" || error "$hw no tiene la partición raíz (fileSystems.\"/\")"
+            como_root cp "$hw" "$hw.respaldo-$FECHA"
+            printf '%s\n' "$limpio" | escribir_root "$hw"
+            ok "Quitados de $hw los montajes temporales (Docker, overlay); respaldo en $hw.respaldo-$FECHA"
+        fi
     fi
 
     # 2. configuration.nix: solo importa el hardware local y el equipo del repo
@@ -252,11 +290,30 @@ paso_sistema() {
         ok "Escrito $conf"
     fi
 
-    # 3. Construir y activar
+    # 3. Construir, revisar que arrancará y activar
+    if [ "$SIMULAR" = 1 ]; then
+        printf '  [simular] nixos-rebuild build + revisar fstab + sudo nixos-rebuild switch\n'
+        return
+    fi
+    local construido
+    construido=$(mktemp -d)
+    (cd "$construido" && nixos-rebuild build) || error "nixos-rebuild build falló. Los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
+    if grep -qE ' overlay | fuse|/var/lib/docker' "$construido/result/etc/fstab"; then
+        error "El sistema construido monta sistemas de archivos temporales (revisa $hw); no se activa para no dejarlo sin arrancar"
+    fi
+    local login_antes login_nuevo
+    login_antes=$(readlink -f /run/current-system/etc/systemd/system/display-manager.service || true)
+    login_nuevo=$(readlink -f "$construido/result/etc/systemd/system/display-manager.service" || true)
+    rm -rf "$construido"
+
     if como_root nixos-rebuild switch; then
-        ok "Sistema actualizado (GRUB, login y paquetes)"
+        ok "Sistema actualizado"
     else
-        error "nixos-rebuild falló. Revisa el error; los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
+        error "nixos-rebuild switch falló. Revisa el error; los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
+    fi
+    # NixOS no reinicia el login durante un switch (cerraría la sesión abierta)
+    if [ "$login_antes" != "$login_nuevo" ]; then
+        aviso "Cambió la pantalla de inicio de sesión: reinicia para verla (hasta entonces, cerrar sesión muestra la anterior)"
     fi
 }
 
