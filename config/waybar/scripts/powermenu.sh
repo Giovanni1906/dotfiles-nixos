@@ -13,6 +13,11 @@ chosen=$(printf " Apagar\n Reiniciar\n Suspender\n Cerrar Sesión" |
 case "$chosen" in
     " Apagar") poweroff ;;
     " Reiniciar") reboot ;;
-    " Suspender") systemctl suspend ;;  # hypridle bloquea con hyprlock antes de dormir
+    " Suspender")
+        # hypridle bloquea antes de dormir; si no está corriendo, se bloquea aquí
+        if ! pidof hypridle > /dev/null; then
+            pidof hyprlock > /dev/null || { hyprlock & sleep 1; }
+        fi
+        systemctl suspend ;;
     " Cerrar Sesión") hyprctl dispatch exit ;;
 esac
