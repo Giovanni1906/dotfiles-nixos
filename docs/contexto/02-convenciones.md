@@ -66,7 +66,7 @@
 ## Paleta y apariencia
 
 - **Ningún color, radio, fuente ni ruta de fondo se escribe a mano en una config**: se define en el tema y se usa como variable (`$acento` en Hyprland, `@acento` en Waybar/Rofi, `include tema.conf` en Kitty). Si una app necesita un valor nuevo, se añade a **todos** los `tema/temas/*.conf` y a `utils/aplicar-tema.sh` (y a `nixos/modulos/tema.nix` si lo usan GRUB o el login).
-- Los archivos `tema.*`, `config/mako/config` y `config/gtk-4.0/gtk.css` son **generados** y no se versionan (`.gitignore`); `init.sh usuario` y `tema-aplicar` los crean.
+- Los archivos `tema.*`, `config/mako/config`, `config/gtk-4.0/gtk.css` y el enlace `config/fastfetch/logo.png` son **generados** y no se versionan (`.gitignore`); `init.sh usuario` y `tema-aplicar` los crean.
 - Tema por defecto (Nova): acento `#3399cc`, secundario `#cba6f7` (degradado secundario → acento en el borde de ventanas), fondo `#0a1e3c`, superficie `#133e7c`; estados urgente `#f38ba8`, éxito `#a6e3a1`, tenue `#6c7086`.
 - Esquinas de 10 px, borde de 2 px, transparencias 0.70 (paneles), 0.85 (terminal) y 0.95 (menús); tema oscuro en todo.
 

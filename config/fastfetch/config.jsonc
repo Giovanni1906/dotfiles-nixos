@@ -2,7 +2,8 @@
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
   "logo": {
     "type": "kitty",
-    "source": "~/dotfiles/public/png/blue_extorsist_blue.png",
+    // Enlace a LOGO_FASTFETCH del tema activo (lo crea utils/aplicar-tema.sh)
+    "source": "~/dotfiles/config/fastfetch/logo.png",
     "width": 25,
     "height": 11
   },

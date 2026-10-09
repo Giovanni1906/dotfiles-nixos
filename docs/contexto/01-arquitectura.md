@@ -59,7 +59,7 @@ dotfiles/
 │   ├── rofi/{config.rasi,themes/nova.rasi}
 │   ├── fastfetch/config.jsonc
 │   ├── gtk-3.0/, gtk-4.0/, gtkrc-2.0   # Escritos originalmente por nwg-look; aplicar-tema.sh ajusta tema, iconos y cursor
-│   └── */tema.*, mako/config, gtk-4.0/gtk.css   # GENERADOS (gitignored) por utils/aplicar-tema.sh
+│   └── */tema.*, mako/config, gtk-4.0/gtk.css, fastfetch/logo.png   # GENERADOS (gitignored) por utils/aplicar-tema.sh
 ├── applications/thorium.desktop # Acceso directo para Rofi drun
 ├── utils/
 │   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)
@@ -67,7 +67,7 @@ dotfiles/
 │   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   └── kitty-zoom.sh, valent-clipboard.sh, reset-trial-navicat.sh
-└── public/                      # Fondos de pantalla y PNG para el logo de fastfetch
+└── public/                      # Fondos de pantalla y PNG para el logo de fastfetch (uno por color de tema)
 ```
 
 ## Diagrama de Componentes
@@ -117,7 +117,7 @@ flowchart TD
 - **Hardware fuera del repo**: el `hardware-configuration.nix` de cada máquina queda en `/etc/nixos`, así una configuración nunca arranca con los UUID de discos de otra PC.
 - **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza con `ln -sfn` para que editar el repo tenga efecto sin reconstruir.
 - **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`.
-- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor e iconos. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023), y el tema de iconos `~/.local/share/icons/dotfiles-iconos` con las carpetas del color del tema (ver ADR-024).
+- **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor, iconos y logo de fastfetch. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023), y el tema de iconos `~/.local/share/icons/dotfiles-iconos` con las carpetas del color del tema (ver ADR-024).
 - **Sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
 
 ## Configuración que NO está en el repo

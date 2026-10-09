@@ -95,7 +95,7 @@ Cada paso de `init.sh` se puede ejecutar por separado (`./init.sh usuario`, `./i
 
 ## Tema: colores, tipografía, cursor y fondo
 
-Cada archivo de `tema/temas/` es un tema completo: colores, transparencias, radio de las esquinas, borde, fuente, fondo de pantalla, cursor e iconos. Al elegir uno se actualizan juntos Hyprland, la pantalla de bloqueo (hyprlock), Waybar, Kitty, Rofi, las notificaciones (Mako), GTK y, tras `nix-switch`, el menú de GRUB y la pantalla de inicio de sesión.
+Cada archivo de `tema/temas/` es un tema completo: colores, transparencias, radio de las esquinas, borde, fuente, fondo de pantalla, cursor, iconos y la imagen de fastfetch. Al elegir uno se actualizan juntos Hyprland, la pantalla de bloqueo (hyprlock), Waybar, Kitty, Rofi, las notificaciones (Mako), GTK, fastfetch y, tras `nix-switch`, el menú de GRUB y la pantalla de inicio de sesión.
 
 - **`SUPER + F2`** abre el selector (`utils/elegir-tema.sh`): muestra cada tema con su fondo y su paleta, y aplica el elegido al instante. La última opción abre el tema activo en un editor y lo aplica al cerrarlo.
 - **Temas incluidos:** Nova (por defecto), Carmesí, Violeta, Noche, Neón y Relámpago.
@@ -105,7 +105,7 @@ Cada archivo de `tema/temas/` es un tema completo: colores, transparencias, radi
 Cómo funciona:
 
 - `tema/tema.conf` es un enlace local al tema elegido en esta máquina, así cada máquina puede tener su tema sin chocar en `git pull`.
-- `utils/aplicar-tema.sh` genera desde el tema un archivo por app: `config/hypr/tema.conf`, `config/waybar/tema.css`, `config/kitty/tema.conf`, `config/rofi/tema.rasi` y `config/mako/config`. No se versionan ni se editan a mano.
+- `utils/aplicar-tema.sh` genera desde el tema un archivo por app: `config/hypr/tema.conf`, `config/waybar/tema.css`, `config/kitty/tema.conf`, `config/rofi/tema.rasi`, `config/mako/config` y el enlace `config/fastfetch/logo.png` (a la imagen `LOGO_FASTFETCH` del tema). No se versionan ni se editan a mano.
 - `nixos/modulos/tema.nix` lee el mismo tema y construye GRUB (fondo, fuentes, iconos y cajas redondeadas) y el inicio de sesión (greetd + nwg-hello sobre un Hyprland mínimo con el fondo desenfocado).
 - La pantalla de bloqueo (`config/hypr/hyprlock.conf`) tiene el mismo diseño que el inicio de sesión. `hypridle` (`config/hypr/hypridle.conf`) la abre antes de cada suspensión.
 - El cursor y los iconos de un tema deben estar instalados (`nixos/modulos/escritorio.nix`): hay un cursor Catppuccin por tema (celeste, rojo, rosa, azul, amarillo y malva) y `papirus-icon-theme`. Si el cursor de un tema aún no está instalado, `tema-aplicar` avisa y mantiene el actual hasta el `nix-switch`.

@@ -30,6 +30,8 @@ for var in OPACIDAD_PANEL OPACIDAD_MENU OPACIDAD_TERMINAL; do
 done
 WALLPAPER="$DOTFILES/$FONDO_PANTALLA"
 [ -f "$WALLPAPER" ] || { echo "tema.conf: no existe FONDO_PANTALLA ($WALLPAPER)" >&2; exit 1; }
+LOGO="$DOTFILES/${LOGO_FASTFETCH:-public/png/blue_extorsist_blue.png}"
+[ -f "$LOGO" ] || { echo "tema.conf: no existe LOGO_FASTFETCH ($LOGO)" >&2; exit 1; }
 COLORES_PAPIRUS="adwaita black blue bluegrey breeze brown carmine cyan darkcyan deeporange green grey indigo magenta nordic orange palebrown paleorange pink red teal violet white yaru yellow"
 COLOR_CARPETAS="${COLOR_CARPETAS:-blue}"
 [[ " $COLORES_PAPIRUS " == *" $COLOR_CARPETAS "* ]] || { echo "tema.conf: COLOR_CARPETAS debe ser uno de: $COLORES_PAPIRUS" >&2; exit 1; }
@@ -234,6 +236,10 @@ border-color=$TEXTO_TENUE
 border-color=$URGENTE
 EOF
 
+# --- FASTFETCH ---
+# config.jsonc usa este enlace; fastfetch cachea el logo por su ruta real, así que ve el cambio al momento
+ln -sfn "$LOGO" "$DOTFILES/config/fastfetch/logo.png"
+
 # --- COLORES DE GTK (Thunar y demás apps GTK3/GTK4) ---
 # adw-gtk3 define sus colores como variables que se pueden redefinir. El tema GTK
 # "dotfiles-tema" lo importa y pone la paleta: GTK vuelve a leer el tema al cambiar su nombre,
@@ -317,7 +323,7 @@ for dir in "$HOME/.icons" "$HOME/.local/share/icons"; do
     fi
 done
 
-echo "Tema \"$NOMBRE\" escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, Rofi, Mako, GTK, cursor)."
+echo "Tema \"$NOMBRE\" escrito en config/ (Hyprland y hyprlock, Waybar, Kitty, Rofi, Mako, GTK, cursor, fastfetch)."
 
 # --- RECARGAR LO QUE ESTÉ ABIERTO ---
 if command -v dconf > /dev/null; then
