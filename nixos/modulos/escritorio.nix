@@ -92,7 +92,12 @@
     imagemagick                 # Cambiar resolución, tamaño, formato (y vistas del selector de temas)
 
     # Apariencia (los nombres que se usan están en tema/tema.conf)
-    catppuccin-cursors.mochaSky # Cursor
+    catppuccin-cursors.mochaSky    # Cursor celeste (Nova)
+    catppuccin-cursors.mochaRed    # Cursor rojo (Carmesí)
+    catppuccin-cursors.mochaPink   # Cursor rosa (Neón)
+    catppuccin-cursors.mochaBlue   # Cursor azul (Noche)
+    catppuccin-cursors.mochaYellow # Cursor amarillo (Relámpago)
+    catppuccin-cursors.mochaMauve  # Cursor malva (Violeta)
     papirus-icon-theme          # Iconos
     adwaita-icon-theme          # Iconos y cursores base oscuros
     gnome-themes-extra          # Adwaita-dark (solo para apps GTK2)

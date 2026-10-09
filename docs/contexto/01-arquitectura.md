@@ -21,7 +21,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Terminal | Kitty (layouts `splits` y `stack`) |
 | Notificaciones | Mako + `libnotify` (`notify-send`) + `paplay` para sonidos |
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
-| Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor `catppuccin-mocha-sky-cursors` (24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
+| Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor Catppuccin del color de cada tema (`catppuccin-mocha-<color>-cursors`, 24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
 | Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |

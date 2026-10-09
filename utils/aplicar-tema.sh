@@ -33,6 +33,11 @@ WALLPAPER="$DOTFILES/$FONDO_PANTALLA"
 COLORES_PAPIRUS="adwaita black blue bluegrey breeze brown carmine cyan darkcyan deeporange green grey indigo magenta nordic orange palebrown paleorange pink red teal violet white yaru yellow"
 COLOR_CARPETAS="${COLOR_CARPETAS:-blue}"
 [[ " $COLORES_PAPIRUS " == *" $COLOR_CARPETAS "* ]] || { echo "tema.conf: COLOR_CARPETAS debe ser uno de: $COLORES_PAPIRUS" >&2; exit 1; }
+# Un cursor que aún no está instalado (falta nix-switch) se vería como el de por defecto: se mantiene el actual
+if [ ! -d "/run/current-system/sw/share/icons/$CURSOR" ]; then
+    echo "Aviso: el cursor $CURSOR no está instalado (nix-switch): se mantiene ${XCURSOR_THEME:-el actual}" >&2
+    [ -n "${XCURSOR_THEME:-}" ] && [ -d "/run/current-system/sw/share/icons/$XCURSOR_THEME" ] && CURSOR="$XCURSOR_THEME"
+fi
 
 # --- CONVERSIONES ---
 # "#3399cc" -> "3399cc"

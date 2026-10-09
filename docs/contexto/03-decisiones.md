@@ -26,7 +26,7 @@
   - Positivas: control total, consumo bajo, atajos coherentes.
   - Negativas: cada función de escritorio (polkit, temas, portapapeles, notificaciones) hay que configurarla explícitamente; cambios de sintaxis entre versiones de Hyprland (p. ej. `windowrule … match:class`) obligan a migrar.
 
-## ADR-004: Cursor Catppuccin servido desde el perfil del sistema
+## ADR-004: Cursor Catppuccin servido desde el perfil del sistema (un color por tema en ADR-026)
 - **Fecha**: 2026-06-28; ajustes 2026-07-06 y 2026-09-03
 - **Contexto**: El cursor aparecía distinto o invisible según la app (GTK, Xwayland, Hyprland).
 - **Decisión**: Instalar `catppuccin-cursors.mochaSky` vía Nix y, en paralelo: variables `XCURSOR_*`/`HYPRCURSOR_*` en Nix y Hyprland, symlinks a `/run/current-system/sw/share/icons` en `~/.icons` y `~/.local/share/icons`, `index.theme` heredando el tema, `dconf`/`hyprctl setcursor` al iniciar y `no_hardware_cursors = true` + `inactive_timeout = 0`.
@@ -178,3 +178,11 @@
 - **Consecuencias**:
   - Positivas: los mismos módulos sirven para cualquier usuario; el entorno de Kubernetes local es igual en todas las máquinas de desarrollo.
   - Negativas: el repo sigue debiendo estar en `~/dotfiles` del usuario; los dominios de admisión apuntan a `127.0.0.1` en todas las máquinas con `desarrollo.nix`.
+
+## ADR-026: Cursor del color de cada tema
+- **Fecha**: 2026-10-09
+- **Contexto**: Todos los temas usaban el cursor celeste (`catppuccin-mocha-sky-cursors`) aunque su acento fuera rojo, rosa o dorado. Además `XCURSOR_THEME` lo fija Nix en cada `nix-switch`, así que las apps abiertas tras cambiar de tema con `SUPER + F2` seguían con el cursor anterior.
+- **Decisión**: `escritorio.nix` instala una variante Catppuccin Mocha por tema (Sky, Red, Pink, Blue, Yellow, Mauve) y cada tema elige la de su acento en `CURSOR`. `hyprland.conf` vuelve a definir `XCURSOR_*`/`HYPRCURSOR_*` con `$cursor` (Hyprland reaplica `env` en cada recarga). Si el cursor del tema no está instalado, `aplicar-tema.sh` avisa y mantiene el actual.
+- **Consecuencias**:
+  - Positivas: el cursor cambia con el tema, en vivo y en las apps nuevas, sin `nix-switch`.
+  - Negativas: los colores de Catppuccin son pastel y no coinciden exactamente con el acento; un tema nuevo con otro color necesita añadir su variante en `escritorio.nix` y hacer `nix-switch`; las apps abiertas antes del cambio que no leen dconf conservan el cursor anterior.
