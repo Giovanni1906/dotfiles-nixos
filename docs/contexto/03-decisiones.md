@@ -186,3 +186,11 @@
 - **Consecuencias**:
   - Positivas: el cursor cambia con el tema, en vivo y en las apps nuevas, sin `nix-switch`.
   - Negativas: los colores de Catppuccin son pastel y no coinciden exactamente con el acento; un tema nuevo con otro color necesita añadir su variante en `escritorio.nix` y hacer `nix-switch`; las apps abiertas antes del cambio que no leen dconf conservan el cursor anterior.
+
+## ADR-027: Números de workspace propios con tooltip de sus ventanas
+- **Fecha**: 2026-10-09
+- **Contexto**: Se quería ver qué ventanas tiene cada workspace al pasar el ratón por su número en Waybar, sin que ocupen espacio en la barra y sin cambiar el clic. El módulo nativo `hyprland/workspaces` (Waybar 0.15) no tiene tooltip en el número; su modo taskbar sí lo tiene, pero en iconos que ocupan espacio y cuyo clic enfoca la ventana, y GTK3 no permite esconderlos encima del número.
+- **Decisión**: `config/waybar/scripts/espacios.sh` reemplaza al módulo nativo (queda comentado). Un módulo oculto (`custom/workspaces`) lee el socket de eventos de Hyprland con `nc -U`, agrupa las ráfagas (50 ms), calcula con `hyprctl` el estado de los workspaces 1–10 (monitor, activo, visible, urgente, títulos) y lo guarda en `/tmp/espacios_$USER/`; si cambió, manda `SIGRTMIN+8` a Waybar. Diez módulos `custom/workspace#<n>` en `group/workspaces` muestran su número solo en la barra de su monitor (`WAYBAR_OUTPUT_NAME`), con el tooltip y las clases `active`, `visible`, `urgent` y `empty`; el clic hace `hyprctl dispatch workspace <n>`. Waybar abre un proceso de escucha por barra; `flock` deja trabajar a uno y el otro espera.
+- **Consecuencias**:
+  - Positivas: el número se ve y se comporta igual que antes (mismo tamaño y estilos) y el tooltip lista las ventanas al momento; sin dependencias nuevas.
+  - Negativas: solo muestra los workspaces 1–10 (los de los atajos) y no los especiales; más código propio que mantener; con la rueda sobre los números no se cambia de workspace (en el nativo ya estaba desactivado).

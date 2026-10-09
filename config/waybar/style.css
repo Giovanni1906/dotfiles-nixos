@@ -116,7 +116,38 @@ window#waybar {
 
 /* ==========================================================================
    CONFIGURACIÓN EXCLUSIVA DE LOS NÚMEROS (Workspaces)
+   Los números son módulos custom/workspace#<n> (scripts/espacios.sh) dentro de
+   group/workspaces, con las clases active, visible, urgent y empty. Los
+   #workspaces button son del módulo nativo, que queda comentado en config.
    ========================================================================== */
+#workspaces > widget {
+    margin: 0;
+    padding: 0;
+}
+
+#custom-workspace {
+    background: transparent;
+    color: @texto_principal;
+    padding: 0 20px;
+    margin: 0 2px;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
+
+#custom-workspace:hover {
+    background: @fondo_hover;
+    border: 1px solid @texto_principal;
+}
+
+#custom-workspace.active {
+    background: @fondo_modulos;
+}
+
+#custom-workspace.urgent {
+    background: @urgente;
+    color: @fondo;
+}
+
 #workspaces button {
     background: transparent;
     color: @texto_principal; 

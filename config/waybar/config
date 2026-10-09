@@ -9,7 +9,8 @@
     "modules-left": [
         "custom/pomo",
         "custom/media",
-        "hyprland/workspaces"
+        // "hyprland/workspaces", // Sin tooltip en el número: lo reemplaza group/workspaces
+        "group/workspaces"
     ],
     "modules-center": [
         "hyprland/window"
@@ -34,6 +35,31 @@
         "active-only": false,
         "on-click": "activate",
     },
+
+    // Números de workspace con tooltip de sus ventanas (scripts/espacios.sh).
+    // custom/workspaces no se ve: sigue los eventos de Hyprland y refresca los números con la señal 8.
+    "group/workspaces": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/workspaces",
+            "custom/workspace#1", "custom/workspace#2", "custom/workspace#3", "custom/workspace#4", "custom/workspace#5",
+            "custom/workspace#6", "custom/workspace#7", "custom/workspace#8", "custom/workspace#9", "custom/workspace#10"
+        ]
+    },
+    "custom/workspaces": {
+        "exec": "~/.config/waybar/scripts/espacios.sh escuchar",
+        "restart-interval": 5
+    },
+    "custom/workspace#1":  { "exec": "~/.config/waybar/scripts/espacios.sh 1",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 1" },
+    "custom/workspace#2":  { "exec": "~/.config/waybar/scripts/espacios.sh 2",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 2" },
+    "custom/workspace#3":  { "exec": "~/.config/waybar/scripts/espacios.sh 3",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 3" },
+    "custom/workspace#4":  { "exec": "~/.config/waybar/scripts/espacios.sh 4",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 4" },
+    "custom/workspace#5":  { "exec": "~/.config/waybar/scripts/espacios.sh 5",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 5" },
+    "custom/workspace#6":  { "exec": "~/.config/waybar/scripts/espacios.sh 6",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 6" },
+    "custom/workspace#7":  { "exec": "~/.config/waybar/scripts/espacios.sh 7",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 7" },
+    "custom/workspace#8":  { "exec": "~/.config/waybar/scripts/espacios.sh 8",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 8" },
+    "custom/workspace#9":  { "exec": "~/.config/waybar/scripts/espacios.sh 9",  "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 9" },
+    "custom/workspace#10": { "exec": "~/.config/waybar/scripts/espacios.sh 10", "return-type": "json", "signal": 8, "on-click": "hyprctl dispatch workspace 10" },
     
     "mpd": {
         "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",

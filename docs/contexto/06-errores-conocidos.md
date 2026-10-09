@@ -26,6 +26,7 @@
 - **Rutas absolutas a `/home/nova/dotfiles`** en el `configuration.nix` que genera `init.sh`, en los alias y en Hyprland: el repo debe clonarse ahí.
 - **Comentarios de Kitty dicen "SUPER"** pero los atajos usan `ctrl`.
 - **La clase `long` del Pomodoro no tiene estilo** en `style.css` (solo `work`, `break`, `idle`).
+- **Waybar solo muestra los workspaces 1–10** (`espacios.sh`, ADR-027): un workspace 11 o con nombre existe en Hyprland pero no tiene número en la barra. Si los números dejan de actualizarse, comprobar que corre `espacios.sh escuchar` (Waybar lo reinicia a los 5 s si se cae).
 - **Configuraciones no versionadas** (WayVNC, Valent): se pierden al reinstalar.
 - **Archivos del tema desfasados**: si se edita un tema sin ejecutar `tema-aplicar`, los `tema.*` siguen con los valores anteriores (GRUB y el login sí se actualizan con `nix-switch`, porque Nix lee el tema directamente). El selector (`SUPER + F2`) aplica solo al cerrar el editor.
 - **Bloques comentados abundantes** en los módulos de `nixos/` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).

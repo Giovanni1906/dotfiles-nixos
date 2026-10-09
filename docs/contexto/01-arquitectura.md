@@ -54,7 +54,7 @@ dotfiles/
 ├── config/                      # Se enlaza a ~/.config/<app>
 │   ├── hypr/{hyprland.conf,hyprlock.conf,hypridle.conf}
 │   ├── hypr/local.conf          # LOCAL: monitores, touchpad y ajustes de esta máquina
-│   ├── waybar/{config,style.css,scripts/{pomo.sh,powermenu.sh}}
+│   ├── waybar/{config,style.css,scripts/{pomo.sh,powermenu.sh,espacios.sh}}
 │   ├── kitty/kitty.conf
 │   ├── rofi/{config.rasi,themes/nova.rasi}
 │   ├── fastfetch/config.jsonc
@@ -93,7 +93,8 @@ flowchart TD
     CFG --> HYPR
     HYPR -->|exec-once| WAYBAR[Waybar] & MAKO[Mako] & VALENT[Valent] & NMA[nm-applet] & SWAYBG[swaybg] & VNC[WayVNC] & IDLE[hypridle]
     IDLE -->|antes de suspender| LOCK[hyprlock]
-    WAYBAR --> POMO[pomo.sh] & ATAJOS[atajos.sh]
+    WAYBAR --> POMO[pomo.sh] & ATAJOS[atajos.sh] & ESPACIOS[espacios.sh]
+    ESPACIOS -->|socket de eventos| HYPR
     HYPR -->|SUPER + F1| ATAJOS
     HYPR -->|SUPER + F2| ELEGIR[elegir-tema.sh] --> APLICAR
     HYPR -->|SUPER + X| POWER[powermenu.sh]
@@ -116,7 +117,7 @@ flowchart TD
 - **Módulos por función + equipos**: lo común se escribe una vez en `nixos/modulos/`; cada equipo elige qué módulos importa. Quitar algo de una máquina es comentar una línea de `imports` (ver ADR-019).
 - **Hardware fuera del repo**: el `hardware-configuration.nix` de cada máquina queda en `/etc/nixos`, así una configuración nunca arranca con los UUID de discos de otra PC.
 - **Sistema declarativo + usuario imperativo**: NixOS gestiona lo que requiere root; la configuración de usuario se enlaza con `ln -sfn` para que editar el repo tenga efecto sin reconstruir.
-- **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`.
+- **Scripts como "módulos" de Waybar**: contrato JSON `{text, tooltip, class}`; el estilo reacciona a `class` en `style.css`. Los números de workspace (`group/workspaces`) son diez módulos `custom/workspace#<n>` que leen el estado que guarda `espacios.sh escuchar` en `/tmp/espacios_$USER/` y se refrescan con la señal 8 (ver ADR-027).
 - **Tema centralizado con presets**: cada `tema/temas/*.conf` define colores, transparencias, radio, borde, fuente, fondo, cursor, iconos y logo de fastfetch. `tema/tema.conf` apunta al elegido; `utils/aplicar-tema.sh` lo traduce al formato de cada app (archivos `tema.*` que las configs incluyen con `source`, `@import` o `include`) y `nixos/modulos/tema.nix` lo lee con `builtins.fromTOML`. Los archivos generados no se versionan (ver ADR-020). Para GTK (Thunar y demás) genera fuera del repo el tema `~/.local/share/themes/dotfiles-tema`, que importa `adw-gtk3-dark` y redefine sus colores (ver ADR-023), y el tema de iconos `~/.local/share/icons/dotfiles-iconos` con las carpetas del color del tema (ver ADR-024).
 - **Sin servicios propios**: no hay systemd units de usuario definidas en el repo; todo arranca desde `exec-once`.
 
