@@ -47,6 +47,7 @@
     kind                        # Clúster de Kubernetes dentro de Docker
     skaffold                    # Construye y despliega en el clúster mientras se edita
     gnumake                     # make para los Makefile de los proyectos
+    nodejs                      # Node.js con npm y npx para ejecutar programas o paquetes
   ];
 
   environment.shellAliases = {
