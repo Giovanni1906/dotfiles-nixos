@@ -15,7 +15,7 @@ Hyprland | SUPER + F                   | Pantalla completa
 Hyprland | SUPER + X                   | Menú de apagado
 Hyprland | SUPER + M                   | Cerrar sesión
 Hyprland | SUPER + Flechas             | Mover el foco entre ventanas
-Hyprland | SUPER + SHIFT + Flechas     | Mover la ventana dentro del mosaico
+Hyprland | SUPER + SHIFT + Flechas     | Mover la ventana: cambiar con la vecina, ir al borde, luego al otro monitor
 Hyprland | SUPER + 0-9                 | Ir al workspace 1-10
 Hyprland | SUPER + SHIFT + 0-9         | Enviar ventana al workspace 1-10
 Hyprland | SUPER + Arrastrar clic izq. | Mover ventana con el ratón

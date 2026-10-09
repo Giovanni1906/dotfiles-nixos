@@ -27,6 +27,7 @@
 - **Comentarios de Kitty dicen "SUPER"** pero los atajos usan `ctrl`.
 - **La clase `long` del Pomodoro no tiene estilo** en `style.css` (solo `work`, `break`, `idle`).
 - **Waybar solo muestra los workspaces 1–10** (`espacios.sh`, ADR-027): un workspace 11 o con nombre existe en Hyprland pero no tiene número en la barra. Si los números dejan de actualizarse, comprobar que corre `espacios.sh escuchar` (Waybar lo reinicia a los 5 s si se cae).
+- **Las divisiones del mosaico conservan su orientación** (`dwindle:preserve_split`, ADR-028): al cerrar ventanas o mover el workspace a otro monitor pueden quedar ventanas en franjas largas. Se corrige con `SUPER + SHIFT + flechas` (lleva la ventana al borde y endereza las demás). `mover-ventana.sh` deduce las divisiones por la geometría; si una división tiene grupos de varias ventanas a ambos lados no la puede girar.
 - **Configuraciones no versionadas** (WayVNC, Valent): se pierden al reinstalar.
 - **Archivos del tema desfasados**: si se edita un tema sin ejecutar `tema-aplicar`, los `tema.*` siguen con los valores anteriores (GRUB y el login sí se actualizan con `nix-switch`, porque Nix lee el tema directamente). El selector (`SUPER + F2`) aplica solo al cerrar el editor.
 - **Bloques comentados abundantes** en los módulos de `nixos/` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).

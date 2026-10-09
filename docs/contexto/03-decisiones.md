@@ -194,3 +194,11 @@
 - **Consecuencias**:
   - Positivas: el número se ve y se comporta igual que antes (mismo tamaño y estilos) y el tooltip lista las ventanas al momento; sin dependencias nuevas.
   - Negativas: solo muestra los workspaces 1–10 (los de los atajos) y no los especiales; más código propio que mantener; con la rueda sobre los números no se cambia de workspace (en el nativo ya estaba desactivado).
+
+## ADR-028: Mover ventanas con una lógica propia (SUPER + SHIFT + flechas)
+- **Fecha**: 2026-10-06
+- **Contexto**: Con dos ventanas lado a lado, `SUPER + SHIFT + ↑/↓` no hacía nada y `←/→` solo las cambiaba de lado. `movewindow` de dwindle re-inserta la ventana junto a la vecina (vuelve a quedar lado a lado), sin vecina ni monitor en esa dirección reordena el mosaico, y dwindle elige la orientación de cada división por la proporción del hueco: en un monitor ancho dos ventanas nunca quedan apiladas.
+- **Decisión**: `utils/mover-ventana.sh l|r|u|d` aplica la misma regla con cualquier número de ventanas, leyendo la geometría con `hyprctl clients`: (1) si hay una ventana en esa dirección, se intercambia con ella (`swapwindow`); (2) si no la hay y la ventana no ocupa todo ese borde, la lleva al borde a todo lo ancho (arriba/abajo) o a todo lo alto (izquierda/derecha) con `layoutmsg movetoroot` + `togglesplit` + `swapsplit`, y gira las divisiones de las demás que quedaron en franjas (deduce la estructura por los cortes de la geometría); (3) si ya ocupa el borde o está sola, pasa al monitor de al lado, y si no hay monitor ahí no hace nada. Flotantes y pantalla completa siguen con `movewindow`. `hyprland.conf` activa `dwindle:preserve_split`, sin el cual Hyprland deshace la orientación elegida al recalcular.
+- **Consecuencias**:
+  - Positivas: dos ventanas se pueden apilar y volver a poner lado a lado; con 3 o 4 el comportamiento es predecible (cambiar, ir al borde, otro monitor) y repetir la tecla en el borde ya no desordena el mosaico.
+  - Negativas: con `preserve_split` las divisiones ya no se re-orientan solas al cerrar ventanas o cambiar de monitor (una pareja apilada sigue apilada); para pasar al otro monitor con `←/→` puede hacer falta una pulsación más (primero va al borde); al enderezar el resto el foco salta un instante a otra ventana.

@@ -65,6 +65,7 @@ dotfiles/
 │   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)
 │   ├── elegir-tema.sh           # Selector Rofi con vista previa (SUPER + F2)
 │   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
+│   ├── mover-ventana.sh         # Mover la ventana en el mosaico o al otro monitor (SUPER + SHIFT + flechas)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   └── kitty-zoom.sh, valent-clipboard.sh, reset-trial-navicat.sh
 └── public/                      # Fondos de pantalla y PNG para el logo de fastfetch (uno por color de tema)
