@@ -202,3 +202,11 @@
 - **Consecuencias**:
   - Positivas: dos ventanas se pueden apilar y volver a poner lado a lado; con 3 o 4 el comportamiento es predecible (cambiar, ir al borde, otro monitor) y repetir la tecla en el borde ya no desordena el mosaico.
   - Negativas: con `preserve_split` las divisiones ya no se re-orientan solas al cerrar ventanas o cambiar de monitor (una pareja apilada sigue apilada); para pasar al otro monitor con `←/→` puede hacer falta una pulsación más (primero va al borde); al enderezar el resto el foco salta un instante a otra ventana.
+
+## ADR-029: `nix-config` como menú en terminal
+- **Fecha**: 2026-10-09
+- **Contexto**: El alias `nix-config` solo abría `nixos/equipos/<equipo>/default.nix`. Con el sistema partido en módulos, lo que se edita a mano está repartido (paquetes y alias en cada módulo, módulos activos en `imports` del equipo) y los equipos no tenían sección de paquetes ni alias propios.
+- **Decisión**: `nix-config` ejecuta `utils/nix-config.sh <equipo>`, un menú en bash puro (no hay `fzf`, `gum` ni `dialog`). Ofrece: activar o quitar módulos (comenta o descomenta su línea en `imports`; `base` siempre activo), los paquetes y alias del equipo (si no existen, crea la sección antes de `system.stateVersion` y añade `pkgs` a los argumentos) y cada módulo con su descripción (línea 2, `# NOMBRE: descripción`). Dentro de un archivo lista sus partes, detectadas por patrón: banners de una o tres líneas y bloques conocidos (`environment.systemPackages`, `shellAliases`, fuentes, firewall…), y abre `micro` en esa línea. Avisa de los archivos de `nixos/` cambiados desde que se abrió o desde el último switch y ofrece `nixos-rebuild switch` y `git diff`.
+- **Consecuencias**:
+  - Positivas: sin dependencias nuevas; un módulo nuevo aparece solo en el menú; se llega a cada parte sin buscar en qué archivo está.
+  - Negativas: las partes dependen de seguir las convenciones (banners, línea 2 del módulo); el aviso de cambios sin aplicar solo ve lo editado en esa sesión del menú.

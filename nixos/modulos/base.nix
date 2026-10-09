@@ -101,7 +101,8 @@
       # Como root borra las generaciones viejas de todos los perfiles, también la del sistema;
       # "boot" rehace el menú de GRUB sin ellas
       nix-clean  = "sudo nix-collect-garbage -d && sudo nixos-rebuild boot";
-      nix-config = "micro ~/dotfiles/nixos/equipos/${config.dotfiles.equipo}/default.nix";
+      # Menú para elegir qué parte editar (módulos, paquetes y alias del equipo o de cada módulo)
+      nix-config = "~/dotfiles/utils/nix-config.sh ${config.dotfiles.equipo}";
       # git pull + enlaces y tema + nixos-rebuild switch
       dotfiles-actualizar = "~/dotfiles/init.sh actualizar";
 

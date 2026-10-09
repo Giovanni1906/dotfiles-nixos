@@ -22,7 +22,7 @@ Las tareas del proyecto viven en el tablero de Notion [nixos](https://app.notion
    ```
 2. `init.sh` pregunta el equipo. Para una máquina que aún no existe en el repo, elegir "Nuevo equipo": copia `nixos/equipos/plantilla` con el nombre y la `stateVersion` de la instalación. Si la máquina arranca en BIOS (sin `/sys/firmware/efi`), avisa para cambiar el cargador de arranque.
 3. El script enlaza `config/`, aplica el tema, escribe `/etc/nixos/configuration.nix` (importa el `hardware-configuration.nix` que generó el instalador y el equipo), ejecuta `nixos-rebuild switch`, instala Zen y Thorium y abre el login de Tailscale. Al final resume los avisos.
-4. Equipo nuevo: revisar qué módulos importa (`nix-config`), `nix-switch` si se cambió algo, y subirlo (`git add nixos/equipos/<equipo>`).
+4. Equipo nuevo: revisar qué módulos importa (`nix-config` → "Activar o quitar módulos"), aplicar si se cambió algo, y subirlo (`git add nixos/equipos/<equipo>`).
 5. Completar `.env` (lo crea `init.sh` desde `.env.example`).
 6. Acceso a GitHub para `git push`: `gh auth login` + `gh auth setup-git`, y cambiar en `~/.gitconfig` la ruta de `/nix/store/…/gh` por `!gh auth git-credential` (ver README; si no, deja de funcionar tras actualizar `gh` + GC).
 7. Reiniciar. Entrar desde la pantalla de login (`nwg-hello`).
@@ -43,9 +43,9 @@ Lo que cambia en `config/` se aplica en cuanto llega el `pull` (las carpetas est
 | Valores del tema activo | `tema-config` (o "Editar el tema activo" en el selector) | `tema-aplicar` (el selector lo hace solo) |
 | Nuevo tema | Copiar `tema/temas/nova.conf` a `tema/temas/<nombre>.conf` | Aparece en el selector |
 | Diseño de GRUB o del login | `nixos/modulos/tema.nix` | `nix-switch`; se ve en el próximo arranque |
-| Paquete o servicio común | El módulo de `nixos/modulos/` que corresponda | `nix-switch` (y `dotfiles-actualizar` en las demás) |
-| Paquete o servicio de una máquina | `nixos/equipos/<equipo>/default.nix` (`nix-config`) | `nix-switch` |
-| Activar o quitar un grupo de funciones | Comentar o descomentar el módulo en `imports` del equipo | `nix-switch` |
+| Paquete o servicio común | El módulo de `nixos/modulos/` que corresponda (`nix-config` → el módulo → la parte) | `nix-switch` o "Aplicar" en `nix-config` (y `dotfiles-actualizar` en las demás) |
+| Paquete, alias o servicio de una máquina | `nixos/equipos/<equipo>/default.nix` (`nix-config` → "Paquetes" o "Alias"; crea la sección si falta) | `nix-switch` o "Aplicar" en `nix-config` |
+| Activar o quitar un grupo de funciones | `nix-config` → "Activar o quitar módulos" (comenta o descomenta el módulo en `imports` del equipo) | `nix-switch` o "Aplicar" en `nix-config` |
 | Atajos, autoarranque, reglas de ventanas | `config/hypr/hyprland.conf` (+ `utils/atajos.txt`) | Hyprland recarga solo al guardar; `exec-once` requiere cerrar sesión (`SUPER + M`) |
 | Monitores, touchpad u otro ajuste de una máquina | `config/hypr/local.conf` (no se versiona) | Hyprland recarga solo |
 | Barra | `config/waybar/{config,style.css}` | `pkill -USR2 -f '^waybar( \|$)'` |
@@ -77,7 +77,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | --- | --- | --- |
 | `nix-switch` | `sudo nixos-rebuild switch` | base |
 | `nix-clean` | Borra las generaciones viejas y los paquetes sin uso (`nix-collect-garbage -d`) y rehace el menú de GRUB (`nixos-rebuild boot`) | base |
-| `nix-config` | Abre `nixos/equipos/<equipo actual>/default.nix` | base |
+| `nix-config` | `utils/nix-config.sh <equipo actual>`: menú en terminal para activar o quitar módulos, editar los paquetes y alias del equipo o una parte de cada módulo (abre `micro` en esa línea) y aplicar con `nixos-rebuild switch` | base |
 | `dotfiles-actualizar` | `~/dotfiles/init.sh actualizar` | base |
 | `ll` | `ls -lha` | base |
 | `ip-public` | `curl -s ipinfo.io/ip` | base |

@@ -50,7 +50,7 @@ cd ~/dotfiles
 3. Instala Zen Browser (Flatpak) y Thorium (AppImage) si faltan.
 4. Inicia sesión en Tailscale si no hay sesión.
 
-Si creaste un equipo nuevo, revisa qué módulos importa (`nix-config`), vuelve a ejecutar `nix-switch` si cambiaste algo y súbelo: `git add nixos/equipos/<nombre> && git commit -m "feat: equipo <nombre>" && git push`.
+Si creaste un equipo nuevo, revisa qué módulos importa (`nix-config` → "Activar o quitar módulos"), aplica si cambiaste algo y súbelo: `git add nixos/equipos/<nombre> && git commit -m "feat: equipo <nombre>" && git push`.
 
 Luego completa `.env` (ver más abajo), configura GitHub y reinicia.
 
@@ -79,9 +79,10 @@ Comprueba que funciona con `git ls-remote origin HEAD` (debe responder sin pedir
 | --- | --- |
 | Traer a esta máquina lo que cambié en otra | `dotfiles-actualizar` (`git pull` + enlaces y tema + `nixos-rebuild switch`) |
 | Cambiar la config de una app | Editar `config/<app>/` (se aplica al recargar la app) y hacer commit |
-| Un paquete o servicio para todas las máquinas | Añadirlo al módulo que corresponda en `nixos/modulos/` y `nix-switch` |
-| Un paquete solo para esta máquina | Añadirlo en `nixos/equipos/<equipo>/default.nix` (`nix-config`) y `nix-switch` |
-| Activar o quitar un grupo de cosas (juegos, desarrollo) | Comentar o descomentar su módulo en `imports` del equipo |
+| Elegir qué parte del sistema cambiar | `nix-config`: menú con los módulos del equipo, sus paquetes y alias, y las partes de cada módulo; al terminar ofrece aplicar |
+| Un paquete o servicio para todas las máquinas | Añadirlo al módulo que corresponda en `nixos/modulos/` (`nix-config` → el módulo) y `nix-switch` |
+| Un paquete solo para esta máquina | `nix-config` → "Paquetes" (crea la sección en `nixos/equipos/<equipo>/default.nix` si falta) y aplicar |
+| Activar o quitar un grupo de cosas (juegos, desarrollo) | `nix-config` → "Activar o quitar módulos" y aplicar |
 | Ajustar monitores o touchpad de esta máquina | `config/hypr/local.conf` (no se versiona) |
 | Cambiar el tema | `SUPER + F2` |
 
