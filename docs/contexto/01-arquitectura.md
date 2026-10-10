@@ -27,6 +27,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular), Remmina (cliente) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Cursor, Postman, Navicat, FileZilla |
+| IA | Hermes Agent (Nous Research) desde su flake, con `builtins.getFlake` fijado a un commit; módulo `ia.nix`, solo en `pc-asus` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
 
@@ -43,6 +44,7 @@ dotfiles/
 │   │   ├── tema.nix             # GRUB, login greetd/nwg-hello y cursor, leídos del tema activo
 │   │   ├── desarrollo.nix       # Docker, Kubernetes local (Kind, Skaffold, dominios en /etc/hosts), virtualización, editores y clientes de BD/API
 │   │   ├── remoto.nix           # Tailscale, Valent, WayVNC, Remmina y sus puertos
+│   │   ├── ia.nix               # Hermes Agent (flake oficial fijado a un commit con builtins.getFlake)
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
 │   └── equipos/                 # Una carpeta por máquina (sin hardware)
 │       ├── pc-asus/default.nix  # Módulos que usa, hostname, cargador de arranque, stateVersion

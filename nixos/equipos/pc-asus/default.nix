@@ -14,6 +14,7 @@
     ../../modulos/tema.nix
     ../../modulos/desarrollo.nix
     ../../modulos/remoto.nix
+    ../../modulos/ia.nix           # Hermes Agent
     # ../../modulos/juegos.nix     # Steam, Heroic, Lutris
   ];
 
