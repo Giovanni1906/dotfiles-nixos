@@ -90,6 +90,7 @@
       yt-dlp                    # Descargar videos de YouTube
       poppler-utils             # Utilidades para pdf (pdfunite, pdfseparate, pdftotext, pdfimages, etc)
       bitwarden-cli             # CLI de Bitwarden
+      unzip                     # Descomprimir archivos zip
     ];
 
     # --------------------------------------------------
