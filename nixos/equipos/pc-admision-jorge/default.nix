@@ -33,6 +33,7 @@
     k-prod = "kubectl --kubeconfig=\"/home/admision/.kube/dalthon-server-kubeconfig.yaml\"";
     open-conexion = "/home/admision/Utilidades/open-conexion.sh";
     local-open-conexion = "/home/admision/Utilidades/local_open-conexion.sh";
+    backups-dev-restore = "/home/admision/Utilidades/backups_impresiones_local.sh";
   };
 
   # Versión de NixOS con la que se instaló esta PC. No cambiarla al actualizar.
