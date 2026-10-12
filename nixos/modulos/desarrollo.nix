@@ -4,6 +4,24 @@
 
 { config, pkgs, ... }:
 
+let
+  # Cursor más nuevo que el del canal. Para actualizar: versión y URL de
+  # https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
+  # y el hash con: nix-prefetch-url <url> | xargs nix hash convert --hash-algo sha256
+  cursor = pkgs.code-cursor.overrideAttrs (old: rec {
+    version = "3.24.12";
+    src = pkgs.appimageTools.extract {
+      pname = "cursor";
+      inherit version;
+      src = pkgs.fetchurl {
+        url = "https://downloads.cursor.com/production/37b865941ccb31e2fc90c685157534efca87f964/linux/x64/Cursor-${version}-x86_64.AppImage";
+        hash = "sha256-JQn7QjetruZsUj744a8c2uH3ytX3AVnhGhfrYBBENjY=";
+      };
+    };
+    sourceRoot = "cursor-${version}-extracted/usr/share/cursor";
+  });
+in
+
 {
   virtualisation.docker.enable = true;
 
@@ -42,7 +60,7 @@
 
   environment.systemPackages = with pkgs; [
     vscode                      # Editor de código con Copilot
-    code-cursor
+    cursor                      # Editor de código con IA (versión fijada arriba)
     sublime4                    # Sublime Text
     filezilla
     navicat-premium
