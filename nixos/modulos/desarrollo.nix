@@ -37,9 +37,13 @@
     "fs.inotify.max_user_instances" = 512;
   };
 
+  # El binario de Sublime Text (sublime4) enlaza OpenSSL 1.1 para su host de plugins
+  nixpkgs.config.permittedInsecurePackages = [ "openssl-1.1.1w" ];
+
   environment.systemPackages = with pkgs; [
     vscode                      # Editor de código con Copilot
     code-cursor
+    sublime4                    # Sublime Text
     filezilla
     navicat-premium
     postman
