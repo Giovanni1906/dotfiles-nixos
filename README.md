@@ -108,7 +108,7 @@ Cómo funciona:
 - `tema/tema.conf` es un enlace local al tema elegido en esta máquina, así cada máquina puede tener su tema sin chocar en `git pull`.
 - `utils/aplicar-tema.sh` genera desde el tema un archivo por app: `config/hypr/tema.conf`, `config/waybar/tema.css`, `config/kitty/tema.conf`, `config/rofi/tema.rasi`, `config/mako/config` y el enlace `config/fastfetch/logo.png` (a la imagen `LOGO_FASTFETCH` del tema). No se versionan ni se editan a mano.
 - `nixos/modulos/tema.nix` lee el mismo tema y construye GRUB (fondo, fuentes, iconos y cajas redondeadas) y el inicio de sesión (greetd + nwg-hello sobre un Hyprland mínimo con el fondo desenfocado).
-- La pantalla de bloqueo (`config/hypr/hyprlock.conf`) tiene el mismo diseño que el inicio de sesión. `hypridle` (`config/hypr/hypridle.conf`) la abre antes de cada suspensión.
+- La pantalla de bloqueo (`config/hypr/hyprlock.conf`) tiene el mismo diseño que el inicio de sesión. `hypridle` (`config/hypr/hypridle.conf`) la abre antes de cada suspensión. Para bloquear sin suspender, `SUPER + X` → Bloquear: la red, WayVNC y lo que corre en segundo plano siguen activos, y se puede desbloquear escribiendo la contraseña desde AVNC (por Tailscale).
 - El cursor y los iconos de un tema deben estar instalados (`nixos/modulos/escritorio.nix`): hay un cursor Catppuccin por tema (celeste, rojo, rosa, azul, amarillo y malva) y `papirus-icon-theme`. Si el cursor de un tema aún no está instalado, `tema-aplicar` avisa y mantiene el actual hasta el `nix-switch`.
 
 ## Variables de entorno y `.env`
