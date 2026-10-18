@@ -34,6 +34,7 @@
 
 ## Resueltos
 
+- **2026-10-16** — aVNC decía que VNC no corría o que el puerto era incorrecto: `wayvnc-tailscale.sh` esperaba la IP de Tailscale como mucho 60 s y salía. En pc-casa la IP llegó ~1,5 min después de Hyprland, y `exec-once` no reintenta. Ahora el script espera sin límite.
 - **2026-10-05** — Los módulos declaraban el usuario `nova` fijo: en la PC de admisión (usuario `admision`) NixOS habría creado `nova` y borrado `admision`. Ahora cada equipo elige su usuario con `dotfiles.usuario` (ADR-025). `thorium.desktop` usa `$HOME` en lugar de `/home/nova`.
 - **2026-10-05** — Alias `k` fallaba con "command not found": `desarrollo.nix` instala `kubectl`, `kind` y `skaffold`.
 - **2026-10-04** — WayVNC no arrancaba al iniciar sesión (`exec-once = exec-once = wayvnc 0.0.0.0` en `hyprland.conf`) y, lanzado a mano, quedaba expuesto sin contraseña en toda la red local. Ahora `utils/wayvnc-tailscale.sh` espera la IP de Tailscale y escucha solo en ella, y el firewall abre el 5900 solo en `tailscale0`.

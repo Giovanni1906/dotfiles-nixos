@@ -63,8 +63,8 @@
 - **Consecuencias**: el secreto no llega a Git, pero se guarda en texto plano y cualquier celular emparejado puede desbloquear la sesión.
 
 ## ADR-010: Acceso remoto con Tailscale + WayVNC
-- **Fecha**: 2026-07-28 (Tailscale); 2026-10-04 (WayVNC al arranque)
-- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`. WayVNC (cliente AVNC en el celular) solo por Tailscale y sin contraseña: `utils/wayvnc-tailscale.sh` (al iniciar sesión y alias `remote-conexion`) espera la IP de Tailscale y escucha solo en ella; el firewall abre el 5900 solo en `tailscale0`. (Antes: `0.0.0.0` con el puerto abierto en todas las redes, sin contraseña.)
+- **Fecha**: 2026-07-28 (Tailscale); 2026-10-04 (WayVNC al arranque); 2026-10-16 (espera sin límite)
+- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`. WayVNC (cliente AVNC en el celular) solo por Tailscale y sin contraseña: `utils/wayvnc-tailscale.sh` (al iniciar sesión y alias `remote-conexion`) espera la IP de Tailscale sin rendirse y escucha solo en ella; el firewall abre el 5900 solo en `tailscale0`. (Antes: `0.0.0.0` con el puerto abierto en todas las redes, sin contraseña. El tope de 60 s de 2026-10-04 salía antes de que la red estuviera lista.)
 - **Consecuencias**: control remoto desde cualquier lugar con Tailscale activo en el celular, cifrado por la VPN; desde el wifi sin Tailscale no conecta. Cualquier dispositivo de la tailnet puede controlar el escritorio (ver `06-errores-conocidos.md`).
 
 ## ADR-011: Lógica de escritorio en scripts Bash conectados a Waybar/Rofi
