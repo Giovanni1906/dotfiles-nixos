@@ -210,3 +210,11 @@
 - **Consecuencias**:
   - Positivas: sin dependencias nuevas; un módulo nuevo aparece solo en el menú; se llega a cada parte sin buscar en qué archivo está.
   - Negativas: las partes dependen de seguir las convenciones (banners, línea 2 del módulo); el aviso de cambios sin aplicar solo ve lo editado en esa sesión del menú.
+
+## ADR-030: Las notificaciones duran 20 segundos y el historial se abre con SUPER + F3
+- **Fecha**: 2026-10-18
+- **Contexto**: Mako no fijaba un tiempo (`default-timeout` en 0) y respetaba el que pidiera cada aplicación, así que unas se quedaban y otras desaparecían en pocos segundos. El historial (`makoctl history`) guardaba 5 y no había un atajo para abrirlo. La config de Mako la genera el tema y la comparten todas las PCs con escritorio.
+- **Decisión**: `aplicar-tema.sh` escribe `default-timeout=20000`, `ignore-timeout=1` (20 s para todas, también las críticas) y `max-history=100`. `SUPER + F3` (`utils/historial-notificaciones.sh`, también en la lista de `SUPER + F1`) abre ese historial en Rofi; Enter vuelve a mostrar la elegida.
+- **Consecuencias**:
+  - Positivas: el mismo tiempo en todas las máquinas, sin depender de la aplicación; se puede recuperar lo que ya se cerró, con el teclado o desde la lista de atajos.
+  - Negativas: una notificación que pedía quedarse hasta leerla también desaparece a los 20 s.

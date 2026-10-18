@@ -228,6 +228,10 @@ margin=10
 width=360
 max-icon-size=48
 icon-path=/run/current-system/sw/share/icons/$ICONOS
+# 20 s para todas, aunque la aplicación pida otro tiempo. Historial: SUPER + F3
+default-timeout=20000
+ignore-timeout=1
+max-history=100
 
 [urgency=low]
 border-color=$TEXTO_TENUE
