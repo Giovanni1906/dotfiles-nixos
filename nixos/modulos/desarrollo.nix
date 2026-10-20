@@ -62,6 +62,7 @@ in
     vscode                      # Editor de código con Copilot
     cursor                      # Editor de código con IA (versión fijada arriba)
     sublime4                    # Sublime Text
+    figma-linux                 # Cliente de escritorio de Figma
     filezilla
     navicat-premium
     postman
