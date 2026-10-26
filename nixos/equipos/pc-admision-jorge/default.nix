@@ -5,7 +5,7 @@
 # El hardware (discos, módulos del kernel) NO está en el repo: es el
 # /etc/nixos/hardware-configuration.nix que generó la instalación de esta PC.
 
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -28,12 +28,19 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Cliente Qsync: el espacio de la NAS no se ve al entrar por IP. El .deb es de
+  # Ubuntu 22.04, así que corre en un Ubuntu aparte (Docker ya está en desarrollo.nix).
+  environment.systemPackages = with pkgs; [
+    distrobox                   # Ubuntu aparte para el cliente Qsync
+  ];
+
   # Atajos de la infraestructura de admisión
   environment.shellAliases = {
     k-prod = "kubectl --kubeconfig=\"/home/admision/.kube/dalthon-server-kubeconfig.yaml\"";
     open-conexion = "/home/admision/Utilidades/open-conexion.sh";
     local-open-conexion = "/home/admision/Utilidades/local_open-conexion.sh";
     backups-dev-restore = "/home/admision/Utilidades/backups_impresiones_local.sh";
+    qsync = "~/dotfiles/utils/qsync.sh";
   };
 
   # Versión de NixOS con la que se instaló esta PC. No cambiarla al actualizar.
