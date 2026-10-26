@@ -42,3 +42,4 @@ Waybar   | Clic en volumen             | Abrir / cerrar el gestor de volumen (pw
 Waybar   | Clic en red                 | Abrir el editor de conexiones | nm-connection-editor
 Waybar   | Clic en multimedia          | Reproducir / pausar | playerctl play-pause
 Waybar   | Clic en el teclado          | Mostrar esta lista de atajos
+Waybar   | Clic derecho en el reloj    | Abrir / cerrar el calendario | ~/.config/waybar/scripts/calendario.sh

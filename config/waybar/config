@@ -100,8 +100,10 @@
 	},
     "clock": {
         // "timezone": "America/New_York",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        // Clic izquierdo: alterna hora y fecha. Clic derecho: calendario flotante.
+        "tooltip-format": "{:%A %d de %B}",
+        "format-alt": "{:%Y-%m-%d}",
+        "on-click-right": "~/.config/waybar/scripts/calendario.sh"
     },
     "cpu": {
         "format": "{usage}%  ",

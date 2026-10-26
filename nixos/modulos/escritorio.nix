@@ -114,6 +114,28 @@
     onlyoffice-desktopeditors   # Editor de documentos
     zathura                     # Para visualizar pdf
     imv                         # Para visualizar imágenes
+
+    # Calendario flotante del reloj (clic derecho). El script sigue en el repo.
+    (let
+      calendarioPython = python3.withPackages (ps: [
+        ps.pygobject3
+      ]);
+    in writeShellScriptBin "calendario" ''
+      export GDK_BACKEND=wayland
+      # .out: en estos paquetes el typelib no está en la salida por defecto (bin)
+      export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [
+        glib.out
+        pango.out
+        gtk3
+        gtk-layer-shell
+        gdk-pixbuf
+        atk
+        harfbuzz
+        gobject-introspection
+      ]}"
+      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+      exec ${calendarioPython}/bin/python3 "$HOME/dotfiles/config/waybar/scripts/calendario.py"
+    '')
   ];
 
   environment.shellAliases = {
