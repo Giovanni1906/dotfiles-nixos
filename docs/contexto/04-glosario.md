@@ -40,7 +40,7 @@
 - **Acento / secundario / fondo / superficie**: nombres de los colores del tema: acento (azul principal), secundario (morado del degradado), fondo (azul marino oscuro), superficie (azul de los paneles).
 - **GRUB**: menú de arranque; su tema (fondo, fuentes, iconos) lo genera `nixos/modulos/tema.nix`.
 - **greetd / nwg-hello**: gestor de inicio de sesión. greetd abre un Hyprland mínimo en el que `nwg-hello` muestra la pantalla de login (reloj, sesión, usuario, contraseña y botones de apagado). Sustituyó a `tuigreet` (login en modo texto).
-- **Mako**: demonio de notificaciones (`notify-send`). Las cierra a los 20 segundos. El historial (las 100 últimas) se abre con `SUPER + F3`.
+- **Mako**: demonio de notificaciones (`notify-send`). Las cierra a los 20 segundos. El historial (las 100 últimas) se abre con `SUPER + F3`. `SUPER + F4` las oculta y las vuelve a mostrar.
 - **hyprlock**: pantalla de bloqueo, con el mismo panel que el login (`config/hypr/hyprlock.conf`). Sustituyó a `swaylock`.
 - **hypridle**: demonio que abre hyprlock antes de suspender (`config/hypr/hypridle.conf`) y cuando se pide `loginctl lock-session`.
 - **swaybg**: pone el fondo de pantalla (el `FONDO_PANTALLA` del tema activo).

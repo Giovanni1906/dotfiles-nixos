@@ -19,7 +19,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Barra | Waybar (JSONC + CSS) con módulos `custom/*` en Bash |
 | Lanzador / menús | Rofi 2.0 (`drun`, y `dmenu` para apagado, atajos y temas) |
 | Terminal | Kitty (layouts `splits` y `stack`) |
-| Notificaciones | Mako (se cierran a los 20 s; historial con `SUPER + F3`) + `libnotify` (`notify-send`) + `paplay` para sonidos |
+| Notificaciones | Mako (se cierran a los 20 s; historial con `SUPER + F3`; ocultar o mostrar con `SUPER + F4`) + `libnotify` (`notify-send`) + `paplay` para sonidos |
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
 | Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor Catppuccin del color de cada tema (`catppuccin-mocha-<color>-cursors`, 24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
@@ -71,6 +71,7 @@ dotfiles/
 │   ├── nix-config.sh            # Menú en terminal: elegir qué parte de nixos/ editar y aplicarla (alias nix-config)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   ├── historial-notificaciones.sh # Historial de Mako en Rofi (SUPER + F3)
+│   ├── alternar-notificaciones.sh  # Ocultar o mostrar las de Mako (SUPER + F4)
 │   └── kitty-zoom.sh, valent-clipboard.sh, reset-trial-navicat.sh
 └── public/                      # Fondos de pantalla y PNG para el logo de fastfetch (uno por color de tema)
 ```

@@ -6,6 +6,7 @@
 Hyprland | SUPER + F1                  | Mostrar esta lista de atajos
 Hyprland | SUPER + F2                  | Elegir el tema (colores y fondo de pantalla)
 Hyprland | SUPER + F3                  | Abrir el historial de notificaciones
+Hyprland | SUPER + F4                  | Ocultar o mostrar las notificaciones
 Hyprland | SUPER + Q                   | Abrir terminal (Kitty)
 Hyprland | SUPER + E                   | Abrir gestor de archivos (Thunar)
 Hyprland | SUPER + R                   | Abrir lanzador de aplicaciones (Rofi)

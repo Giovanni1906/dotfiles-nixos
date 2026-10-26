@@ -238,6 +238,13 @@ border-color=$TEXTO_TENUE
 
 [urgency=critical]
 border-color=$URGENTE
+
+# SUPER + F4: modo "ocultas" esconde las que hay y las nuevas. El aviso de estado sigue visible.
+[mode=ocultas]
+invisible=1
+
+[mode=ocultas app-name=Notificaciones]
+invisible=0
 EOF
 
 # --- FASTFETCH ---
