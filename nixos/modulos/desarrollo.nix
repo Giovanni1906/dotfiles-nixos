@@ -20,6 +20,18 @@ let
     };
     sourceRoot = "cursor-${version}-extracted/usr/share/cursor";
   });
+
+  # Sublime Text más nuevo que el del canal (4200). El empaquetado del canal
+  # ya usa el host de plugins de Python 3.14 a partir del build 4205.
+  # Para actualizar: versión de https://download.sublimetext.com/latest/stable
+  # y cada hash con:
+  # nix-prefetch-url https://download.sublimetext.com/sublime_text_build_<versión>_x64.tar.xz | xargs nix hash convert --hash-algo sha256
+  # (lo mismo con arm64). Los hashes de nixos-unstable sirven si ya trae esa versión.
+  sublime4 = pkgs.callPackage (import (pkgs.path + "/pkgs/applications/editors/sublime/4/common.nix") {
+    buildVersion = "4215";
+    x64sha256 = "wVP0GNOrJrkOzOjAKoLk6WECXtemX34lBgpUV9Q+iNk=";
+    aarch64sha256 = "0xRmWkJy8zVRUDQyNyo0UW27WpoS3OKkcELBlC9m7nk=";
+  }) { };
 in
 
 {
@@ -61,7 +73,7 @@ in
   environment.systemPackages = with pkgs; [
     vscode                      # Editor de código con Copilot
     cursor                      # Editor de código con IA (versión fijada arriba)
-    sublime4                    # Sublime Text
+    sublime4                    # Sublime Text (build fijado arriba)
     figma-linux                 # Cliente de escritorio de Figma
     filezilla
     navicat-premium
