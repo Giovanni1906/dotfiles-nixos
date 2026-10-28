@@ -32,6 +32,30 @@ let
     x64sha256 = "wVP0GNOrJrkOzOjAKoLk6WECXtemX34lBgpUV9Q+iNk=";
     aarch64sha256 = "0xRmWkJy8zVRUDQyNyo0UW27WpoS3OKkcELBlC9m7nk=";
   }) { };
+
+  # El .desktop de nixpkgs no anuncia figma://. Al iniciar sesión la web abre
+  # ese esquema y GTK muestra «Abrir con», cuyo botón lanza gnome-software.
+  escritorioFigma = pkgs.writeText "figma-linux.desktop" ''
+    [Desktop Entry]
+    Version=1.5
+    Type=Application
+    Name=Figma Linux
+    Comment=Cliente de escritorio de Figma
+    Exec=figma-linux %U
+    Icon=figma-linux
+    Terminal=false
+    MimeType=x-scheme-handler/figma;
+    Categories=Graphics;
+  '';
+
+  figma-linux = pkgs.symlinkJoin {
+    name = "figma-linux";
+    paths = [ pkgs.figma-linux ];
+    postBuild = ''
+      rm "$out/share/applications/figma-linux.desktop"
+      install -Dm644 ${escritorioFigma} "$out/share/applications/figma-linux.desktop"
+    '';
+  };
 in
 
 {
@@ -45,6 +69,9 @@ in
   programs.virt-manager.enable = true;
 
   users.users.${config.dotfiles.usuario}.extraGroups = [ "docker" "libvirtd" "kvm" ];
+
+  # El login de Figma abre figma://. Sin esta asociación GTK muestra «Abrir con».
+  xdg.mime.defaultApplications."x-scheme-handler/figma" = "figma-linux.desktop";
 
   # --------------------------------------------------
   # ---     Kubernetes local (Kind + Skaffold)     ---
