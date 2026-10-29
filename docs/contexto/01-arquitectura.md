@@ -25,7 +25,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
 | Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
-| Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular), Remmina (cliente) |
+| Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
 | IA | Antigravity CLI (`agy`), Claude Code (`claude`), Cursor, Hermes Agent (`hermes`) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |

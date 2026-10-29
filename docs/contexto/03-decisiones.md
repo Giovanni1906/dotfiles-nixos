@@ -63,9 +63,9 @@
 - **Consecuencias**: el secreto no llega a Git, pero se guarda en texto plano y cualquier celular emparejado puede desbloquear la sesión.
 
 ## ADR-010: Acceso remoto con Tailscale + WayVNC
-- **Fecha**: 2026-07-28 (Tailscale); 2026-10-04 (WayVNC al arranque); 2026-10-16 (espera sin límite)
-- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`. WayVNC (cliente AVNC en el celular) solo por Tailscale y sin contraseña: `utils/wayvnc-tailscale.sh` (al iniciar sesión y alias `remote-conexion`) espera la IP de Tailscale sin rendirse y escucha solo en ella; el firewall abre el 5900 solo en `tailscale0`. (Antes: `0.0.0.0` con el puerto abierto en todas las redes, sin contraseña. El tope de 60 s de 2026-10-04 salía antes de que la red estuviera lista.)
-- **Consecuencias**: control remoto desde cualquier lugar con Tailscale activo en el celular, cifrado por la VPN; desde el wifi sin Tailscale no conecta. Cualquier dispositivo de la tailnet puede controlar el escritorio (ver `06-errores-conocidos.md`).
+- **Fecha**: 2026-07-28 (Tailscale); 2026-10-04 (WayVNC al arranque); 2026-10-16 (espera sin límite); 2026-10-29 (supervisión en bucle + WayVNC desde el login `nwg-hello`)
+- **Decisión**: `services.tailscale.enable` y `sudo tailscale up` al final de `init.sh`. WayVNC (cliente AVNC en el celular) solo por Tailscale y sin contraseña: `utils/wayvnc-tailscale.sh` (al iniciar sesión con `exec` en `hyprland.conf` y alias `remote-conexion`) comprueba que la IP ya esté asignada a la interfaz `tailscale0` en el kernel (`ip -4 -o addr show dev tailscale0`), evita duplicados con `flock` y mantiene `wayvnc` en un bucle que reintenta si el puerto aún está ocupado o si `tailscaled` se reinicia. Además, el Hyprland del greeter (`nixos/modulos/tema.nix`) también lanza `wayvnc` en `tailscale0:5900` para poder iniciar sesión en `nwg-hello` desde AVNC apenas enciende la PC, y lo cierra al entrar a la sesión del usuario.
+- **Consecuencias**: control remoto desde cualquier lugar con Tailscale activo en el celular, incluso desde antes de iniciar sesión al encender la PC; al pasar del login a la sesión de usuario hay un corte de ~1 s mientras el puerto 5900 pasa del greeter a la sesión. Cualquier dispositivo de la tailnet puede controlar el escritorio (ver `06-errores-conocidos.md`).
 
 ## ADR-011: Lógica de escritorio en scripts Bash conectados a Waybar/Rofi
 - **Fecha**: 2026-06-24 (powermenu), Pomodoro desde el primer commit
