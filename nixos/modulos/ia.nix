@@ -13,5 +13,12 @@ in
 {
   environment.systemPackages = [
     hermes.packages.${pkgs.stdenv.hostPlatform.system}.default   # Hermes Agent: hermes, hermes-agent, hermes-acp (config en ~/.hermes)
+    pkgs.uv       # Gestor de entornos Python (google-antigravity y otros SDKs de IA)
+    pkgs.python3  # Intérprete base para los entornos virtuales
   ];
+
+  environment.shellAliases = {
+    ag-setup    = "~/dotfiles/utils/antigravity-setup.sh";
+    ag-activate = "source ~/.local/share/antigravity/venv/bin/activate";
+  };
 }
