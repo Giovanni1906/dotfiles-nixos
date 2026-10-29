@@ -25,9 +25,9 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
 | Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
-| Acceso remoto | Tailscale (VPN), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular), Remmina (cliente) |
-| Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Cursor, Postman, Navicat, FileZilla |
-| IA | Hermes Agent (Nous Research) desde su flake, con `builtins.getFlake` fijado a un commit; módulo `ia.nix`, solo en `pc-asus` |
+| Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular), Remmina (cliente) |
+| Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
+| IA | Antigravity CLI (`agy`), Claude Code (`claude`), Cursor, Hermes Agent (`hermes`) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
 
@@ -36,15 +36,15 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 ```
 dotfiles/
 ├── init.sh                      # Instala y actualiza por pasos: usuario, sistema, apps, red, actualizar, nuevo-equipo
-├── .env.example                 # Plantilla de secretos (PASS_SWAYLOCK)
+├── .env.example                 # Plantilla de secretos (PASS_SWAYLOCK, CONTEXT_HUB_URL, VALENT_DEVICE_ID)
 ├── nixos/
 │   ├── modulos/                 # Configuración de sistema por función (compartida)
 │   │   ├── base.nix             # Nix, idioma, red, audio, usuario, CLI, aliases; opciones dotfiles.equipo y dotfiles.usuario
 │   │   ├── escritorio.nix       # Hyprland, hyprlock, portales, fuentes, apps gráficas, cursor e iconos
 │   │   ├── tema.nix             # GRUB, login greetd/nwg-hello y cursor, leídos del tema activo
 │   │   ├── desarrollo.nix       # Docker, Kubernetes local (Kind, Skaffold, dominios en /etc/hosts), virtualización, editores y clientes de BD/API
-│   │   ├── remoto.nix           # Tailscale, Valent, WayVNC, Remmina y sus puertos
-│   │   ├── ia.nix               # Hermes Agent (flake oficial fijado a un commit con builtins.getFlake)
+│   │   ├── remoto.nix           # Tailscale, OpenSSH (solo por Tailscale), Valent, WayVNC, Remmina, tmux y sus puertos
+│   │   ├── ia.nix               # Agentes de IA (agy, claude, cursor, hermes), MCP context-hub y alias context-init
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
 │   └── equipos/                 # Una carpeta por máquina (sin hardware)
 │       ├── pc-asus/default.nix  # Módulos que usa, hostname, cargador de arranque, stateVersion
@@ -116,7 +116,7 @@ flowchart TD
 - **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes. Al final incluye `local.conf`.
 - **Capa de presentación (Waybar, Rofi, Kitty, GTK)**: archivos de configuración puros que usan las variables del tema; Waybar delega lógica a scripts Bash que devuelven JSON (`return-type: json`).
 - **Utilidades (`config/waybar/scripts/`, `utils/`)**: scripts Bash sin dependencias más allá de los paquetes del sistema. Estado efímero en `/tmp` (Pomodoro) y vistas previas de temas en `~/.cache/dotfiles/temas`.
-- **Secretos (`.env`)**: archivo local (`chmod 600`) con `PASS_SWAYLOCK`, consumido por comandos remotos de Valent para desbloquear la pantalla con `wtype`.
+- **Secretos (`.env`)**: archivo local (`chmod 600`) con `PASS_SWAYLOCK` (desbloqueo desde Valent con `wtype`), `CONTEXT_HUB_URL` (URL del servidor MCP en la red Tailscale) y `VALENT_DEVICE_ID` (ID del celular en Valent).
 
 ## Patrones Arquitectónicos
 

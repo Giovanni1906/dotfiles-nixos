@@ -1,0 +1,7 @@
+---
+description: Conexión automática al servidor MCP context-hub
+globs: *
+alwaysApply: true
+---
+
+Al iniciar cualquier tarea en este proyecto (`dotfiles`), llama primero a la herramienta `get_project_context(project_name="dotfiles")` del servidor MCP `context-hub` para cargar las reglas globales, las reglas del proyecto y la memoria compartida entre agentes.

@@ -16,6 +16,7 @@
     ../../modulos/tema.nix
     ../../modulos/desarrollo.nix
     ../../modulos/remoto.nix
+    ../../modulos/ia.nix           # Agentes de IA y MCP context-hub
     # ../../modulos/juegos.nix     # Steam, Heroic, Lutris
   ];
 

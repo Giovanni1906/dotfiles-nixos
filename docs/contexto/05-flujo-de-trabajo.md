@@ -79,6 +79,7 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | `nix-clean` | Borra las generaciones viejas y los paquetes sin uso (`nix-collect-garbage -d`) y rehace el menú de GRUB (`nixos-rebuild boot`) | base |
 | `nix-config` | `utils/nix-config.sh <equipo actual>`: menú en terminal para activar o quitar módulos, editar los paquetes y alias del equipo o una parte de cada módulo (abre `micro` en esa línea) y aplicar con `nixos-rebuild switch` | base |
 | `dotfiles-actualizar` | `~/dotfiles/init.sh actualizar` | base |
+| `context-init` | `~/dotfiles/utils/context-init.sh` (crea `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/context-hub.mdc` y registra el proyecto en el MCP `context-hub` de la Mac Mini) | ia |
 | `ll` | `ls -lha` | base |
 | `ip-public` | `curl -s ipinfo.io/ip` | base |
 | `tema-config` | Abre el tema activo (`tema/tema.conf`) | escritorio |
