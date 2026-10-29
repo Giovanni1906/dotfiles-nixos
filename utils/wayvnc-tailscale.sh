@@ -4,23 +4,39 @@
 # Desde el celular (AVNC): Tailscale activo y conectar a <IP de Tailscale de este equipo>:5900.
 set -euo pipefail
 
-pidof wayvnc > /dev/null && { echo "WayVNC ya está corriendo"; exit 0; }
+# Evitar instancias duplicadas del propio script o de wayvnc del mismo usuario
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/wayvnc-tailscale.lock"
+exec 9>"$LOCK_FILE"
+flock -n 9 || { echo "WayVNC ya está gestionado por otra instancia"; exit 0; }
 
-# Tras el login la red puede tardar más de un minuto. En pc-casa (2026-10-16) Hyprland
-# arrancó a las 23:18 y la IP de Tailscale llegó a las 23:20: el tope de 60 s salía antes
-# y exec-once no vuelve a lanzar el script. Por eso se espera sin límite.
+# Tras el arranque o login la red puede tardar, y `tailscale ip -4` puede devolver la IP
+# un segundo antes de que el kernel la asigne a `tailscale0` (causando fallo en bind).
+# Además, si wayvnc sale (por reinicio de red o al cambiar del greeter a la sesión),
+# el bucle vuelve a esperar y reintentar mientras la sesión Wayland siga activa.
 avisado=0
-while true; do
-    ip=$(tailscale ip -4 2> /dev/null | head -n 1 || true)
-    if [ -n "$ip" ]; then
-        break
-    fi
-    if [ "$avisado" -eq 0 ]; then
-        notify-send "WayVNC" "Esperando la IP de Tailscale para compartir el escritorio" 2> /dev/null || true
-        avisado=1
-    fi
-    sleep 2
-done
+notificado_escucha=0
 
-notify-send "WayVNC" "Escuchando en ${ip}:5900" 2> /dev/null || true
-exec wayvnc "$ip" 5900
+while true; do
+    # Si la sesión Wayland terminó, salir limpiamente
+    if [ -n "${WAYLAND_DISPLAY:-}" ] && [ -n "${XDG_RUNTIME_DIR:-}" ] && [ ! -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]; then
+        exit 0
+    fi
+
+    ip=$(ip -4 -o addr show dev tailscale0 2> /dev/null | awk '{split($4, a, "/"); print a[1]; exit}' || true)
+    if [ -z "$ip" ]; then
+        if [ "$avisado" -eq 0 ]; then
+            notify-send "WayVNC" "Esperando la IP de Tailscale para compartir el escritorio" 2> /dev/null || true
+            avisado=1
+        fi
+        sleep 2
+        continue
+    fi
+
+    if [ "$notificado_escucha" -eq 0 ]; then
+        notify-send "WayVNC" "Escuchando en ${ip}:5900" 2> /dev/null || true
+        notificado_escucha=1
+    fi
+
+    wayvnc "$ip" 5900 2> /dev/null || true
+    sleep 1
+done

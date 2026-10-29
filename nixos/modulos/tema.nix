@@ -384,6 +384,22 @@ let
     }
   '';
 
+  # WayVNC en el login: permite conectarse con AVNC por Tailscale apenas enciende la PC
+  # para escribir la contraseña en nwg-hello. Al cerrar el greeter, muere con la sesión
+  # y deja libre el puerto 5900 para el WayVNC de la sesión del usuario.
+  wayvncGreeter = pkgs.writeShellScript "wayvnc-greeter" ''
+    while true; do
+      if [ -n "''${WAYLAND_DISPLAY:-}" ] && [ -n "''${XDG_RUNTIME_DIR:-}" ] && [ ! -S "''${XDG_RUNTIME_DIR}/''${WAYLAND_DISPLAY}" ]; then
+        exit 0
+      fi
+      ip=$(${pkgs.iproute2}/bin/ip -4 -o addr show dev tailscale0 2>/dev/null | ${pkgs.gawk}/bin/awk '{split($4, a, "/"); print a[1]; exit}')
+      if [ -n "$ip" ]; then
+        ${pkgs.wayvnc}/bin/wayvnc "$ip" 5900 2>/dev/null || true
+      fi
+      sleep 1
+    done
+  '';
+
   hyprlandGreeter = pkgs.writeText "hyprland-greeter.conf" ''
     # Hyprland mínimo que solo muestra nwg-hello. Generado por nixos/modulos/tema.nix.
     monitor = , preferred, auto, 1
@@ -432,7 +448,8 @@ let
     layerrule = blur on, ignore_alpha 0.2, match:namespace nwg-hello
 
     exec-once = ${pkgs.swaybg}/bin/swaybg -i ${fondoPantalla} -m fill
-    exec-once = ${nwgHello}/bin/nwg-hello -c ${configGreeter} -s ${estiloGreeter}; ${hyprland}/bin/hyprctl dispatch exit
+    exec-once = ${wayvncGreeter}
+    exec-once = ${nwgHello}/bin/nwg-hello -c ${configGreeter} -s ${estiloGreeter}; ${pkgs.procps}/bin/pkill -x wayvnc 2>/dev/null || true; ${hyprland}/bin/hyprctl dispatch exit
   '';
 in
 {
