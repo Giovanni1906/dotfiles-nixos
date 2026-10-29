@@ -348,20 +348,6 @@ paso_apps() {
         fi
     fi
     [ -f "$appimage" ] && enlazar "$DOTFILES/applications/thorium.desktop" "$HOME/.local/share/applications/thorium.desktop"
-
-    # Google Antigravity SDK (entorno virtual en ~/.local/share/antigravity/venv)
-    local ag_venv="$HOME/.local/share/antigravity/venv"
-    if [ -d "$ag_venv" ]; then
-        ok "Entorno de google-antigravity ya existe"
-    elif command -v uv > /dev/null; then
-        if "$DOTFILES/utils/antigravity-setup.sh"; then
-            ok "Entorno de google-antigravity creado"
-        else
-            aviso "No se pudo crear el entorno de google-antigravity (ag-setup)"
-        fi
-    else
-        aviso "uv no disponible: después de ./init.sh sistema, ejecuta ag-setup"
-    fi
     return 0
 }
 
