@@ -113,7 +113,7 @@ Cómo funciona:
 
 ## Variables de entorno y `.env`
 
-`.env` guarda valores sensibles (hoy `PASS_SWAYLOCK`, la contraseña para el desbloqueo remoto). `init.sh` lo crea desde `.env.example` con permisos `600`; edítalo con tus valores.
+`.env` guarda valores sensibles y locales (`PASS_SWAYLOCK` para el desbloqueo remoto, `CONTEXT_HUB_URL` con la URL del servidor MCP por Tailscale y `VALENT_DEVICE_ID` con el ID del celular en Valent). `init.sh` lo crea desde `.env.example` con permisos `600`; edítalo con tus valores.
 
 - No subas `.env` (está en `.gitignore`).
 - Mantén `.env.example` con placeholders y documenta aquí cada variable nueva.

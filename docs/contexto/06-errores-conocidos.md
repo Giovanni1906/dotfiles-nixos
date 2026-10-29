@@ -16,7 +16,6 @@
 
 ## Fragilidades (funcionan hoy, pero se pueden romper)
 
-- **ID de dispositivo Valent hardcodeado** en `valent-clipboard.sh` (`9f91b45437b94e139957b9d336079ea0`): si se vuelve a emparejar el celular o se cambia de teléfono, el puente deja de funcionar en silencio (la salida va a `/dev/null`). Mover el ID a `.env`.
 - **Escapado incompleto en `valent-clipboard.sh`**: solo escapa `"`; textos con `\` o saltos de línea pueden romper el GVariant que recibe `gdbus`.
 - **Ruta hardcodeada a `/home/nova`** en `config/gtkrc-2.0` (la escribe nwg-look): falla con otro usuario.
 - **Thorium fijado a la versión M128 AVX2** en `init.sh`: sin actualizaciones; falla en CPUs sin AVX2. Para actualizarlo, cambiar la URL y borrar `~/.local/bin/appimages/Thorium.AppImage`.
@@ -34,6 +33,7 @@
 
 ## Resueltos
 
+- **2026-10-29** — IP de Tailscale (`CONTEXT_HUB_URL`) e ID de dispositivo Valent (`VALENT_DEVICE_ID`) estaban hardcodeados en `ia.nix`, `utils/context-init.sh`, `utils/valent-clipboard.sh` y la documentación: movidos a `.env` (ignorado en git) con placeholders en `.env.example`.
 - **2026-10-16** — aVNC decía que VNC no corría o que el puerto era incorrecto: `wayvnc-tailscale.sh` esperaba la IP de Tailscale como mucho 60 s y salía. En pc-casa la IP llegó ~1,5 min después de Hyprland, y `exec-once` no reintenta. Ahora el script espera sin límite.
 - **2026-10-05** — Los módulos declaraban el usuario `nova` fijo: en la PC de admisión (usuario `admision`) NixOS habría creado `nova` y borrado `admision`. Ahora cada equipo elige su usuario con `dotfiles.usuario` (ADR-025). `thorium.desktop` usa `$HOME` en lugar de `/home/nova`.
 - **2026-10-05** — Alias `k` fallaba con "command not found": `desarrollo.nix` instala `kubectl`, `kind` y `skaffold`.

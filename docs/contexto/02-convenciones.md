@@ -74,7 +74,7 @@
 
 - Todo valor sensible va en `.env` (ignorado en `.gitignore`) con formato `export NOMBRE="valor"`, y se documenta con un placeholder en `.env.example`.
 - Consumo: `source ~/dotfiles/.env && … "$NOMBRE"`.
-- Nunca versionar contraseñas, tokens ni IDs de dispositivos nuevos (hoy `valent-clipboard.sh` incumple esto con el ID del celular hardcodeado).
+- Nunca versionar contraseñas, tokens, IPs privadas ni IDs de dispositivos (todos se leen de `.env`: `PASS_SWAYLOCK`, `CONTEXT_HUB_URL`, `VALENT_DEVICE_ID`).
 
 ## Git y Commits
 
