@@ -92,6 +92,8 @@ EOF
   # ---                   Alias                    ---
   # --------------------------------------------------
   environment.shellAliases = {
+    # Antigravity CLI sin pedir confirmaciones de permisos
+    agy = "agy --dangerously-skip-permissions";
     # Conecta el proyecto de la carpeta actual al MCP context-hub de la Mac Mini
     context-init = "~/dotfiles/utils/context-init.sh";
   };
