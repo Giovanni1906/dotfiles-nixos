@@ -136,6 +136,26 @@
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
       exec ${calendarioPython}/bin/python3 "$HOME/dotfiles/config/waybar/scripts/calendario.py"
     '')
+
+    # Utilidad gráfica de descargas (yt-dlp) y conversión multimedia (ffmpeg) (SUPER + D).
+    (let
+      multimediaPython = python3.withPackages (ps: [
+        ps.pygobject3
+      ]);
+    in writeShellScriptBin "multimedia" ''
+      export GDK_BACKEND=wayland
+      export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [
+        glib.out
+        pango.out
+        gtk3
+        gdk-pixbuf
+        atk
+        harfbuzz
+        gobject-introspection
+      ]}"
+      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+      exec ${multimediaPython}/bin/python3 "$HOME/dotfiles/utils/multimedia.py"
+    '')
   ];
 
   environment.shellAliases = {

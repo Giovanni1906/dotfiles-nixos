@@ -11,6 +11,7 @@ Hyprland | SUPER + Q                   | Abrir terminal (Kitty)
 Hyprland | SUPER + E                   | Abrir gestor de archivos (Thunar)
 Hyprland | SUPER + R                   | Abrir lanzador de aplicaciones (Rofi)
 Hyprland | SUPER + B                   | Abrir navegador (Zen Browser)
+Hyprland | SUPER + D                   | Abrir utilidad para descargar y convertir multimedia
 Hyprland | SUPER + C                   | Cerrar ventana activa
 Hyprland | SUPER + V                   | Alternar ventana flotante
 Hyprland | SUPER + F                   | Pantalla completa

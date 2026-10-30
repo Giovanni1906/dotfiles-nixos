@@ -13,3 +13,7 @@ config/rofi/tema.rasi
 config/mako/config
 config/gtk-4.0/gtk.css
 config/fastfetch/logo.png
+
+# Python
+__pycache__/
+*.pyc
