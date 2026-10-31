@@ -70,6 +70,8 @@ in
     127.0.0.1 puntaje.postula.admision.dev
     127.0.0.1 imagen.postula.admision.dev
     127.0.0.1 asisto.admision.dev
+    127.0.0.1 biometrico.postula.admision.dev
+    127.0.0.1 biometrico.admision.dev
   '';
 
   # Kind y la sincronización de archivos de Skaffold necesitan más inotify
