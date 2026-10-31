@@ -33,6 +33,8 @@
 
 ## Resueltos
 
+- **2026-10-30** — `anydesk` en NixOS fallaba al descargar los binarios (`download.anydesk.com` devolvía HTTP 404/429 para la versión 8.0.2 al rotar tarballs anteriores): se añadió un `overrideAttrs` en `nixos/modulos/remoto.nix` que agrega la copia preservada en Wayback Machine (Web Archive) como URL de respaldo.
+
 - **2026-10-29** — WayVNC no levantaba al iniciar sesión ni estaba disponible en la pantalla de login al encender la PC: (1) `tailscale ip -4` devolvía la IP ~1 s antes de que el kernel la asignara a la interfaz `tailscale0`, haciendo que `exec wayvnc "$ip" 5900` fallara en `bind` y saliera sin reintentar; ahora `wayvnc-tailscale.sh` verifica la IP directamente en `tailscale0` (`ip -4 -o addr show dev tailscale0`), usa `flock` y supervisa `wayvnc` en bucle (lanzado con `exec` en `hyprland.conf`). (2) `hyprlandGreeter` en `nixos/modulos/tema.nix` ahora también lanza `wayvnc` sobre `tailscale0:5900` durante `nwg-hello` y lo libera al iniciar sesión.
 - **2026-10-29** — IP de Tailscale (`CONTEXT_HUB_URL`) e ID de dispositivo Valent (`VALENT_DEVICE_ID`) estaban hardcodeados en `ia.nix`, `utils/context-init.sh`, `utils/valent-clipboard.sh` y la documentación: movidos a `.env` (ignorado en git) con placeholders en `.env.example`.
 - **2026-10-16** — aVNC decía que VNC no corría o que el puerto era incorrecto: `wayvnc-tailscale.sh` esperaba la IP de Tailscale como mucho 60 s y salía. En pc-casa la IP llegó ~1,5 min después de Hyprland, y `exec-once` no reintenta. Ahora el script espera sin límite.

@@ -4,6 +4,15 @@
 
 { config, pkgs, ... }:
 
+let
+  anydeskMirrored = pkgs.anydesk.overrideAttrs (old: {
+    src = old.src.overrideAttrs (oldSrc: {
+      urls = oldSrc.urls ++ [
+        "https://web.archive.org/web/20260611112327if_/${builtins.head oldSrc.urls}"
+      ];
+    });
+  });
+in
 {
   services.tailscale.enable = true;           # Login: sudo tailscale up (lo hace init.sh)
 
@@ -28,6 +37,7 @@
     wtype                       # Desbloqueo remoto desde Valent (escribe la contraseña en hyprlock)
     wayvnc                      # Conexión remota desde otro dispositivo
     remmina                     # Cliente de escritorio remoto
+    anydeskMirrored             # Escritorio remoto AnyDesk (respaldo vía Web Archive por 404 upstream)
     tmux                        # Mantener sesiones de terminal vivas por SSH (agy, claude)
   ];
 
