@@ -157,6 +157,26 @@
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
       exec ${multimediaPython}/bin/python3 "$HOME/dotfiles/utils/multimedia.py"
     '')
+
+    # Utilidad gráfica para optimizar y redimensionar imágenes (SUPER + I).
+    (let
+      optimizarImagenesPython = python3.withPackages (ps: [
+        ps.pygobject3
+      ]);
+    in writeShellScriptBin "optimizar-imagenes" ''
+      export GDK_BACKEND=wayland
+      export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [
+        glib.out
+        pango.out
+        gtk3
+        gdk-pixbuf
+        atk
+        harfbuzz
+        gobject-introspection
+      ]}"
+      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+      exec ${optimizarImagenesPython}/bin/python3 "$HOME/dotfiles/utils/optimizar-imagenes.py"
+    '')
   ];
 
   environment.shellAliases = {
