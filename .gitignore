@@ -1,9 +1,11 @@
 .env
 
-# Locales de cada máquina (los crea init.sh)
+# Locales de cada máquina (los crea init.sh o son propios del equipo)
 tema/tema.conf
 config/hypr/local.conf
 config/gtk-3.0/bookmarks
+utils/backups_impresiones_local.sh
+utils/backups_asisto_local.sh
 
 # Generados por utils/aplicar-tema.sh desde el tema activo
 config/hypr/tema.conf

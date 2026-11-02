@@ -40,7 +40,8 @@
     k-prod = "kubectl --kubeconfig=\"/home/admision/.kube/dalthon-server-kubeconfig.yaml\"";
     open-conexion = "/home/admision/Utilidades/open-conexion.sh";
     local-open-conexion = "/home/admision/Utilidades/local_open-conexion.sh";
-    backups-dev-restore = "/home/admision/Utilidades/backups_impresiones_local.sh";
+    backups-dev-restore = "~/dotfiles/utils/backups_impresiones_local.sh";
+    backups-asisto-restore = "~/dotfiles/utils/backups_asisto_local.sh";
     qsync = "~/dotfiles/utils/qsync.sh";
   };
 
