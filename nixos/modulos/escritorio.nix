@@ -80,6 +80,7 @@
     hypridle                    # Bloquea con hyprlock antes de suspender (config/hypr/hypridle.conf)
     # swaylock-effects          # Bloqueo de wayland (reemplazado por hyprlock, ver programs.hyprlock)
     wl-clipboard                # Gestión del portapapeles en Wayland
+    xsel                        # Gestión del portapapeles en X11/XWayland (OnlyOffice, etc.)
     grim                        # El capturador
     slurp                       # El selector de área
     networkmanagerapplet        # Gestor de red
