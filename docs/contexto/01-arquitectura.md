@@ -60,8 +60,8 @@ dotfiles/
 │   ├── kitty/kitty.conf
 │   ├── rofi/{config.rasi,themes/nova.rasi}
 │   ├── fastfetch/config.jsonc
-│   ├── gtk-3.0/, gtk-4.0/, gtkrc-2.0   # Escritos originalmente por nwg-look; aplicar-tema.sh ajusta tema, iconos y cursor
-│   └── */tema.*, mako/config, gtk-4.0/gtk.css, fastfetch/logo.png   # GENERADOS (gitignored) por utils/aplicar-tema.sh
+│   ├── gtk-3.0/settings.ini.template, gtk-4.0/settings.ini.template, gtkrc-2.0.template   # Plantillas base versionadas
+│   └── */tema.*, mako/config, gtk-4.0/gtk.css, gtk-3.0/settings.ini, gtk-4.0/settings.ini, gtkrc-2.0, fastfetch/logo.png   # GENERADOS (gitignored) por utils/aplicar-tema.sh
 ├── applications/thorium.desktop # Acceso directo para Rofi drun
 ├── utils/
 │   ├── aplicar-tema.sh          # Genera los tema.* y recarga el escritorio (alias tema-aplicar)

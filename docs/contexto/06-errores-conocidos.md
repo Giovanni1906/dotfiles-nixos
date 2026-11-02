@@ -17,7 +17,6 @@
 ## Fragilidades (funcionan hoy, pero se pueden romper)
 
 - **Escapado incompleto en `valent-clipboard.sh`**: solo escapa `"`; textos con `\` o saltos de línea pueden romper el GVariant que recibe `gdbus`.
-- **Ruta hardcodeada a `/home/nova`** en `config/gtkrc-2.0` (la escribe nwg-look): falla con otro usuario.
 - **Thorium fijado a la versión M128 AVX2** en `init.sh`: sin actualizaciones; falla en CPUs sin AVX2. Para actualizarlo, cambiar la URL y borrar `~/.local/bin/appimages/Thorium.AppImage`.
 - **`hardware-configuration.nix` sin respaldo en git**: si se pierde, `init.sh sistema` lo regenera con `nixos-generate-config`, que puede omitir módulos como `uas`/`sd_mod` (irrelevante si el disco raíz es interno) y copia todo lo montado en ese momento (`init.sh` filtra Docker, overlay, fuse, `/run` y `/tmp`; revisar si hay otros montajes temporales).
 - **Entrada antigua de systemd-boot en el firmware** (`Linux Boot Manager`, `\EFI\systemd\systemd-bootx64.efi`): queda como respaldo detrás de GRUB en el orden de arranque; sus entradas apuntan a generaciones viejas.
@@ -32,6 +31,8 @@
 - **Bloques comentados abundantes** en los módulos de `nixos/` y `config.rasi` (~160 líneas de opciones por defecto comentadas): dificultan leer qué está activo. Candidatos a eliminar según el paso 2 de la filosofía (Eliminar).
 
 ## Resueltos
+
+- **2026-11-02** — Cambios dinámicos de GTK ensuciaban git: `config/gtk-3.0/settings.ini`, `config/gtk-4.0/settings.ini` y `config/gtkrc-2.0` se modificaban con `sed -i` en cada cambio de tema (`SUPER + F2`). Ahora se generan desde plantillas (`.template`) ignorando los archivos resultantes en Git, y se corrigió la ruta hardcodeada a `/home/nova` en `gtkrc-2.0`.
 
 - **2026-10-30** — `anydesk` en NixOS fallaba al descargar los binarios (`download.anydesk.com` devolvía HTTP 404/429 para la versión 8.0.2 al rotar tarballs anteriores): se añadió un `overrideAttrs` en `nixos/modulos/remoto.nix` que agrega la copia preservada en Wayback Machine (Web Archive) como URL de respaldo.
 

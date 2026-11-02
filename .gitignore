@@ -14,6 +14,9 @@ config/kitty/tema.conf
 config/rofi/tema.rasi
 config/mako/config
 config/gtk-4.0/gtk.css
+config/gtk-3.0/settings.ini
+config/gtk-4.0/settings.ini
+config/gtkrc-2.0
 config/fastfetch/logo.png
 
 # Python

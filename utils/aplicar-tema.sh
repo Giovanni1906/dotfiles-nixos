@@ -314,17 +314,19 @@ else
 fi
 { echo "/* $CABECERA */"; colores_gtk; } | escribir "$DOTFILES/config/gtk-4.0/gtk.css"
 
-# --- GTK Y CURSOR (solo las claves del tema; el resto lo gestiona nwg-look) ---
-sed -i -E \
-    -e "s|^(gtk-icon-theme-name=).*|\1$ICONOS_GTK|" \
-    -e "s|^(gtk-cursor-theme-name=).*|\1$CURSOR|" \
-    -e "s|^(gtk-cursor-theme-size=).*|\1$CURSOR_TAMANO|" \
-    "$DOTFILES/config/gtk-3.0/settings.ini" "$DOTFILES/config/gtk-4.0/settings.ini"
-sed -i -E \
-    -e "s|^(gtk-icon-theme-name=).*|\1\"$ICONOS_GTK\"|" \
-    -e "s|^(gtk-cursor-theme-name=).*|\1\"$CURSOR\"|" \
-    -e "s|^(gtk-cursor-theme-size=).*|\1$CURSOR_TAMANO|" \
-    "$DOTFILES/config/gtkrc-2.0"
+# --- GTK Y CURSOR (generados desde .template con las claves del tema) ---
+generar_gtk_settings() {
+    sed \
+        -e "s|__ICONOS_GTK__|$ICONOS_GTK|g" \
+        -e "s|__CURSOR__|$CURSOR|g" \
+        -e "s|__CURSOR_TAMANO__|$CURSOR_TAMANO|g" \
+        -e "s|__HOME__|$HOME|g" \
+        "$1"
+}
+
+generar_gtk_settings "$DOTFILES/config/gtk-3.0/settings.ini.template" | escribir "$DOTFILES/config/gtk-3.0/settings.ini"
+generar_gtk_settings "$DOTFILES/config/gtk-4.0/settings.ini.template" | escribir "$DOTFILES/config/gtk-4.0/settings.ini"
+generar_gtk_settings "$DOTFILES/config/gtkrc-2.0.template" | escribir "$DOTFILES/config/gtkrc-2.0"
 # Cursor por defecto para Xwayland y apps que no leen GTK ni las variables XCURSOR_*
 for dir in "$HOME/.icons" "$HOME/.local/share/icons"; do
     mkdir -p "$dir/default"

@@ -1,12 +1,12 @@
-# DO NOT EDIT! This file will be overwritten by nwg-look.
+# DO NOT EDIT! This file is generated from config/gtkrc-2.0.template.
 # Any customization should be done in ~/.gtkrc-2.0.mine instead.
 
-include "/home/nova/.gtkrc-2.0.mine"
+include "__HOME__/.gtkrc-2.0.mine"
 gtk-theme-name="Adwaita-dark"
-gtk-icon-theme-name="dotfiles-iconos"
+gtk-icon-theme-name="__ICONOS_GTK__"
 gtk-font-name="Adwaita Sans 11"
-gtk-cursor-theme-name="catppuccin-mocha-pink-cursors"
-gtk-cursor-theme-size=24
+gtk-cursor-theme-name="__CURSOR__"
+gtk-cursor-theme-size=__CURSOR_TAMANO__
 gtk-toolbar-style=3
 gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
 gtk-button-images=1
