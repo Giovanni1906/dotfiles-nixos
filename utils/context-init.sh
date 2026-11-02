@@ -12,6 +12,22 @@
 
 set -euo pipefail
 
+# 0. Si el CLI universal context-hub está disponible, delegar en él directamente
+for candidate in \
+    "$HOME/.local/bin/context-init" \
+    "$HOME/Proyectos/personal/context-hub/context-menu.sh" \
+    "$HOME/.local/share/context-hub/context-menu.sh"; do
+    if [ -f "$candidate" ] && [ -x "$candidate" ] && [ "$(realpath "$candidate" 2>/dev/null || true)" != "$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || true)" ]; then
+        exec "$candidate" "$@"
+    fi
+done
+
+if [ "$PWD" = "$HOME" ] || [ "$PWD" = "/" ]; then
+    printf '\n\033[1;31m✗ No puedes ejecutar context-init en tu carpeta personal (%s) ni en la raíz (/).\033[0m\n' "$PWD" >&2
+    printf '  Navega a la carpeta de tu proyecto (ej. cd ~/Proyectos/mi-proyecto) antes de conectarlo.\n\n' >&2
+    exit 1
+fi
+
 [ -f "$HOME/dotfiles/.env" ] && source "$HOME/dotfiles/.env"
 MCP_URL="${CONTEXT_HUB_URL:-}"
 PROYECTO=""
