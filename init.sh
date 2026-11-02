@@ -5,11 +5,11 @@
 # Uso: ./init.sh [paso] [opciones]
 #
 #   (sin paso) | todo [equipo]  Máquina nueva: usuario, sistema, apps y red
-#   usuario                     Enlaces de config/, tema, permisos y archivos locales
+#   usuario                     Enlaces de config/, tema, permisos, context-hub y archivos locales
 #   sistema [equipo]            /etc/nixos usa el equipo del repo + nixos-rebuild switch
 #   apps                        Zen Browser (Flatpak) y Thorium (AppImage), si faltan
 #   red                         Inicia sesión en Tailscale, si no hay sesión
-#   actualizar                  git pull + usuario + sistema (alias dotfiles-actualizar)
+#   actualizar                  git pull (dotfiles + context-hub) + usuario + sistema (alias dotfiles-actualizar)
 #   nuevo-equipo <nombre>       Crea nixos/equipos/<nombre> desde la plantilla
 #
 #   --simular                   Muestra lo que haría con sudo, sin ejecutarlo
@@ -24,6 +24,7 @@ DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FECHA="$(date +%Y%m%d-%H%M%S)"
 RESPALDO="$HOME/.local/state/dotfiles/respaldo/$FECHA"
 THORIUM_URL="https://github.com/Alex313031/Thorium/releases/download/M128.0.6613.189/Thorium_Browser_128.0.6613.189_AVX2.AppImage"
+CONTEXT_HUB_REPO="https://github.com/Giovanni1906/context-hub.git"
 SIMULAR=0
 AVISOS=()
 
@@ -217,6 +218,40 @@ EOF
         ok "Tema aplicado ($(basename "$(readlink "$DOTFILES/tema/tema.conf")" .conf)); cambiarlo con SUPER + F2"
     else
         aviso "No se pudo aplicar el tema (utils/aplicar-tema.sh)"
+    fi
+
+    sincronizar_context_hub
+}
+
+# Clona o actualiza el repositorio de context-hub y ejecuta su instalador de cliente
+sincronizar_context_hub() {
+    local ch_dir="$HOME/Proyectos/personal/context-hub"
+    if [ ! -d "$ch_dir/.git" ] && [ -d "$HOME/.local/share/context-hub/.git" ]; then
+        ch_dir="$HOME/.local/share/context-hub"
+    fi
+
+    if [ -d "$ch_dir/.git" ]; then
+        if git -C "$ch_dir" pull --rebase --autostash > /dev/null 2>&1; then
+            ok "Context Hub al día (${ch_dir/#$HOME/\~})"
+        else
+            aviso "No se pudo actualizar context-hub desde GitHub (revisa conexión o git status en ${ch_dir/#$HOME/\~})"
+        fi
+    else
+        mkdir -p "$(dirname "$ch_dir")"
+        if git clone -q "$CONTEXT_HUB_REPO" "$ch_dir" 2> /dev/null; then
+            ok "Context Hub clonado en ${ch_dir/#$HOME/\~}"
+        else
+            aviso "No se pudo clonar context-hub ($CONTEXT_HUB_REPO): verifica sesión de GitHub (gh auth login)"
+            return 0
+        fi
+    fi
+
+    if [ -x "$ch_dir/scripts/install-client.sh" ]; then
+        if "$ch_dir/scripts/install-client.sh" --non-interactive > /dev/null; then
+            ok "Cliente Context Hub instalado (context-init, context-menu y agentes MCP)"
+        else
+            aviso "No se pudo instalar el modo cliente de context-hub"
+        fi
     fi
 }
 

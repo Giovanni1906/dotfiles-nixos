@@ -60,12 +60,12 @@ Después de cada cambio que funcione: `git add -A && git commit -m "feat|fix|doc
 
 | Comando | Qué hace |
 | --- | --- |
-| `./init.sh` | Todo: usuario, sistema, apps y red (pregunta el equipo si no lo sabe) |
-| `./init.sh usuario` | Enlaces en `~/.config`, `.env` y `local.conf`, permisos, tema. Sin `sudo` |
+| `./init.sh` | Todo: usuario (incluye sincronizar e instalar cliente `context-hub`), sistema, apps y red (pregunta el equipo si no lo sabe) |
+| `./init.sh usuario` | Enlaces en `~/.config`, `.env` y `local.conf`, permisos, tema y sincronización/instalación cliente de `context-hub`. Sin `sudo` |
 | `./init.sh sistema [equipo]` | Escribe `/etc/nixos/configuration.nix`, migra symlinks antiguos, conserva o regenera el hardware y `nixos-rebuild switch` |
 | `./init.sh apps` | Flathub + Zen Browser y Thorium, si faltan |
 | `./init.sh red` | `tailscale up` si no hay sesión |
-| `./init.sh actualizar` | `git pull` + usuario + sistema |
+| `./init.sh actualizar` | `git pull` (`dotfiles` + `context-hub`) + usuario + sistema |
 | `./init.sh nuevo-equipo <nombre>` | Crea `nixos/equipos/<nombre>` desde la plantilla |
 | `--simular` | Muestra los comandos con `sudo` sin ejecutarlos |
 
@@ -79,7 +79,8 @@ Todo es repetible: lo que ya está hecho se salta, y lo que se reemplaza se resp
 | `nix-clean` | Borra las generaciones viejas y los paquetes sin uso (`nix-collect-garbage -d`) y rehace el menú de GRUB (`nixos-rebuild boot`) | base |
 | `nix-config` | `utils/nix-config.sh <equipo actual>`: menú en terminal para activar o quitar módulos, editar los paquetes y alias del equipo o una parte de cada módulo (abre `micro` en esa línea) y aplicar con `nixos-rebuild switch` | base |
 | `dotfiles-actualizar` | `~/dotfiles/init.sh actualizar` | base |
-| `context-init` | `~/dotfiles/utils/context-init.sh` (crea `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/context-hub.mdc` y registra el proyecto en el MCP `context-hub` de la Mac Mini) | ia |
+| `context-init` | `~/dotfiles/utils/context-init.sh` (delega al CLI universal de `context-hub`: conecta/desconecta proyectos, lista contexto, vincula Notion) | ia |
+| `context-menu` | `~/dotfiles/utils/context-init.sh --menu` (menú interactivo TUI de `context-hub`) | ia |
 | `ll` | `ls -lha` | base |
 | `ip-public` | `curl -s ipinfo.io/ip` | base |
 | `tema-config` | Abre el tema activo (`tema/tema.conf`) | escritorio |
