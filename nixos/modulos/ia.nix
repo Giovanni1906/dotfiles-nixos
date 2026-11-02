@@ -72,7 +72,7 @@ url = "$mcp_url"
 EOF
       fi
 
-      if [ -f "$HOME/.claude.json" ] && ! grep -q '"context-hub"' "$HOME/.claude.json" 2>/dev/null; then
+      if ! grep -q '"context-hub"' "$HOME/.claude.json" 2>/dev/null; then
         ${pkgs.claude-code}/bin/claude mcp add --transport http --scope user context-hub "$mcp_url" >/dev/null 2>&1 || true
       fi
     fi
