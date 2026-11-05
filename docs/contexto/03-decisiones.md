@@ -226,3 +226,11 @@
 - **Consecuencias**:
   - Positivas: control granular por categorías; permite tener visibles solo avisos de IA y celular mientras el resto del sistema permanece en silencio; toggle rápido de reenvío de Valent sin abrir su interfaz gráfica.
   - Negativas: las notificaciones ocultas siguen su temporizador de 20 s en Mako y caducan si no se consultan desde el historial (`SUPER + F3`).
+
+## ADR-032: Módulo `desarrollo-apps.nix` para desarrollo multiplataforma (Flutter, móvil y escritorio)
+- **Fecha**: 2026-11-05
+- **Contexto**: El entorno contaba con herramientas generales en `desarrollo.nix` (Docker, Kubernetes, VS Code), pero Flutter estaba instalado de forma imperativa en `nix-env` y no existían SDKs, depuración móvil (ADB) ni toolchain estructurada para desarrollo de aplicaciones móviles y de escritorio en NixOS. Se requería un módulo centralizado activo tanto para la máquina de admisión (`pc-admision-jorge`) como para la de casa (`pc-asus`).
+- **Decisión**: Se creó `nixos/modulos/desarrollo-apps.nix`, importado en `pc-admision-jorge`, `pc-asus` y `plantilla`. Centraliza: (1) Flutter SDK y Dart; (2) Herramientas móviles Android (`android-tools` con `adb`, `android-studio` en entorno FHS, OpenJDK 17 y preconfiguración de `JAVA_HOME`, `ANDROID_HOME` y `ANDROID_SDK_ROOT`); (3) Toolchain de compilación de aplicaciones de escritorio Linux nativas (`clang`, `cmake`, `ninja`, `pkg-config`, `gtk3`, `glib`); (4) Chromium con `CHROME_EXECUTABLE` para la toolchain web de Flutter; (5) Aliases útiles para inspección y depuración inalámbrica (`adb-devices`, `adb-tcpip`, `flutter-doctor`). En NixOS 26.05 con systemd 258, el acceso a dispositivos USB Android no requiere grupos obsoletos como `adbusers` ni opciones removidas como `programs.adb`.
+- **Consecuencias**:
+  - Positivas: 100% declarativo y reproducible entre máquinas; Flutter y Android Studio quedan configurados con un solo rebuild; soporte simultáneo para probar en celulares físicos por cable/WiFi o como apps de escritorio Linux nativas.
+  - Negativas: La primera compilación o descarga de paquetes de Android Studio y Chromium requiere espacio adicional en disco en `/nix/store`.

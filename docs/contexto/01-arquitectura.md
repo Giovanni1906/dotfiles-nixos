@@ -27,6 +27,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente), AnyDesk (respaldo con espejo Web Archive) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
+| Desarrollo de Apps | Flutter, Dart, Android Studio, SDK/ADB (`android-tools`), OpenJDK 17, Chromium, toolchain Linux Desktop (Clang, CMake, Ninja, GTK3); módulo `desarrollo-apps.nix` |
 | IA | Antigravity CLI (`agy`), Claude Code (`claude`), Claude Desktop GUI, Cursor, Hermes Agent (`hermes`) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
@@ -43,6 +44,7 @@ dotfiles/
 │   │   ├── escritorio.nix       # Hyprland, hyprlock, portales, fuentes, apps gráficas, cursor e iconos
 │   │   ├── tema.nix             # GRUB, login greetd/nwg-hello y cursor, leídos del tema activo
 │   │   ├── desarrollo.nix       # Docker, Kubernetes local (Kind, Skaffold, dominios en /etc/hosts), virtualización, editores y clientes de BD/API
+│   │   ├── desarrollo-apps.nix  # Flutter, Dart, Android Studio, Android SDK/ADB, JDK 17 y toolchain de escritorio Linux
 │   │   ├── remoto.nix           # Tailscale, OpenSSH (solo por Tailscale), Valent, WayVNC, Remmina, tmux y sus puertos
 │   │   ├── ia.nix               # Agentes de IA (agy, claude, cursor, hermes), MCP context-hub y alias context-init
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
