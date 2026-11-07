@@ -27,7 +27,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente), AnyDesk (respaldo con espejo Web Archive) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
-| IA | Antigravity CLI (`agy`), Claude Code (`claude`), Cursor, Hermes Agent (`hermes`) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
+| IA | Antigravity CLI (`agy`), Claude Code (`claude`), Claude Desktop GUI, Cursor, Hermes Agent (`hermes`) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
 

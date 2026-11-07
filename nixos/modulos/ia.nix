@@ -11,8 +11,9 @@ let
   # ---     Versiones fijadas (flakes y Cursor)    ---
   # Agentes desde flakes oficiales, fijados a un commit (base.nix habilita "flakes").
   # Para actualizar: cambiar el commit (y la versión del comentario) por el de un tag nuevo.
-  hermes = builtins.getFlake "github:NousResearch/hermes-agent/f97608f178d1ffeca59860195ab7da295f7c8e5f";   # v2026.9.24
-  agy    = builtins.getFlake "github:nklmilojevic/antigravity-cli-nix/420b870443784434047aa9d0748c04bb7058963f";  # v2026.10.29
+  hermes        = builtins.getFlake "github:NousResearch/hermes-agent/f97608f178d1ffeca59860195ab7da295f7c8e5f";          # v2026.9.24
+  agy           = builtins.getFlake "github:nklmilojevic/antigravity-cli-nix/420b870443784434047aa9d0748c04bb7058963f";         # v2026.10.29
+  claudeDesktop = builtins.getFlake "github:k3d3/claude-desktop-linux-flake/b2b040cb68231d2118906507d9cc8fd181ca6308"; # v0.14.10
 
   # Cursor más nuevo que el del canal. Para actualizar: versión y URL de
   # https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable
@@ -40,8 +41,8 @@ in
     [ -f "$HOME/dotfiles/.env" ] && . "$HOME/dotfiles/.env"
     mcp_url="''${CONTEXT_HUB_URL:-}"
     if [ -n "$mcp_url" ] && [[ "$mcp_url" != *"ip_tailscale"* ]]; then
-      mkdir -p "$HOME/.gemini/config" "$HOME/.cursor" "$HOME/.codex"
-      for mcp_file in "$HOME/.gemini/config/mcp_config.json" "$HOME/.cursor/mcp.json"; do
+      mkdir -p "$HOME/.gemini/config" "$HOME/.cursor" "$HOME/.codex" "$HOME/.config/Claude"
+      for mcp_file in "$HOME/.gemini/config/mcp_config.json" "$HOME/.cursor/mcp.json" "$HOME/.config/Claude/claude_desktop_config.json"; do
         if [ ! -s "$mcp_file" ]; then
           cat > "$mcp_file" <<EOF
 {
@@ -104,9 +105,10 @@ EOF
   # ---              Agentes y editores            ---
   # --------------------------------------------------
   environment.systemPackages = [
-    agy.packages.${pkgs.stdenv.hostPlatform.system}.default      # Antigravity CLI: agy (login con cuenta Google)
-    pkgs.claude-code                                             # Claude Code para terminal: claude
-    cursor                                                       # Editor de código con IA (versión fijada arriba)
+    agy.packages.${pkgs.stdenv.hostPlatform.system}.default                              # Antigravity CLI: agy (login con cuenta Google)
+    pkgs.claude-code                                                                     # Claude Code para terminal: claude
+    claudeDesktop.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop-with-fhs   # Claude Desktop GUI con soporte FHS y MCP
+    cursor                                                                               # Editor de código con IA (versión fijada arriba)
     hermes.packages.${pkgs.stdenv.hostPlatform.system}.default   # Hermes Agent: hermes, hermes-agent, hermes-acp (config en ~/.hermes)
     pkgs.piper-tts                                               # Motor TTS neuronal de alta calidad y voz natural (utils/voz.sh)
     pkgs.espeak-ng                                               # Motor TTS de respaldo para notificaciones (utils/voz.sh)

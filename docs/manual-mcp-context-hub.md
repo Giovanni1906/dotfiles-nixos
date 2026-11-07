@@ -64,6 +64,7 @@ Cuando instalas un agente nuevo en tu PC, hay dos partes:
 | **Antigravity (`agy`)** | `~/.gemini/config/mcp_config.json` | Ya automático en `ia.nix` (usando `.env`) |
 | **Cursor** | `~/.cursor/mcp.json` | Ya automático en `ia.nix` (usando `.env`) |
 | **Claude Code (`claude`)** | `~/.claude.json` | `claude mcp add --transport http --scope user context-hub "$CONTEXT_HUB_URL"` (ya automático en `ia.nix`) |
+| **Claude Desktop** | `~/.config/Claude/claude_desktop_config.json` | Ya automático en `ia.nix` (usando `.env`) |
 | **Hermes (`hermes`)** | `~/.hermes/config.yaml` | `hermes mcp add --url "$CONTEXT_HUB_URL" context-hub` (ya automático en `ia.nix`) |
 | **Codex CLI (`codex`)** | `~/.codex/config.toml` | Bloque `[mcp_servers.context-hub]` con `url = "$CONTEXT_HUB_URL"` (ya automático en `ia.nix`) |
 
