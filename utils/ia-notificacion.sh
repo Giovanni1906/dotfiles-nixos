@@ -34,8 +34,33 @@ ultimo_voz=0
 hablar=1
 (( ahora - ultimo_voz < COOLDOWN_VOZ )) && hablar=0
 
-# Detectar nombre del proyecto desde git o carpeta actual
-DIRECTORIO="${PWD:-$(pwd)}"
+# Detectar nombre del proyecto desde contexto de IA (stdin) o directorio actual
+DIRECTORIO=""
+if [ ! -t 0 ]; then
+    input=$(timeout 0.3 cat 2>/dev/null || true)
+    if [ -n "$input" ]; then
+        if command -v node >/dev/null 2>&1; then
+            DIRECTORIO=$(node -e "
+            let d = '';
+            process.stdin.on('data', c => d += c);
+            process.stdin.on('end', () => {
+              try {
+                const j = JSON.parse(d);
+                const ws = (j.workspacePaths && j.workspacePaths[0]) || j.cwd || '';
+                if (ws) console.log(ws);
+              } catch(e){}
+            });
+            " <<< "$input" 2>/dev/null)
+        fi
+        # Respaldo rápido con grep si node no dio resultado
+        if [ -z "$DIRECTORIO" ]; then
+            DIRECTORIO=$(echo "$input" | grep -oP '"workspacePaths"\s*:\s*\[\s*"\K[^"]+' 2>/dev/null || true)
+            [ -z "$DIRECTORIO" ] && DIRECTORIO=$(echo "$input" | grep -oP '"cwd"\s*:\s*"\K[^"]+' 2>/dev/null || true)
+        fi
+    fi
+fi
+[ -z "$DIRECTORIO" ] && DIRECTORIO="${PWD:-$(pwd)}"
+
 if git -C "$DIRECTORIO" rev-parse --show-toplevel >/dev/null 2>&1; then
     PROYECTO=$(basename "$(git -C "$DIRECTORIO" rev-parse --show-toplevel)")
 else
