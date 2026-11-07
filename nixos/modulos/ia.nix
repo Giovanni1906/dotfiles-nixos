@@ -55,14 +55,28 @@ EOF
         fi
       done
 
-      if [ -d "$HOME/.hermes" ] && ! grep -q 'context-hub:' "$HOME/.hermes/config.yaml" 2>/dev/null; then
-        cat >> "$HOME/.hermes/config.yaml" <<EOF
+      if [ -d "$HOME/.hermes" ]; then
+        if ! grep -q 'context-hub:' "$HOME/.hermes/config.yaml" 2>/dev/null; then
+          cat >> "$HOME/.hermes/config.yaml" <<EOF
 
 mcp_servers:
   context-hub:
     url: $mcp_url
     enabled: true
 EOF
+        fi
+        if ! grep -q 'base_url:' "$HOME/.hermes/config.yaml" 2>/dev/null; then
+          mac_ip=$(echo "$mcp_url" | sed -E 's|https?://([^:/]+).*|\1|')
+          if [ -n "$mac_ip" ]; then
+            cat >> "$HOME/.hermes/config.yaml" <<EOF
+
+model:
+  provider: custom
+  base_url: http://$mac_ip:11434/v1
+  default: llama3.1:8b
+EOF
+          fi
+        fi
       fi
 
       if ! grep -q 'context-hub' "$HOME/.codex/config.toml" 2>/dev/null; then
