@@ -94,7 +94,8 @@ EOF
     pkgs.claude-code                                             # Claude Code para terminal: claude
     cursor                                                       # Editor de código con IA (versión fijada arriba)
     hermes.packages.${pkgs.stdenv.hostPlatform.system}.default   # Hermes Agent: hermes, hermes-agent, hermes-acp (config en ~/.hermes)
-    pkgs.espeak-ng                                               # Motor TTS para notificaciones de voz (utils/voz.sh)
+    pkgs.piper-tts                                               # Motor TTS neuronal de alta calidad y voz natural (utils/voz.sh)
+    pkgs.espeak-ng                                               # Motor TTS de respaldo para notificaciones (utils/voz.sh)
   ];
 
   # --------------------------------------------------

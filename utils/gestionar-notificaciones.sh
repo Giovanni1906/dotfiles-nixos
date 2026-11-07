@@ -11,6 +11,7 @@
 #
 # Estado persistente en: ~/.config/mako/notif-estado.state
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ESTADO="$HOME/.config/mako/notif-estado.state"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
 MARCA_INI="# FILTROS-NOTIF:INI"
@@ -139,6 +140,38 @@ EOF
 fi
 
 # ------------------------------------------------------------------
+# Selector de voz neuronal (Piper TTS)
+# ------------------------------------------------------------------
+elegir_voz() {
+    local piper_dir="${XDG_DATA_HOME:-$HOME/.local/share}/piper"
+    local config_voz="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/voz.conf"
+    mkdir -p "$(dirname "$config_voz")"
+
+    local opciones=(
+        "Claude (Latino neutro — Femenina natural)"
+        "Ald (Latino — Masculina)"
+        "Sharvard (España — Femenina natural)"
+        "Dave (España — Masculina)"
+        "Espeak (Robótica sintética)"
+    )
+
+    local sel
+    sel=$(printf '%s\n' "${opciones[@]}" \
+        | rofi -dmenu -i -p "Elegir voz" -format i \
+            -theme-str 'window { width: 500px; }' 2>/dev/null) || return 0
+
+    case "$sel" in
+        0) echo "modelo=$piper_dir/es_MX-claude-high.onnx" > "$config_voz" ;;
+        1) echo "modelo=$piper_dir/es_MX-ald-medium.onnx" > "$config_voz" ;;
+        2) echo "modelo=$piper_dir/es_ES-sharvard-medium.onnx" > "$config_voz" ;;
+        3) echo "modelo=$piper_dir/es_ES-davefx-medium.onnx" > "$config_voz" ;;
+        4) echo "modelo=" > "$config_voz" ;;
+    esac
+
+    "$SCRIPT_DIR/voz.sh" --silencio "Voz seleccionada correctamente" 2>/dev/null &
+}
+
+# ------------------------------------------------------------------
 # Menú Rofi interactivo (loop hasta Escape)
 # ------------------------------------------------------------------
 icono() { [ "$(get_val "$1")" = "1" ] && echo "✓" || echo "✗"; }
@@ -147,8 +180,10 @@ ITEMS=(
     ""                                           # 0: IA (texto dinámico, se rellena en el loop)
     ""                                           # 1: Sistema (ídem)
     "───────────────────────────────────"        # 2: separador
-    "  Mostrar todo"                             # 3
-    "  Ocultar todo"                             # 4
+    "  Cambiar voz TTS (Piper neuronal)"         # 3: selector de voz
+    "───────────────────────────────────"        # 4: separador
+    "  Mostrar todo"                             # 5
+    "  Ocultar todo"                             # 6
 )
 
 while true; do
@@ -163,8 +198,10 @@ while true; do
         0) toggle_val ia;      aplicar_todo ;;
         1) toggle_val sistema; aplicar_todo ;;
         2) continue ;;  # separador
-        3) set_val ia 1; set_val sistema 1; aplicar_todo ;;
-        4) set_val ia 0; set_val sistema 0; aplicar_todo ;;
+        3) elegir_voz ;;
+        4) continue ;;  # separador
+        5) set_val ia 1; set_val sistema 1; aplicar_todo ;;
+        6) set_val ia 0; set_val sistema 0; aplicar_todo ;;
         *) break ;;
     esac
 done

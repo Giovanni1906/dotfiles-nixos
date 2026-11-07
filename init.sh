@@ -220,11 +220,11 @@ EOF
         aviso "No se pudo aplicar el tema (utils/aplicar-tema.sh)"
     fi
 
-    # Hooks de Claude Code: notificación de IA al terminar cada tarea
+    # Hooks de agentes IA: notificación al terminar cada tarea
     if "$DOTFILES/utils/configurar-ia-hooks.sh" > /dev/null 2>&1; then
-        ok "Hook de notificaciones de IA registrado en Claude Code"
+        ok "Hooks de notificaciones de IA registrados (Claude Code y Antigravity)"
     else
-        aviso "No se pudo registrar el hook de Claude Code (python3 requerido)"
+        aviso "No se pudieron registrar los hooks de IA (Node.js o Python 3 requerido)"
     fi
 
     sincronizar_context_hub
