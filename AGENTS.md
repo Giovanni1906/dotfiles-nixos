@@ -18,7 +18,8 @@ Si el servidor MCP `context-hub` no está accesible temporalmente, aplica estas 
 
 ### 2. Tablero kanban del proyecto (Notion)
 - Tablero **nixos**: https://app.notion.com/p/nixos-3f0bf08bb2f880849364ea3f4cb40c2d
-- Data source (para el MCP de Notion): `collection://3f0bf08b-b2f8-807b-8142-000b0ca5a3e8`
+- Data source (para el MCP de Notion): `https://app.notion.com/p/3f0bf08bb2f880cd8f04c38434201c2e?v=3f0bf08bb2f880c0b8e5000cc0b8ba75`
+- Database ID: `3f0bf08b-b2f8-80cd-8f04-c38434201c2e`
 - Estados: `Not started` → `In progress` → `In revision` → `Done` (nunca pasar a `Done`, lo hace el usuario).
 - Contenido de tarjeta: **Diagnóstico**, **Pasos** (to-dos) y **Verificación**.
 - Commits por función en español (`feat:`, `fix:`, `docs:`, `refactor:`; ver `docs/contexto/02-convenciones.md`).
