@@ -172,7 +172,7 @@ paso_usuario() {
     titulo "Usuario: config/, tema y archivos locales"
     mkdir -p "$HOME/.config" "$HOME/Imágenes/CapturasPantalla"
 
-    for app in hypr waybar kitty rofi mako fastfetch gtk-3.0 gtk-4.0; do
+    for app in hypr waybar kitty rofi mako fastfetch gtk-3.0 gtk-4.0 lazydocker; do
         enlazar "$DOTFILES/config/$app" "$HOME/.config/$app"
     done
     enlazar "$DOTFILES/config/gtkrc-2.0" "$HOME/.gtkrc-2.0"

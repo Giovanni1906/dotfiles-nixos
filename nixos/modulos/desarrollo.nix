@@ -95,6 +95,7 @@ in
     skaffold                    # Construye y despliega en el clúster mientras se edita
     gnumake                     # make para los Makefile de los proyectos
     nodejs                      # Node.js con npm y npx para ejecutar programas o paquetes
+    lazydocker                  # Interfaz TUI para Docker y Docker Compose
   ];
 
   environment.shellAliases = {
@@ -102,6 +103,7 @@ in
     d  = "docker";
     dc-up = "docker compose up -d";
     dc-down = "docker compose down";
+    lzd = "lazydocker";
     reset-trial-navicat = "~/dotfiles/utils/reset-trial-navicat.sh";
   };
 }

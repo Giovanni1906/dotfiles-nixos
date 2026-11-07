@@ -1,0 +1,22 @@
+gui:
+  scrollHeight: 2
+  theme:
+    activeBorderColor:
+      - green
+      - bold
+    selectedLineBgColor:
+      - blue
+    optionsTextColor:
+      - blue
+
+customCommands:
+  containers:
+    - name: "Compose: Stop proyecto completo (docker compose stop)"
+      command: "/home/nova/dotfiles/utils/docker-compose-action.sh stop {{ .Container.ID }}"
+      attach: false
+    - name: "Compose: Down proyecto completo (docker compose down)"
+      command: "/home/nova/dotfiles/utils/docker-compose-action.sh down {{ .Container.ID }}"
+      attach: false
+    - name: "Compose: Restart proyecto completo (docker compose restart)"
+      command: "/home/nova/dotfiles/utils/docker-compose-action.sh restart {{ .Container.ID }}"
+      attach: false
