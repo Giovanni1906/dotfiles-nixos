@@ -4,22 +4,35 @@
 #
 # Usado por:
 #   - hook Stop de Claude Code (~/.claude/settings.json)
+#   - hook Stop de Antigravity (~/.gemini/config/hooks.json)
 #   - alias de agy / hermes (nixos/modulos/ia.nix)
 #
-# El sonido siempre suena; la voz respeta un cooldown para no saturar
-# en conversaciones largas. Ambos se saltan si no hay sesión de audio.
+# El sonido suena con un debounce mínimo de 3s para evitar disparos dobles (hook + alias).
+# La voz respeta un cooldown de 20s para no saturar en conversaciones largas.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COOLDOWN_VOZ=20
-TS_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/ia-notificacion-ts"
+DEBOUNCE_TOTAL=3
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+TS_TOTAL="$CACHE_DIR/ia-notificacion-total-ts"
+TS_VOZ="$CACHE_DIR/ia-notificacion-voz-ts"
 
-# Cooldown para la voz (el sonido siempre suena)
 ahora=$(date +%s)
-hablar=1
-if [ -f "$TS_FILE" ]; then
-    ultimo=$(cat "$TS_FILE" 2>/dev/null || echo 0)
-    (( ahora - ultimo < COOLDOWN_VOZ )) && hablar=0
+
+# Debounce total: evita doble notificación si el hook y el alias terminan a la vez (<3s)
+ultimo_total=0
+[ -f "$TS_TOTAL" ] && ultimo_total=$(cat "$TS_TOTAL" 2>/dev/null || echo 0)
+if (( ahora - ultimo_total < DEBOUNCE_TOTAL )); then
+    exit 0
 fi
+mkdir -p "$CACHE_DIR"
+echo "$ahora" > "$TS_TOTAL"
+
+# Cooldown para la voz (no repetir en menos de 20s)
+ultimo_voz=0
+[ -f "$TS_VOZ" ] && ultimo_voz=$(cat "$TS_VOZ" 2>/dev/null || echo 0)
+hablar=1
+(( ahora - ultimo_voz < COOLDOWN_VOZ )) && hablar=0
 
 # Detectar nombre del proyecto desde git o carpeta actual
 DIRECTORIO="${PWD:-$(pwd)}"
@@ -28,19 +41,19 @@ if git -C "$DIRECTORIO" rev-parse --show-toplevel >/dev/null 2>&1; then
 else
     PROYECTO=$(basename "$DIRECTORIO")
 fi
-# Limpiar separadores para pronunciación natural
-PROYECTO_VOZ=$(echo "$PROYECTO" | tr '-_' '  ')
+# Limpiar separadores para pronunciación natural en bash puro
+PROYECTO_VOZ="${PROYECTO//[-_]/ }"
 
 # Notificación visual (app-name=ia para filtros de Mako)
 notify-send -a ia -t 7000 -i utilities-terminal \
     "IA — $PROYECTO" "Tarea terminada" 2>/dev/null &
 
-# Sonido siempre
+# Sonido
 "$SCRIPT_DIR/voz.sh" --sonido
 
 # Voz si fuera del cooldown
 if [ "$hablar" = "1" ]; then
-    echo "$ahora" > "$TS_FILE"
+    echo "$ahora" > "$TS_VOZ"
     sleep 0.4
     "$SCRIPT_DIR/voz.sh" --silencio "Tarea terminada en $PROYECTO_VOZ"
 fi

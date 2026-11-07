@@ -13,6 +13,7 @@ config/waybar/tema.css
 config/kitty/tema.conf
 config/rofi/tema.rasi
 config/mako/config
+config/mako/*.state
 config/gtk-4.0/gtk.css
 config/gtk-3.0/settings.ini
 config/gtk-4.0/settings.ini

@@ -91,6 +91,7 @@
       poppler-utils             # Utilidades para pdf (pdfunite, pdfseparate, pdftotext, pdfimages, etc)
       bitwarden-cli             # CLI de Bitwarden
       unzip                     # Descomprimir archivos zip
+      python3                   # Intérprete Python para scripts y utilidades del sistema
     ];
 
     # --------------------------------------------------
