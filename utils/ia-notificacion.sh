@@ -10,6 +10,20 @@
 # El sonido suena con un debounce mínimo de 3s para evitar disparos dobles (hook + alias).
 # La voz respeta un cooldown de 20s para no saturar en conversaciones largas.
 
+# Argumentos: --agente "Nombre" (ej. Claude, Antigravity, Cursor)
+AGENTE=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --agente|-a)
+            AGENTE="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COOLDOWN_VOZ=20
 DEBOUNCE_TOTAL=3
@@ -61,9 +75,30 @@ if [ ! -t 0 ]; then
             [ -z "$DIRECTORIO" ] && DIRECTORIO=$(echo "$input" | grep -oP '"workspace_roots"\s*:\s*\[\s*"\K[^"]+' 2>/dev/null || true)
             [ -z "$DIRECTORIO" ] && DIRECTORIO=$(echo "$input" | grep -oP '"cwd"\s*:\s*"\K[^"]+' 2>/dev/null || true)
         fi
+
+        # Auto-detección del agente por el payload si no vino por parámetro
+        if [ -z "$AGENTE" ]; then
+            if echo "$input" | grep -q '"hook_event_name"'; then
+                AGENTE="Cursor"
+            elif echo "$input" | grep -q '"transcriptPath"'; then
+                AGENTE="Antigravity"
+            elif echo "$input" | grep -q '"session_id"'; then
+                AGENTE="Claude"
+            fi
+        fi
     fi
 fi
 [ -z "$DIRECTORIO" ] && DIRECTORIO="${PWD:-$(pwd)}"
+
+if [ -z "$AGENTE" ]; then
+    parent_comm=$(ps -p $PPID -o comm= 2>/dev/null || true)
+    case "$parent_comm" in
+        *claude*) AGENTE="Claude" ;;
+        *agy*)    AGENTE="Antigravity" ;;
+        *cursor*) AGENTE="Cursor" ;;
+        *hermes*) AGENTE="Hermes" ;;
+    esac
+fi
 
 if git -C "$DIRECTORIO" rev-parse --show-toplevel >/dev/null 2>&1; then
     PROYECTO=$(basename "$(git -C "$DIRECTORIO" rev-parse --show-toplevel)")
@@ -73,9 +108,19 @@ fi
 # Limpiar separadores para pronunciación natural en bash puro
 PROYECTO_VOZ="${PROYECTO//[-_]/ }"
 
+if [ -n "$AGENTE" ]; then
+    TITULO_NOTIF="IA ($AGENTE) — $PROYECTO"
+    TEXTO_NOTIF="Tarea terminada desde $AGENTE"
+    TEXTO_VOZ="Tarea terminada en $PROYECTO_VOZ desde $AGENTE"
+else
+    TITULO_NOTIF="IA — $PROYECTO"
+    TEXTO_NOTIF="Tarea terminada"
+    TEXTO_VOZ="Tarea terminada en $PROYECTO_VOZ"
+fi
+
 # Notificación visual (app-name=ia para filtros de Mako)
 notify-send -a ia -t 7000 -i utilities-terminal \
-    "IA — $PROYECTO" "Tarea terminada" 2>/dev/null &
+    "$TITULO_NOTIF" "$TEXTO_NOTIF" 2>/dev/null &
 
 # Sonido
 "$SCRIPT_DIR/voz.sh" --sonido
@@ -84,7 +129,7 @@ notify-send -a ia -t 7000 -i utilities-terminal \
 if [ "$hablar" = "1" ]; then
     echo "$ahora" > "$TS_VOZ"
     sleep 0.4
-    "$SCRIPT_DIR/voz.sh" --silencio "Tarea terminada en $PROYECTO_VOZ"
+    "$SCRIPT_DIR/voz.sh" --silencio "$TEXTO_VOZ"
 fi
 
 wait

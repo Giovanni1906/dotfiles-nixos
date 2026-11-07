@@ -7,14 +7,14 @@
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 AGY_HOOKS="$HOME/.gemini/config/hooks.json"
 CURSOR_HOOKS="$HOME/.cursor/hooks.json"
-HOOK_CMD="~/dotfiles/utils/ia-notificacion.sh"
+HOOK_BASE="~/dotfiles/utils/ia-notificacion.sh"
 
 mkdir -p "$(dirname "$CLAUDE_SETTINGS")" "$(dirname "$AGY_HOOKS")" "$(dirname "$CURSOR_HOOKS")"
 
 _configurar_con_node() {
-    node - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_CMD" <<'JSEOF'
+    node - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_BASE" <<'JSEOF'
 const fs = require('fs');
-const [claudeFile, agyFile, cursorFile, hookCmd] = process.argv.slice(2);
+const [claudeFile, agyFile, cursorFile, hookBase] = process.argv.slice(2);
 
 // 1. Claude Code
 try {
@@ -26,19 +26,28 @@ try {
   }
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.Stop) settings.hooks.Stop = [];
+  const claudeCmd = `${hookBase} --agente Claude`;
 
-  const alreadyClaude = settings.hooks.Stop.some(entry =>
-    (entry.hooks || []).some(h => (h.command || '').includes('ia-notificacion.sh'))
-  );
+  let updated = false;
+  settings.hooks.Stop = settings.hooks.Stop.map(entry => {
+    const hooks = (entry.hooks || []).map(h => {
+      if ((h.command || '').includes('ia-notificacion.sh')) {
+        updated = true;
+        return { ...h, command: claudeCmd };
+      }
+      return h;
+    });
+    return { ...entry, hooks };
+  });
 
-  if (!alreadyClaude) {
+  if (!updated) {
     settings.hooks.Stop.push({
       matcher: '',
-      hooks: [{ type: 'command', command: hookCmd }]
+      hooks: [{ type: 'command', command: claudeCmd }]
     });
-    fs.writeFileSync(claudeFile, JSON.stringify(settings, null, 2) + '\n');
-    console.log(`Hook Stop configurado en Claude Code: ${claudeFile}`);
   }
+  fs.writeFileSync(claudeFile, JSON.stringify(settings, null, 2) + '\n');
+  console.log(`Hook Stop configurado en Claude Code: ${claudeFile}`);
 } catch (err) {
   console.error(`Error al configurar Claude Code: ${err.message}`);
 }
@@ -53,19 +62,25 @@ try {
   }
   if (!hooks['ia-notificacion']) hooks['ia-notificacion'] = {};
   if (!hooks['ia-notificacion'].Stop) hooks['ia-notificacion'].Stop = [];
+  const agyCmd = `${hookBase} --agente Antigravity`;
 
-  const alreadyAgy = hooks['ia-notificacion'].Stop.some(h =>
-    (h.command || '').includes('ia-notificacion.sh')
-  );
+  let updated = false;
+  hooks['ia-notificacion'].Stop = hooks['ia-notificacion'].Stop.map(h => {
+    if ((h.command || '').includes('ia-notificacion.sh')) {
+      updated = true;
+      return { ...h, command: agyCmd };
+    }
+    return h;
+  });
 
-  if (!alreadyAgy) {
+  if (!updated) {
     hooks['ia-notificacion'].Stop.push({
       type: 'command',
-      command: hookCmd
+      command: agyCmd
     });
-    fs.writeFileSync(agyFile, JSON.stringify(hooks, null, 2) + '\n');
-    console.log(`Hook Stop configurado en Antigravity: ${agyFile}`);
   }
+  fs.writeFileSync(agyFile, JSON.stringify(hooks, null, 2) + '\n');
+  console.log(`Hook Stop configurado en Antigravity: ${agyFile}`);
 } catch (err) {
   console.error(`Error al configurar Antigravity: ${err.message}`);
 }
@@ -80,16 +95,22 @@ try {
   }
   if (!cursorHooks.hooks) cursorHooks.hooks = {};
   if (!cursorHooks.hooks.stop) cursorHooks.hooks.stop = [];
+  const cursorCmd = `${hookBase} --agente Cursor`;
 
-  const alreadyCursor = cursorHooks.hooks.stop.some(h =>
-    (h.command || '').includes('ia-notificacion.sh')
-  );
+  let updated = false;
+  cursorHooks.hooks.stop = cursorHooks.hooks.stop.map(h => {
+    if ((h.command || '').includes('ia-notificacion.sh')) {
+      updated = true;
+      return { ...h, command: cursorCmd };
+    }
+    return h;
+  });
 
-  if (!alreadyCursor) {
-    cursorHooks.hooks.stop.push({ command: hookCmd });
-    fs.writeFileSync(cursorFile, JSON.stringify(cursorHooks, null, 2) + '\n');
-    console.log(`Hook Stop configurado en Cursor: ${cursorFile}`);
+  if (!updated) {
+    cursorHooks.hooks.stop.push({ command: cursorCmd });
   }
+  fs.writeFileSync(cursorFile, JSON.stringify(cursorHooks, null, 2) + '\n');
+  console.log(`Hook Stop configurado en Cursor: ${cursorFile}`);
 } catch (err) {
   console.error(`Error al configurar Cursor: ${err.message}`);
 }
@@ -97,10 +118,10 @@ JSEOF
 }
 
 _configurar_con_python() {
-    python3 - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_CMD" <<'PYEOF'
+    python3 - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_BASE" <<'PYEOF'
 import json, sys, os
 
-claude_file, agy_file, cursor_file, hook_cmd = sys.argv[1:5]
+claude_file, agy_file, cursor_file, hook_base = sys.argv[1:5]
 
 # 1. Claude Code
 try:
@@ -111,20 +132,22 @@ try:
         settings = {}
 
     stop_hooks = settings.setdefault("hooks", {}).setdefault("Stop", [])
-    already_claude = any(
-        "ia-notificacion.sh" in h.get("command", "")
-        for entry in stop_hooks
-        for h in entry.get("hooks", [])
-    )
-    if not already_claude:
+    claude_cmd = f"{hook_base} --agente Claude"
+    updated = False
+    for entry in stop_hooks:
+        for h in entry.get("hooks", []):
+            if "ia-notificacion.sh" in h.get("command", ""):
+                h["command"] = claude_cmd
+                updated = True
+    if not updated:
         stop_hooks.append({
             "matcher": "",
-            "hooks": [{"type": "command", "command": hook_cmd}]
+            "hooks": [{"type": "command", "command": claude_cmd}]
         })
-        with open(claude_file, "w") as f:
-            json.dump(settings, f, indent=2)
-            f.write("\n")
-        print(f"Hook Stop configurado en Claude Code: {claude_file}")
+    with open(claude_file, "w") as f:
+        json.dump(settings, f, indent=2)
+        f.write("\n")
+    print(f"Hook Stop configurado en Claude Code: {claude_file}")
 except Exception as e:
     print(f"Error al configurar Claude Code: {e}", file=sys.stderr)
 
@@ -137,13 +160,18 @@ try:
         hooks = {}
 
     stop_list = hooks.setdefault("ia-notificacion", {}).setdefault("Stop", [])
-    already_agy = any("ia-notificacion.sh" in h.get("command", "") for h in stop_list)
-    if not already_agy:
-        stop_list.append({"type": "command", "command": hook_cmd})
-        with open(agy_file, "w") as f:
-            json.dump(hooks, f, indent=2)
-            f.write("\n")
-        print(f"Hook Stop configurado en Antigravity: {agy_file}")
+    agy_cmd = f"{hook_base} --agente Antigravity"
+    updated = False
+    for h in stop_list:
+        if "ia-notificacion.sh" in h.get("command", ""):
+            h["command"] = agy_cmd
+            updated = True
+    if not updated:
+        stop_list.append({"type": "command", "command": agy_cmd})
+    with open(agy_file, "w") as f:
+        json.dump(hooks, f, indent=2)
+        f.write("\n")
+    print(f"Hook Stop configurado en Antigravity: {agy_file}")
 except Exception as e:
     print(f"Error al configurar Antigravity: {e}", file=sys.stderr)
 
@@ -156,13 +184,18 @@ try:
         cursor_hooks = {"version": 1, "hooks": {}}
 
     stop_cursor = cursor_hooks.setdefault("hooks", {}).setdefault("stop", [])
-    already_cursor = any("ia-notificacion.sh" in h.get("command", "") for h in stop_cursor)
-    if not already_cursor:
-        stop_cursor.append({"command": hook_cmd})
-        with open(cursor_file, "w") as f:
-            json.dump(cursor_hooks, f, indent=2)
-            f.write("\n")
-        print(f"Hook Stop configurado en Cursor: {cursor_file}")
+    cursor_cmd = f"{hook_base} --agente Cursor"
+    updated = False
+    for h in stop_cursor:
+        if "ia-notificacion.sh" in h.get("command", ""):
+            h["command"] = cursor_cmd
+            updated = True
+    if not updated:
+        stop_cursor.append({"command": cursor_cmd})
+    with open(cursor_file, "w") as f:
+        json.dump(cursor_hooks, f, indent=2)
+        f.write("\n")
+    print(f"Hook Stop configurado en Cursor: {cursor_file}")
 except Exception as e:
     print(f"Error al configurar Cursor: {e}", file=sys.stderr)
 PYEOF

@@ -103,7 +103,7 @@ EOF
   # --------------------------------------------------
   environment.shellAliases = {
     # Antigravity CLI sin pedir confirmaciones de permisos; notifica al salir de la sesión
-    agy = "agy --dangerously-skip-permissions; ~/dotfiles/utils/ia-notificacion.sh";
+    agy = "agy --dangerously-skip-permissions; ~/dotfiles/utils/ia-notificacion.sh --agente Antigravity";
     # Conecta el proyecto de la carpeta actual al MCP context-hub de la Mac Mini
     context-init = "~/dotfiles/utils/context-init.sh";
     # Menú interactivo TUI de context-hub (proyectos, Notion, secrets, MDD)
