@@ -46,7 +46,10 @@ if [ ! -t 0 ]; then
             process.stdin.on('end', () => {
               try {
                 const j = JSON.parse(d);
-                const ws = (j.workspacePaths && j.workspacePaths[0]) || j.cwd || '';
+                const ws = (j.workspacePaths && j.workspacePaths[0])
+                        || (j.workspace_roots && j.workspace_roots[0])
+                        || j.cwd
+                        || '';
                 if (ws) console.log(ws);
               } catch(e){}
             });
@@ -55,6 +58,7 @@ if [ ! -t 0 ]; then
         # Respaldo rápido con grep si node no dio resultado
         if [ -z "$DIRECTORIO" ]; then
             DIRECTORIO=$(echo "$input" | grep -oP '"workspacePaths"\s*:\s*\[\s*"\K[^"]+' 2>/dev/null || true)
+            [ -z "$DIRECTORIO" ] && DIRECTORIO=$(echo "$input" | grep -oP '"workspace_roots"\s*:\s*\[\s*"\K[^"]+' 2>/dev/null || true)
             [ -z "$DIRECTORIO" ] && DIRECTORIO=$(echo "$input" | grep -oP '"cwd"\s*:\s*"\K[^"]+' 2>/dev/null || true)
         fi
     fi

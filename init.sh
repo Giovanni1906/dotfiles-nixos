@@ -222,7 +222,7 @@ EOF
 
     # Hooks de agentes IA: notificación al terminar cada tarea
     if "$DOTFILES/utils/configurar-ia-hooks.sh" > /dev/null 2>&1; then
-        ok "Hooks de notificaciones de IA registrados (Claude Code y Antigravity)"
+        ok "Hooks de notificaciones de IA registrados (Claude Code, Antigravity y Cursor)"
     else
         aviso "No se pudieron registrar los hooks de IA (Node.js o Python 3 requerido)"
     fi

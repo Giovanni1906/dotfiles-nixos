@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
-# Configura los hooks Stop de agentes de IA (Claude Code y Antigravity).
+# Configura los hooks Stop de agentes de IA (Claude Code, Antigravity y Cursor).
 # Idempotente: no duplica si los hooks ya están registrados.
 # Compatible con Node.js y Python 3.
 # Llamado por: nixos/modulos/ia.nix (userActivationScripts) e init.sh (paso_usuario).
 
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 AGY_HOOKS="$HOME/.gemini/config/hooks.json"
+CURSOR_HOOKS="$HOME/.cursor/hooks.json"
 HOOK_CMD="~/dotfiles/utils/ia-notificacion.sh"
 
-mkdir -p "$(dirname "$CLAUDE_SETTINGS")" "$(dirname "$AGY_HOOKS")"
+mkdir -p "$(dirname "$CLAUDE_SETTINGS")" "$(dirname "$AGY_HOOKS")" "$(dirname "$CURSOR_HOOKS")"
 
 _configurar_con_node() {
-    node - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$HOOK_CMD" <<'JSEOF'
+    node - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_CMD" <<'JSEOF'
 const fs = require('fs');
-const [claudeFile, agyFile, hookCmd] = process.argv.slice(2);
+const [claudeFile, agyFile, cursorFile, hookCmd] = process.argv.slice(2);
 
 // 1. Claude Code
 try {
@@ -68,14 +69,38 @@ try {
 } catch (err) {
   console.error(`Error al configurar Antigravity: ${err.message}`);
 }
+
+// 3. Cursor Agent
+try {
+  let cursorHooks = {};
+  try {
+    cursorHooks = JSON.parse(fs.readFileSync(cursorFile, 'utf8'));
+  } catch (e) {
+    cursorHooks = { version: 1, hooks: {} };
+  }
+  if (!cursorHooks.hooks) cursorHooks.hooks = {};
+  if (!cursorHooks.hooks.stop) cursorHooks.hooks.stop = [];
+
+  const alreadyCursor = cursorHooks.hooks.stop.some(h =>
+    (h.command || '').includes('ia-notificacion.sh')
+  );
+
+  if (!alreadyCursor) {
+    cursorHooks.hooks.stop.push({ command: hookCmd });
+    fs.writeFileSync(cursorFile, JSON.stringify(cursorHooks, null, 2) + '\n');
+    console.log(`Hook Stop configurado en Cursor: ${cursorFile}`);
+  }
+} catch (err) {
+  console.error(`Error al configurar Cursor: ${err.message}`);
+}
 JSEOF
 }
 
 _configurar_con_python() {
-    python3 - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$HOOK_CMD" <<'PYEOF'
+    python3 - "$CLAUDE_SETTINGS" "$AGY_HOOKS" "$CURSOR_HOOKS" "$HOOK_CMD" <<'PYEOF'
 import json, sys, os
 
-claude_file, agy_file, hook_cmd = sys.argv[1:4]
+claude_file, agy_file, cursor_file, hook_cmd = sys.argv[1:5]
 
 # 1. Claude Code
 try:
@@ -121,6 +146,25 @@ try:
         print(f"Hook Stop configurado en Antigravity: {agy_file}")
 except Exception as e:
     print(f"Error al configurar Antigravity: {e}", file=sys.stderr)
+
+# 3. Cursor Agent
+try:
+    try:
+        with open(cursor_file) as f:
+            cursor_hooks = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        cursor_hooks = {"version": 1, "hooks": {}}
+
+    stop_cursor = cursor_hooks.setdefault("hooks", {}).setdefault("stop", [])
+    already_cursor = any("ia-notificacion.sh" in h.get("command", "") for h in stop_cursor)
+    if not already_cursor:
+        stop_cursor.append({"command": hook_cmd})
+        with open(cursor_file, "w") as f:
+            json.dump(cursor_hooks, f, indent=2)
+            f.write("\n")
+        print(f"Hook Stop configurado en Cursor: {cursor_file}")
+except Exception as e:
+    print(f"Error al configurar Cursor: {e}", file=sys.stderr)
 PYEOF
 }
 
