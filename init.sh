@@ -226,7 +226,9 @@ EOF
 # Clona o actualiza el repositorio de context-hub y ejecuta su instalador de cliente
 sincronizar_context_hub() {
     local ch_dir="$HOME/Proyectos/personal/context-hub"
-    if [ ! -d "$ch_dir/.git" ] && [ -d "$HOME/.local/share/context-hub/.git" ]; then
+    if [ ! -d "$ch_dir/.git" ] && [ -d "$HOME/Proyectos/context-hub/.git" ]; then
+        ch_dir="$HOME/Proyectos/context-hub"
+    elif [ ! -d "$ch_dir/.git" ] && [ -d "$HOME/.local/share/context-hub/.git" ]; then
         ch_dir="$HOME/.local/share/context-hub"
     fi
 

@@ -15,6 +15,7 @@ set -euo pipefail
 # 0. Si el CLI universal context-hub está disponible, delegar en él directamente
 for candidate in \
     "$HOME/.local/bin/context-init" \
+    "$HOME/Proyectos/context-hub/context-menu.sh" \
     "$HOME/Proyectos/personal/context-hub/context-menu.sh" \
     "$HOME/.local/share/context-hub/context-menu.sh"; do
     if [ -f "$candidate" ] && [ -x "$candidate" ] && [ "$(realpath "$candidate" 2>/dev/null || true)" != "$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || true)" ]; then

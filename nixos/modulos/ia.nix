@@ -96,7 +96,7 @@ EOF
     agy = "agy --dangerously-skip-permissions";
     # Conecta el proyecto de la carpeta actual al MCP context-hub de la Mac Mini
     context-init = "~/dotfiles/utils/context-init.sh";
-    # Menú interactivo TUI de context-hub
+    # Menú interactivo TUI de context-hub (proyectos, Notion, secrets, MDD)
     context-menu = "~/dotfiles/utils/context-init.sh --menu";
   };
 }
