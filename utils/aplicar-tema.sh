@@ -246,6 +246,8 @@ invisible=1
 [mode=ocultas app-name=Notificaciones]
 invisible=0
 EOF
+# Reaplicar filtros dinámicos de categorías (IA, Sistema) tras regenerar config de Mako
+"$DOTFILES/utils/gestionar-notificaciones.sh" --solo-reglas 2>/dev/null || true
 
 # --- FASTFETCH ---
 # config.jsonc usa este enlace; fastfetch cachea el logo por su ruta real, así que ve el cambio al momento

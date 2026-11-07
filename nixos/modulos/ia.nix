@@ -86,14 +86,15 @@ EOF
     pkgs.claude-code                                             # Claude Code para terminal: claude
     cursor                                                       # Editor de código con IA (versión fijada arriba)
     hermes.packages.${pkgs.stdenv.hostPlatform.system}.default   # Hermes Agent: hermes, hermes-agent, hermes-acp (config en ~/.hermes)
+    pkgs.espeak-ng                                               # Motor TTS para notificaciones de voz (utils/voz.sh)
   ];
 
   # --------------------------------------------------
   # ---                   Alias                    ---
   # --------------------------------------------------
   environment.shellAliases = {
-    # Antigravity CLI sin pedir confirmaciones de permisos
-    agy = "agy --dangerously-skip-permissions";
+    # Antigravity CLI sin pedir confirmaciones de permisos; notifica al salir de la sesión
+    agy = "agy --dangerously-skip-permissions; ~/dotfiles/utils/ia-notificacion.sh";
     # Conecta el proyecto de la carpeta actual al MCP context-hub de la Mac Mini
     context-init = "~/dotfiles/utils/context-init.sh";
     # Menú interactivo TUI de context-hub (proyectos, Notion, secrets, MDD)
