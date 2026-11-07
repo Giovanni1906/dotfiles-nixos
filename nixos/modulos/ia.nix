@@ -78,6 +78,14 @@ EOF
     fi
   '';
 
+  # Registra el hook Stop de Claude Code para notificaciones de IA.
+  # Se ejecuta en cada 'nixos-rebuild switch' (idempotente).
+  system.userActivationScripts.ia-hooks.text = ''
+    if [ -f "$HOME/dotfiles/utils/configurar-ia-hooks.sh" ]; then
+      bash "$HOME/dotfiles/utils/configurar-ia-hooks.sh" >/dev/null 2>&1 || true
+    fi
+  '';
+
   # --------------------------------------------------
   # ---              Agentes y editores            ---
   # --------------------------------------------------
