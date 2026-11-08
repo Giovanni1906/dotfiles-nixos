@@ -25,6 +25,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$HOME/dotfiles/.env" ] && source "$HOME/dotfiles/.env"
 COOLDOWN_VOZ=20
 DEBOUNCE_TOTAL=3
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
@@ -121,6 +122,17 @@ fi
 # Notificación visual (app-name=ia para filtros de Mako)
 notify-send -a ia -t 7000 -i utilities-terminal \
     "$TITULO_NOTIF" "$TEXTO_NOTIF" 2>/dev/null &
+
+# Notificación a móvil vía ntfy (si está configurado NTFY_TOPIC en .env)
+if [ -n "${NTFY_TOPIC:-}" ]; then
+    NTFY_SERVER="${NTFY_URL:-https://ntfy.sh}"
+    curl -s \
+        -H "Title: $TITULO_NOTIF" \
+        -H "Priority: high" \
+        -H "Tags: robot,loudspeaker" \
+        -d "$TEXTO_VOZ" \
+        "$NTFY_SERVER/$NTFY_TOPIC" >/dev/null 2>&1 &
+fi
 
 # Sonido
 "$SCRIPT_DIR/voz.sh" --sonido

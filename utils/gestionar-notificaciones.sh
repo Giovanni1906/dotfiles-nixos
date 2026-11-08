@@ -7,11 +7,13 @@
 #
 # Categorías:
 #   ia       → notificaciones de Claude Code, Agy, Cursor y Hermes (app-name=ia)
+#   celular  → notificaciones recibidas del móvil por Valent (app-name=Valent)
 #   sistema  → todas las demás apps (usa mode=ocultas internamente)
 #
 # Estado persistente en: ~/.config/mako/notif-estado.state
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$HOME/dotfiles/.env" ] && source "$HOME/dotfiles/.env"
 ESTADO="$HOME/.config/mako/notif-estado.state"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
 MARCA_INI="# FILTROS-NOTIF:INI"
@@ -22,7 +24,8 @@ MARCA_FIN="# FILTROS-NOTIF:FIN"
 # ------------------------------------------------------------------
 init_estado() {
     mkdir -p "$(dirname "$ESTADO")"
-    [ -f "$ESTADO" ] || printf 'ia=1\nsistema=1\n' > "$ESTADO"
+    [ -f "$ESTADO" ] || printf 'ia=1\ncelular=1\nsistema=1\n' > "$ESTADO"
+    grep -q "^celular=" "$ESTADO" || echo "celular=1" >> "$ESTADO"
 }
 
 get_val() {
@@ -45,6 +48,41 @@ toggle_val() {
 }
 
 # ------------------------------------------------------------------
+# Helpers para reenvío de PC hacia celular con Valent
+# ------------------------------------------------------------------
+_obtener_schema_valent() {
+    local bin prefix root
+    bin=$(which valent 2>/dev/null || true)
+    [ -n "$bin" ] || return 1
+    prefix=$(dirname "$(dirname "$(readlink -f "$bin")")")
+    root=$(find "$prefix/share/gsettings-schemas" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -n1)
+    [ -n "$root" ] && echo "$root"
+}
+
+get_valent_reenvio() {
+    [ -n "${VALENT_DEVICE_ID:-}" ] || { echo "0"; return; }
+    local schema_root val
+    schema_root=$(_obtener_schema_valent)
+    [ -n "$schema_root" ] || { echo "0"; return; }
+    val=$(XDG_DATA_DIRS="$schema_root:$XDG_DATA_DIRS" \
+          gsettings get "ca.andyholmes.Valent.Plugin.notification:/ca/andyholmes/valent/device/$VALENT_DEVICE_ID/plugin/notification/" forward-when-active 2>/dev/null || echo "false")
+    [ "$val" = "true" ] && echo "1" || echo "0"
+}
+
+toggle_valent_reenvio() {
+    [ -n "${VALENT_DEVICE_ID:-}" ] || return 0
+    local schema_root actual nuevo
+    schema_root=$(_obtener_schema_valent)
+    [ -n "$schema_root" ] || return 0
+    actual=$(get_valent_reenvio)
+    [ "$actual" = "1" ] && nuevo="false" || nuevo="true"
+    XDG_DATA_DIRS="$schema_root:$XDG_DATA_DIRS" \
+        gsettings set "ca.andyholmes.Valent.Plugin.notification:/ca/andyholmes/valent/device/$VALENT_DEVICE_ID/plugin/notification/" forward-notifications true 2>/dev/null || true
+    XDG_DATA_DIRS="$schema_root:$XDG_DATA_DIRS" \
+        gsettings set "ca.andyholmes.Valent.Plugin.notification:/ca/andyholmes/valent/device/$VALENT_DEVICE_ID/plugin/notification/" forward-when-active "$nuevo" 2>/dev/null || true
+}
+
+# ------------------------------------------------------------------
 # Reglas dinámicas en la config de Mako
 # ------------------------------------------------------------------
 escribir_reglas() {
@@ -53,22 +91,31 @@ escribir_reglas() {
     # Eliminar sección dinámica previa
     sed -i "/^${MARCA_INI}$/,/^${MARCA_FIN}$/d" "$CONFIG"
 
-    local ia sistema
+    local ia celular sistema
     ia=$(get_val ia)
+    celular=$(get_val celular)
     sistema=$(get_val sistema)
 
     {
         echo ""
         echo "$MARCA_INI"
 
-        # IA visible dentro del mode=ocultas (caso "solo IA")
+        # Cuando sistema está oculto (mode=ocultas), permitir las categorías activas
         if [ "$ia" = "1" ]; then
             printf '[mode=ocultas app-name=ia]\ninvisible=0\n\n'
         fi
+        if [ "$celular" = "1" ]; then
+            printf '[mode=ocultas app-name=Valent]\ninvisible=0\n\n'
+            printf '[mode=ocultas desktop-entry=ca.andyholmes.Valent]\ninvisible=0\n\n'
+        fi
 
-        # IA bloqueada (caso "solo Sistema" o "todo oculto")
+        # Cuando una categoría está desmarcada, bloquearla siempre (incluso en modo normal)
         if [ "$ia" = "0" ]; then
             printf '[app-name=ia]\ninvisible=1\n\n'
+        fi
+        if [ "$celular" = "0" ]; then
+            printf '[app-name=Valent]\ninvisible=1\n\n'
+            printf '[desktop-entry=ca.andyholmes.Valent]\ninvisible=1\n\n'
         fi
 
         echo "$MARCA_FIN"
@@ -175,42 +222,66 @@ elegir_voz() {
 # Menú Rofi interactivo (loop hasta Escape)
 # ------------------------------------------------------------------
 icono() { [ "$(get_val "$1")" = "1" ] && echo "✓" || echo "✗"; }
+icono_reenvio() { [ "$(get_valent_reenvio)" = "1" ] && echo "✓" || echo "✗"; }
 
 ITEMS=(
-    ""                                           # 0: IA (texto dinámico, se rellena en el loop)
-    ""                                           # 1: Sistema (ídem)
-    "───────────────────────────────────"        # 2: separador
-    "  Cambiar voz TTS (Piper neuronal)"         # 3: selector de voz
-    "───────────────────────────────────"        # 4: separador
-    "  Mostrar todo"                             # 5
-    "  Ocultar todo"                             # 6
+    ""                                           # 0: IA
+    ""                                           # 1: Celular (Valent)
+    ""                                           # 2: Sistema
+    "───────────────────────────────────"        # 3: separador
+    ""                                           # 4: Reenviar avisos al celular
+    "  Cambiar voz TTS (Piper neuronal)"         # 5: selector de voz
+    "───────────────────────────────────"        # 6: separador
+    "  Mostrar todo"                             # 7
+    "  Ocultar todo"                             # 8
 )
 
 while true; do
     ITEMS[0]="$(icono ia)  IA — Claude Code · Agy · Cursor · Hermes"
-    ITEMS[1]="$(icono sistema)  Sistema — todas las demás apps"
+    ITEMS[1]="$(icono celular)  Celular (Valent) — avisos del móvil en pantalla"
+    ITEMS[2]="$(icono sistema)  Sistema — todas las demás apps"
+
+    [ -f "$HOME/dotfiles/.env" ] && source "$HOME/dotfiles/.env"
+    if [ -n "${VALENT_DEVICE_ID:-}" ]; then
+        ITEMS[4]="$(icono_reenvio)  Reenviar avisos de PC al celular (Valent activo)"
+    else
+        ITEMS[4]="  Reenviar al celular (falta VALENT_DEVICE_ID en .env)"
+    fi
 
     indice=$(printf '%s\n' "${ITEMS[@]}" \
         | rofi -dmenu -i -p "Notificaciones" -no-custom -format i \
-            -theme-str 'window { width: 500px; }' 2>/dev/null) || break
+            -theme-str 'window { width: 520px; }' 2>/dev/null) || break
 
     case "$indice" in
         0) toggle_val ia;      aplicar_todo ;;
-        1) toggle_val sistema; aplicar_todo ;;
-        2) continue ;;  # separador
-        3) elegir_voz ;;
-        4) continue ;;  # separador
-        5) set_val ia 1; set_val sistema 1; aplicar_todo ;;
-        6) set_val ia 0; set_val sistema 0; aplicar_todo ;;
+        1) toggle_val celular; aplicar_todo ;;
+        2) toggle_val sistema; aplicar_todo ;;
+        3) continue ;;  # separador
+        4) toggle_valent_reenvio ;;
+        5) elegir_voz ;;
+        6) continue ;;  # separador
+        7) set_val ia 1; set_val celular 1; set_val sistema 1; aplicar_todo ;;
+        8) set_val ia 0; set_val celular 0; set_val sistema 0; aplicar_todo ;;
         *) break ;;
     esac
 done
 
 # Notificación de estado al cerrar
-ia=$(get_val ia); sistema=$(get_val sistema)
-if   [ "$ia" = "1" ] && [ "$sistema" = "1" ]; then MSG="Todo visible"
-elif [ "$ia" = "1" ] && [ "$sistema" = "0" ]; then MSG="Solo IA visible"
-elif [ "$ia" = "0" ] && [ "$sistema" = "1" ]; then MSG="IA oculta"
-else                                                MSG="Todo oculto"
+ia=$(get_val ia); celular=$(get_val celular); sistema=$(get_val sistema)
+if [ "$ia" = "1" ] && [ "$celular" = "1" ] && [ "$sistema" = "1" ]; then
+    MSG="Todo visible"
+elif [ "$ia" = "0" ] && [ "$celular" = "0" ] && [ "$sistema" = "0" ]; then
+    MSG="Todo oculto"
+else
+    activos=()
+    [ "$ia" = "1" ] && activos+=("IA")
+    [ "$celular" = "1" ] && activos+=("Celular")
+    [ "$sistema" = "1" ] && activos+=("Sistema")
+    if [ ${#activos[@]} -eq 0 ]; then
+        MSG="Todo oculto"
+    else
+        IFS=', '
+        MSG="Visibles: ${activos[*]}"
+    fi
 fi
 notify-send -a Notificaciones -t 4000 "Notificaciones" "$MSG" 2>/dev/null || true

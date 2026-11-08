@@ -116,7 +116,7 @@ flowchart TD
 - **Capa de sesión (`config/hypr/hyprland.conf`)**: orquesta el escritorio. Arranca servicios de usuario con `exec-once`, fija preferencias de tema vía `dconf`/`gsettings`, define atajos (`SUPER` como modificador) y reglas de ventanas flotantes. Al final incluye `local.conf`.
 - **Capa de presentación (Waybar, Rofi, Kitty, GTK)**: archivos de configuración puros que usan las variables del tema; Waybar delega lógica a scripts Bash que devuelven JSON (`return-type: json`).
 - **Utilidades (`config/waybar/scripts/`, `utils/`)**: scripts Bash sin dependencias más allá de los paquetes del sistema. Estado efímero en `/tmp` (Pomodoro) y vistas previas de temas en `~/.cache/dotfiles/temas`.
-- **Secretos (`.env`)**: archivo local (`chmod 600`) con `PASS_SWAYLOCK` (desbloqueo desde Valent con `wtype`), `CONTEXT_HUB_URL` (URL del servidor MCP en la red Tailscale) y `VALENT_DEVICE_ID` (ID del celular en Valent).
+- **Secretos (`.env`)**: archivo local (`chmod 600`) con `PASS_SWAYLOCK` (desbloqueo desde Valent con `wtype`), `CONTEXT_HUB_URL` (URL del servidor MCP en la red Tailscale), `VALENT_DEVICE_ID` (ID del celular en Valent) y `NTFY_TOPIC` (tema para notificaciones push en el celular).
 
 ## Patrones Arquitectónicos
 

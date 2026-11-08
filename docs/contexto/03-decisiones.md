@@ -219,10 +219,10 @@
   - Positivas: el mismo tiempo en todas las máquinas, sin depender de la aplicación; se puede recuperar lo que ya se cerró, con el teclado o desde la lista de atajos.
   - Negativas: una notificación que pedía quedarse hasta leerla también desaparece a los 20 s.
 
-## ADR-031: SUPER + F4 oculta y muestra las notificaciones
-- **Fecha**: 2026-10-26
-- **Contexto**: Con Mako en marcha no había forma de apartar las notificaciones un momento (una llamada, una captura, leer sin el aviso encima) y recuperarlas. Descartarlas (`makoctl dismiss`) las manda al historial; hace falta un atajo que las esconda y las devuelva.
-- **Decisión**: `aplicar-tema.sh` escribe el modo `ocultas` (`invisible=1`) en la config generada de cada PC con escritorio (el módulo `escritorio.nix`, no un equipo). `SUPER + F4` (`utils/alternar-notificaciones.sh`, también en la lista de `SUPER + F1`) lo activa y lo quita con `makoctl mode`. Si esa PC aún no ha vuelto a aplicar el tema, el script añade el modo a su config local antes de alternar. Al quitarlo reaparecen las que siguen dentro de sus 20 s. El aviso «Ocultas» / «Visibles» usa `app-name=Notificaciones`, excluido del modo, para que se vea también mientras están ocultas.
+## ADR-031: SUPER + F4 gestiona categorías de notificaciones (IA, Celular, Sistema)
+- **Fecha**: 2026-10-26 (actualizado 2026-11-08)
+- **Contexto**: Con Mako en marcha no había forma de apartar las notificaciones un momento ni discriminar entre avisos críticos de IA, mensajes del celular (Valent) y notificaciones generales del sistema.
+- **Decisión**: `SUPER + F4` ejecuta `utils/gestionar-notificaciones.sh`, abriendo un menú Rofi con checkboxes que permite alternar independientemente las categorías **IA** (`app-name=ia`), **Celular** (`app-name=Valent`), y **Sistema** (usando internamente `mode=ocultas` en Mako), además de alternar el reenvío de avisos de la PC al celular por Valent y cambiar la voz neuronal de Piper. `aplicar-tema.sh` preserva estos filtros invocando `--solo-reglas`.
 - **Consecuencias**:
-  - Positivas: un atajo junto al historial (`F3`); lo que se esconde no se pierde si aún no caducó, y el historial sigue en `F3`.
-  - Negativas: si se dejan ocultas más de 20 s, caducan igual y solo vuelven desde el historial; el aviso de estado también dura esos 20 s cuando el tema fuerza `ignore-timeout`.
+  - Positivas: control granular por categorías; permite tener visibles solo avisos de IA y celular mientras el resto del sistema permanece en silencio; toggle rápido de reenvío de Valent sin abrir su interfaz gráfica.
+  - Negativas: las notificaciones ocultas siguen su temporizador de 20 s en Mako y caducan si no se consultan desde el historial (`SUPER + F3`).
