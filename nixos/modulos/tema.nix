@@ -474,7 +474,6 @@ in
   # Arranque sin texto entre GRUB y el login
   boot.kernelParams = [ "quiet" "udev.log_level=3" ];
   boot.consoleLogLevel = 3;
-  boot.initrd.verbose = false;
 
   # --- PANTALLA DE INICIO DE SESIÓN ---
   services.greetd = {
