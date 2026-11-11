@@ -40,6 +40,18 @@ let
       install -Dm644 ${escritorioFigma} "$out/share/applications/figma-linux.desktop"
     '';
   };
+
+  # nixpkgs apunta la descarga de Navicat a web.archive.org (extremadamente lento o se congela).
+  # Usamos la descarga directa oficial desde Amazon S3 (dn.navicat.com).
+  navicat-premium = pkgs.navicat-premium.overrideAttrs (old: {
+    src = pkgs.appimageTools.extract {
+      inherit (old) pname version;
+      src = pkgs.fetchurl {
+        url = "https://dn.navicat.com/download/navicat18-premium-en-x86_64.AppImage";
+        hash = "sha256-hPu4ZFphUEiSUW0Jd8Emka5+Nxw5V97Q8/q+dzXlHo8=";
+      };
+    };
+  });
 in
 
 {
