@@ -7,6 +7,7 @@
 #   (sin paso) | todo [equipo]  Máquina nueva: usuario, sistema, apps y red
 #   usuario                     Enlaces de config/, tema, permisos, context-hub y archivos locales
 #   sistema [equipo]            /etc/nixos usa el equipo del repo + nixos-rebuild switch
+#   modulos [equipo]            Elige qué módulos activar/desactivar en un equipo
 #   apps                        Zen Browser (Flatpak) y Thorium (AppImage), si faltan
 #   red                         Inicia sesión en Tailscale, si no hay sesión
 #   actualizar                  git pull (dotfiles + context-hub) + usuario + sistema (alias dotfiles-actualizar)
@@ -27,6 +28,8 @@ THORIUM_URL="https://github.com/Alex313031/Thorium/releases/download/M128.0.6613
 CONTEXT_HUB_REPO="https://github.com/Giovanni1906/context-hub.git"
 SIMULAR=0
 AVISOS=()
+MODULOS_ORDEN=(escritorio tema desarrollo desarrollo-apps remoto ia juegos)
+MODULOS_YA_CONFIGURADOS=0
 
 # Flakes requeridos para evaluar módulos como ia.nix (builtins.getFlake)
 export NIX_CONFIG="${NIX_CONFIG:-} experimental-features = nix-command flakes"
@@ -37,7 +40,7 @@ ok()     { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 aviso()  { printf '  \033[33m!\033[0m %s\n' "$*"; AVISOS+=("$*"); }
 error()  { printf '\n\033[1;31m✗ %s\033[0m\n' "$*" >&2; exit 1; }
 
-ayuda() { sed -n '5,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+ayuda() { sed -n '5,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 # --- SUDO ---
 SUDO_ACTIVO=0
@@ -148,6 +151,79 @@ elegir_equipo() {
     printf '%s' "$equipo"
 }
 
+# --- MÓDULOS DE UN EQUIPO ---
+modulo_activo() {
+    local m="$1" archivo="$2"
+    grep -qE "^[[:space:]]*\.\./\.\./modulos/$m\.nix" "$archivo"
+}
+
+alternar_modulo_equipo() {
+    local m="$1" archivo="$2"
+    [ "$m" != "base" ] || return
+    if modulo_activo "$m" "$archivo"; then
+        sed -i -E "s|^([[:space:]]*)(\.\./\.\./modulos/$m\.nix)|\1# \2|" "$archivo"
+    elif grep -qE "^[[:space:]]*#[[:space:]]*\.\./\.\./modulos/$m\.nix" "$archivo"; then
+        sed -i -E "s|^([[:space:]]*)#[[:space:]]*(\.\./\.\./modulos/$m\.nix)|\1\2|" "$archivo"
+    else
+        sed -i -E "/^[[:space:]]*\];/i\\    ../../modulos/$m.nix" "$archivo"
+    fi
+}
+
+resumen_modulos() {
+    local archivo="$1"
+    local m activos=() inactivos=() str_activos="" str_inactivos=""
+    [ -f "$archivo" ] || return
+    for m in base "${MODULOS_ORDEN[@]}"; do
+        if modulo_activo "$m" "$archivo"; then
+            activos+=("$m")
+        else
+            inactivos+=("$m")
+        fi
+    done
+    if [ "${#activos[@]}" -gt 0 ]; then
+        printf -v str_activos '%s, ' "${activos[@]}"
+        printf '  \033[32m✓\033[0m Módulos activos: %s\n' "${str_activos%, }"
+    fi
+    if [ "${#inactivos[@]}" -gt 0 ]; then
+        printf -v str_inactivos '%s, ' "${inactivos[@]}"
+        printf '  \033[2m  (Desactivados: %s)\033[0m\n' "${str_inactivos%, }"
+    fi
+}
+
+seleccionar_modulos_equipo() {
+    local equipo="$1"
+    local archivo="$DOTFILES/nixos/equipos/$equipo/default.nix"
+    [ -f "$archivo" ] || error "No encuentro la configuración de '$equipo' ($archivo)"
+
+    local op i m marca desc
+    while true; do
+        printf '\n\033[1;36m==> Módulos de %s\033[0m\n' "$equipo"
+        printf '  Escribe el número para activar/desactivar (Enter para guardar y continuar):\n\n'
+        printf '      \033[32m[✓]\033[0m %-15s %s\n' "base" "sistema base (requerido siempre)"
+        i=1
+        for m in "${MODULOS_ORDEN[@]}"; do
+            desc=$(sed -n '2s/^# [^:]*: *//p' "$DOTFILES/nixos/modulos/$m.nix" 2>/dev/null || true)
+            if modulo_activo "$m" "$archivo"; then
+                marca='\033[32m[✓]\033[0m'
+            else
+                marca='\033[2m[ ]\033[0m'
+            fi
+            printf '  %2d) %b %-15s %s\n' "$i" "$marca" "$m" "$desc"
+            i=$((i + 1))
+        done
+        printf '\n'
+        read -rp "  Número a alternar (Enter para guardar): " op
+        [ -n "$op" ] || break
+        if [[ "$op" =~ ^[0-9]+$ ]] && [ "$op" -ge 1 ] && [ "$op" -le "${#MODULOS_ORDEN[@]}" ]; then
+            m="${MODULOS_ORDEN[$((op - 1))]}"
+            alternar_modulo_equipo "$m" "$archivo"
+        else
+            printf '  \033[33mOpción no válida: %s\033[0m\n' "$op"
+        fi
+    done
+    ok "Módulos guardados en nixos/equipos/$equipo/default.nix"
+}
+
 nuevo_equipo() {
     local nombre="$1" destino="$DOTFILES/nixos/equipos/$1" version
     [[ "$nombre" =~ ^[a-z0-9][a-z0-9-]*$ ]] || error "Nombre de equipo inválido: '$nombre' (minúsculas, números y guiones)"
@@ -167,6 +243,15 @@ nuevo_equipo() {
         sed -i 's/efiSupport = true;/efiSupport = false;/' "$destino/default.nix"
         sed -i 's/boot\.loader\.efi\.canTouchEfiVariables = true;/# boot.loader.efi.canTouchEfiVariables = false;/' "$destino/default.nix"
         aviso "Máquina en modo BIOS: se ajustó boot.loader.grub sin EFI en nixos/equipos/$nombre/default.nix"
+    fi
+
+    if [ -t 0 ]; then
+        local r=""
+        read -rp "  ¿Deseas elegir qué módulos activar para $nombre ahora? [S/n] " r
+        if [[ ! "$r" =~ ^[nN] ]]; then
+            seleccionar_modulos_equipo "$nombre"
+            MODULOS_YA_CONFIGURADOS=1
+        fi
     fi
     aviso "Revisa los módulos que importa nixos/equipos/$nombre/default.nix y súbelo con git"
 }
@@ -278,6 +363,17 @@ paso_sistema() {
     [[ "$equipo" =~ ^[a-z0-9][a-z0-9-]*$ ]] || error "Equipo inválido o sin elegir: '$equipo'"
     [ -d "$DOTFILES/nixos/equipos/$equipo" ] || nuevo_equipo "$equipo"
     ok "Equipo: $equipo (nixos/equipos/$equipo)"
+
+    local conf_equipo="$DOTFILES/nixos/equipos/$equipo/default.nix"
+    resumen_modulos "$conf_equipo"
+    if [ -t 0 ] && [ "${MODULOS_YA_CONFIGURADOS:-0}" != "1" ]; then
+        local r=""
+        read -rp "  ¿Deseas cambiar los módulos antes de continuar? [s/N] " r
+        if [[ "$r" =~ ^[sS] ]]; then
+            seleccionar_modulos_equipo "$equipo"
+            resumen_modulos "$conf_equipo"
+        fi
+    fi
     pedir_sudo
 
     # Flakes y nix-command en /etc/nix/nix.conf (máquinas nuevas recién instaladas donde flakes viene desactivado).
@@ -471,6 +567,7 @@ main() {
         todo)         paso_usuario; paso_sistema "${args[1]:-}"; paso_apps; paso_red ;;
         usuario)      paso_usuario ;;
         sistema)      paso_sistema "${args[1]:-}" ;;
+        modulos)      local eq; eq=$(elegir_equipo "${args[1]:-}"); seleccionar_modulos_equipo "$eq" ;;
         apps)         paso_apps ;;
         red)          paso_red ;;
         actualizar)   paso_actualizar ;;

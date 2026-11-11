@@ -43,7 +43,7 @@ cd ~/dotfiles
 ./init.sh
 ```
 
-`init.sh` pregunta qué equipo es esta máquina. Si eliges "Nuevo equipo", crea `nixos/equipos/<nombre>` desde la plantilla, con la versión de NixOS de la instalación. Después:
+`init.sh` pregunta qué equipo es esta máquina. Si eliges "Nuevo equipo", crea `nixos/equipos/<nombre>` desde la plantilla con la versión de NixOS de la instalación y te permite elegir interactivamente qué módulos activar (para no descargar herramientas pesadas como apps de desarrollo o agentes de IA si no las necesitas). Después:
 
 1. Enlaza `config/` en `~/.config`, aplica el tema y crea los archivos locales (`.env`, `config/hypr/local.conf`).
 2. Escribe `/etc/nixos/configuration.nix` apuntando al equipo, conserva el `hardware-configuration.nix` de la máquina y ejecuta `nixos-rebuild switch`. Lo que reemplaza lo deja en `/etc/nixos/*.respaldo-<fecha>`.

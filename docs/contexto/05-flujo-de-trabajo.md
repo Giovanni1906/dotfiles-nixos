@@ -20,8 +20,8 @@ Las tareas del proyecto viven en el tablero de Notion [nixos](https://app.notion
    git clone https://github.com/Giovanni1906/dotfiles-nixos.git ~/dotfiles
    cd ~/dotfiles && ./init.sh
    ```
-2. `init.sh` pregunta el equipo. Para una máquina que aún no existe en el repo, elegir "Nuevo equipo": copia `nixos/equipos/plantilla` con el nombre y la `stateVersion` de la instalación. Si la máquina arranca en BIOS (sin `/sys/firmware/efi`), avisa para cambiar el cargador de arranque.
-3. El script enlaza `config/`, aplica el tema, escribe `/etc/nixos/configuration.nix` (importa el `hardware-configuration.nix` que generó el instalador y el equipo), ejecuta `nixos-rebuild switch`, instala Zen y Thorium y abre el login de Tailscale. Al final resume los avisos.
+2. `init.sh` pregunta el equipo. Para una máquina que aún no existe en el repo, elegir "Nuevo equipo": copia `nixos/equipos/plantilla` con el nombre y la `stateVersion` de la instalación, y ofrece seleccionar qué módulos activar (para evitar descargas pesadas iniciales). Si la máquina arranca en BIOS (sin `/sys/firmware/efi`), avisa para cambiar el cargador de arranque.
+3. El script enlaza `config/`, aplica el tema, muestra el resumen de módulos activos (permitiendo cambiarlos antes de construir), escribe `/etc/nixos/configuration.nix` (importa el `hardware-configuration.nix` que generó el instalador y el equipo), ejecuta `nixos-rebuild switch`, instala Zen y Thorium y abre el login de Tailscale. Al final resume los avisos.
 4. Equipo nuevo: revisar qué módulos importa (`nix-config` → "Activar o quitar módulos"), aplicar si se cambió algo, y subirlo (`git add nixos/equipos/<equipo>`).
 5. Completar `.env` (lo crea `init.sh` desde `.env.example`).
 6. Acceso a GitHub para `git push`: `gh auth login` + `gh auth setup-git`, y cambiar en `~/.gitconfig` la ruta de `/nix/store/…/gh` por `!gh auth git-credential` (ver README; si no, deja de funcionar tras actualizar `gh` + GC).
