@@ -280,10 +280,15 @@ paso_sistema() {
     ok "Equipo: $equipo (nixos/equipos/$equipo)"
     pedir_sudo
 
-    # Flakes y nix-command en /etc/nix/nix.conf (máquinas nuevas recién instaladas donde flakes viene desactivado)
+    # Flakes y nix-command en /etc/nix/nix.conf (máquinas nuevas recién instaladas donde flakes viene desactivado).
+    # /etc/nix/nix.conf suele ser un enlace simbólico a /nix/store (de solo lectura), por lo que tee -a falla
+    # si no se desenlaza primero.
     if ! grep -qE 'experimental-features.*flakes' /etc/nix/nix.conf 2> /dev/null; then
         como_root mkdir -p /etc/nix
-        printf 'experimental-features = nix-command flakes\n' | como_root tee -a /etc/nix/nix.conf > /dev/null
+        local conf_nix=""
+        [ -f /etc/nix/nix.conf ] && conf_nix=$(cat /etc/nix/nix.conf)
+        como_root rm -f /etc/nix/nix.conf
+        printf '%s\nexperimental-features = nix-command flakes\n' "$conf_nix" | como_root tee /etc/nix/nix.conf > /dev/null
         como_root systemctl restart nix-daemon.service 2> /dev/null || true
         ok "Habilitadas características experimentales (nix-command flakes) en /etc/nix/nix.conf"
     fi
