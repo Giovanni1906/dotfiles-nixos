@@ -23,3 +23,7 @@ config/fastfetch/logo.png
 # Python
 __pycache__/
 *.pyc
+
+# Nix build outputs
+result
+result-*

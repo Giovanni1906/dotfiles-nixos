@@ -28,6 +28,9 @@ CONTEXT_HUB_REPO="https://github.com/Giovanni1906/context-hub.git"
 SIMULAR=0
 AVISOS=()
 
+# Flakes requeridos para evaluar módulos como ia.nix (builtins.getFlake)
+export NIX_CONFIG="${NIX_CONFIG:-} experimental-features = nix-command flakes"
+
 # --- SALIDA ---
 titulo() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 ok()     { printf '  \033[32m✓\033[0m %s\n' "$*"; }
@@ -160,8 +163,12 @@ nuevo_equipo() {
     sed -e "s/@EQUIPO@/$nombre/g" -e "s/@VERSION@/$version/g" -e "s/@USUARIO@/$USER/g" \
         "$DOTFILES/nixos/equipos/plantilla/default.nix" > "$destino/default.nix"
     ok "Creado nixos/equipos/$nombre (stateVersion $version, usuario $USER)"
+    if [ ! -d /sys/firmware/efi ]; then
+        sed -i 's/efiSupport = true;/efiSupport = false;/' "$destino/default.nix"
+        sed -i 's/boot\.loader\.efi\.canTouchEfiVariables = true;/# boot.loader.efi.canTouchEfiVariables = false;/' "$destino/default.nix"
+        aviso "Máquina en modo BIOS: se ajustó boot.loader.grub sin EFI en nixos/equipos/$nombre/default.nix"
+    fi
     aviso "Revisa los módulos que importa nixos/equipos/$nombre/default.nix y súbelo con git"
-    [ -d /sys/firmware/efi ] || aviso "Esta máquina arranca en modo BIOS: ajusta boot.loader.grub en nixos/equipos/$nombre/default.nix"
 }
 
 # =============================================================================
@@ -273,6 +280,14 @@ paso_sistema() {
     ok "Equipo: $equipo (nixos/equipos/$equipo)"
     pedir_sudo
 
+    # Flakes y nix-command en /etc/nix/nix.conf (máquinas nuevas recién instaladas donde flakes viene desactivado)
+    if ! grep -qE 'experimental-features.*flakes' /etc/nix/nix.conf 2> /dev/null; then
+        como_root mkdir -p /etc/nix
+        printf 'experimental-features = nix-command flakes\n' | como_root tee -a /etc/nix/nix.conf > /dev/null
+        como_root systemctl restart nix-daemon.service 2> /dev/null || true
+        ok "Habilitadas características experimentales (nix-command flakes) en /etc/nix/nix.conf"
+    fi
+
     local hw=/etc/nixos/hardware-configuration.nix conf=/etc/nixos/configuration.nix
 
     # 1. Hardware: siempre el de ESTA máquina y fuera del repo. Un enlace al repo
@@ -341,7 +356,7 @@ paso_sistema() {
     fi
     local construido
     construido=$(mktemp -d)
-    (cd "$construido" && nixos-rebuild build) || error "nixos-rebuild build falló. Los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
+    (cd "$construido" && nixos-rebuild build --option experimental-features "nix-command flakes") || error "nixos-rebuild build falló. Los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
     if grep -qE ' overlay | fuse|/var/lib/docker' "$construido/result/etc/fstab"; then
         error "El sistema construido monta sistemas de archivos temporales (revisa $hw); no se activa para no dejarlo sin arrancar"
     fi
@@ -350,7 +365,7 @@ paso_sistema() {
     login_nuevo=$(readlink -f "$construido/result/etc/systemd/system/display-manager.service" || true)
     rm -rf "$construido"
 
-    if como_root nixos-rebuild switch; then
+    if como_root nixos-rebuild switch --option experimental-features "nix-command flakes"; then
         ok "Sistema actualizado"
     else
         error "nixos-rebuild switch falló. Revisa el error; los archivos anteriores quedaron en /etc/nixos/*.respaldo-$FECHA"
@@ -382,13 +397,19 @@ paso_apps() {
         ok "Thorium ya descargado"
     else
         mkdir -p "$(dirname "$appimage")"
-        if wget -q --show-progress -O "$appimage.tmp" "$THORIUM_URL"; then
+        local descargado=0
+        if command -v wget > /dev/null; then
+            wget -q --show-progress -O "$appimage.tmp" "$THORIUM_URL" && descargado=1 || true
+        elif command -v curl > /dev/null; then
+            curl -fL --progress-bar -o "$appimage.tmp" "$THORIUM_URL" && descargado=1 || true
+        fi
+        if [ "$descargado" = 1 ]; then
             mv "$appimage.tmp" "$appimage"
             chmod +x "$appimage"
             ok "Thorium descargado"
         else
             rm -f "$appimage.tmp"
-            aviso "No se pudo descargar Thorium"
+            aviso "No se pudo descargar Thorium (requiere wget o curl)"
         fi
     fi
     [ -f "$appimage" ] && enlazar "$DOTFILES/applications/thorium.desktop" "$HOME/.local/share/applications/thorium.desktop"
