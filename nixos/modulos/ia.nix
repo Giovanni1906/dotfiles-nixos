@@ -110,6 +110,7 @@ EOF
     claudeDesktop.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop-with-fhs   # Claude Desktop GUI con soporte FHS y MCP
     cursor                                                                               # Editor de código con IA (versión fijada arriba)
     hermes.packages.${pkgs.stdenv.hostPlatform.system}.default   # Hermes Agent: hermes, hermes-agent, hermes-acp (config en ~/.hermes)
+    pkgs.whisper-cpp                                             # Motor STT neuronal para transcripción de voz local (whisper-cli)
     pkgs.piper-tts                                               # Motor TTS neuronal de alta calidad y voz natural (utils/voz.sh)
     pkgs.espeak-ng                                               # Motor TTS de respaldo para notificaciones (utils/voz.sh)
   ];

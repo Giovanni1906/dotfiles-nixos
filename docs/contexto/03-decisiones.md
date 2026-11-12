@@ -234,3 +234,20 @@
 - **Consecuencias**:
   - Positivas: 100% declarativo y reproducible entre máquinas; Flutter y Android Studio quedan configurados con un solo rebuild; soporte simultáneo para probar en celulares físicos por cable/WiFi o como apps de escritorio Linux nativas.
   - Negativas: La primera compilación o descarga de paquetes de Android Studio y Chromium requiere espacio adicional en disco en `/nix/store`.
+
+## ADR-033: Asistente de voz Jarvis con widget de bola de energía flotante en Hyprland
+- **Fecha**: 2026-11-12
+- **Contexto**: Se requería un asistente de voz interactivo ("Jarvis") integrado al escritorio NixOS / Hyprland que permitiera dictar comandos por voz, ejecutarlos en proyectos, terminal o agentes de IA, y recibir respuesta hablada por altavoces, acompañado de una interfaz visual tipo reactor arc / bola de energía reactiva en la esquina inferior derecha.
+- **Decisión**: Se implementó una arquitectura en capas:
+  1. **Disparador y Atajo**: `SUPER + SPACE` (Hyprland `bind` en `config/hypr/hyprland.conf` y `utils/atajos.txt`) ejecuta `utils/jarvis.sh`. Funciona en modo toggle: la primera pulsación abre el asistente e inicia la captura; pulsar `Espacio` (o `SUPER + SPACE` de nuevo) finaliza la grabación y procesa la orden; `Escape` cancela.
+  2. **Interfaz Gráfica Wayland (Widget "Bola de Energía")**: `utils/jarvis.py` utiliza GTK3 + `GtkLayerShell` (capa `OVERLAY`, anclada en la esquina inferior derecha `BOTTOM + RIGHT` encima de Waybar) con Cairo para renderizar en tiempo real un reactor de energía reactivo con núcleo de plasma, anillos giratorios segmentados y ondas de pulso que adoptan los colores del tema activo (`tema/tema.conf`).
+  3. **STT Local Ultrarrápido**: Transcripción mediante `whisper-cpp` (`pkgs.whisper-cpp` en `nixos/modulos/ia.nix`) con el modelo `ggml-base.bin` multilingüe en `~/.local/share/whisper/`, permitiendo reconocimiento en español en menos de 1 segundo sin llamadas a nubes de terceros.
+  4. **Orquestador Inteligente**: Enruta según la intención hacia:
+     - Terminal activa: inyección directa de comandos mediante `wtype` (ej. "escribe en la terminal git status").
+     - Proyectos y editores: apertura de repositorios en `~/Proyectos/` o `~/dotfiles` en Cursor, Sublime o Kitty.
+     - Control del sistema: lanzamiento de navegador, apps, bloqueo (`hyprlock`) o volumen (`wpctl`).
+     - Agentes / IA: consultas a Ollama en la Mac mini (`llama3.1:8b`) o Hermes Agent con respuestas concisas para TTS.
+  5. **Respuesta por Voz (TTS)**: Respuestas habladas automáticas mediante `utils/voz.sh` (Piper TTS neuronal).
+- **Consecuencias**:
+  - Positivas: Flujo de voz hands-free rápido y fluido; widget estético que no bloquea el foco del usuario; procesamiento de audio 100% local o en red privada vía Tailscale.
+  - Negativas: Requiere que `whisper-cli` y el modelo GGML estén descargados localmente (~141 MB).

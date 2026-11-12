@@ -8,6 +8,7 @@ Hyprland | SUPER + F2                  | Elegir el tema (colores y fondo de pant
 Hyprland | SUPER + F3                  | Abrir el historial de notificaciones
 Hyprland | SUPER + F4                  | Gestionar categorías de notificaciones (IA, Celular, Sistema)
 Hyprland | SUPER + F5                  | Abrir menú de Context Hub (proyectos, Notion, memoria Mac Mini)
+Hyprland | SUPER + SPACE               | Activar asistente de voz Jarvis (pulsar Espacio para enviar)
 Hyprland | SUPER + H                   | Abrir agente Hermes (conectado a la IA de la Mac Mini)
 Hyprland | SUPER + Q                   | Abrir terminal (Kitty)
 Hyprland | SUPER + E                   | Abrir gestor de archivos (Thunar)
