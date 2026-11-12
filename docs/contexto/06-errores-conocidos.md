@@ -32,6 +32,8 @@
 
 ## Resueltos
 
+- **2026-11-12** — Error de hash mismatch en AnyDesk (`anydesk-8.0.2-amd64.tar.gz.drv`): al construir el sistema (`nixos-rebuild build`), la descarga de AnyDesk 8.0.2 reportó un nuevo hash (`sha256-6noMPfe0x6kx/whyd66qcmk7WhEivx3xK5q58Se9Ij0=`). Se actualizó `outputHash` en `nixos/modulos/remoto.nix`.
+
 - **2026-11-07** — Fallo al configurar hooks de IA (Claude Code / Antigravity): `utils/configurar-ia-hooks.sh` dependía de `python3` que no estaba en `systemPackages`, provocando `python3: orden no encontrada`. Se añadió soporte dual (Node.js nativo + Python 3 como respaldo), se configuró también el hook `Stop` de Antigravity en `~/.gemini/config/hooks.json`, se corrigió un error de sintaxis de `tr` en `utils/ia-notificacion.sh` (reemplazado con sustitución nativa de Bash) con debounce de 3s para evitar dobles alertas (hook + alias), se ignoró `config/mako/*.state` en `.gitignore` y se añadió `python3` a `nixos/modulos/base.nix`.
 
 - **2026-11-02** — Cambios dinámicos de GTK ensuciaban git: `config/gtk-3.0/settings.ini`, `config/gtk-4.0/settings.ini` y `config/gtkrc-2.0` se modificaban con `sed -i` en cada cambio de tema (`SUPER + F2`). Ahora se generan desde plantillas (`.template`) ignorando los archivos resultantes en Git, y se corrigió la ruta hardcodeada a `/home/nova` en `gtkrc-2.0`.
