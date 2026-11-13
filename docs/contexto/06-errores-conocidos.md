@@ -32,7 +32,7 @@
 
 ## Resueltos
 
-- **2026-11-13** — Hash mismatch en AnyDesk (`anydesk-8.1.0-amd64.tar.gz.drv`): al construir el sistema (`nixos-rebuild build`), la descarga de AnyDesk 8.1.0 coincidió con `sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=`. Se restableció `outputHash` en `nixos/modulos/remoto.nix`.
+- **2026-11-13** — Hash mismatch en AnyDesk según versión de canal (8.0.2 vs 8.1.0): al ejecutar `sudo nixos-rebuild switch`, el canal de root (`nixos-26.05`) compila AnyDesk 8.0.2 (`sha256-6noMPfe0x6kx/whyd66qcmk7WhEivx3xK5q58Se9Ij0=`), mientras que canales más recientes evalúan AnyDesk 8.1.0 (`sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=`). Se condicionó dinámicamente `outputHash` según el prefijo de versión (`8.0` vs `8.1`) en `nixos/modulos/remoto.nix`.
 - **2026-11-13** — Error en nixos-rebuild por paquete renombrado ('poppler_utils' a 'poppler-utils'): al compilar el módulo `nixos/modulos/impresion.nix`, nixpkgs lanzó `error: 'poppler_utils' has been renamed to/replaced by 'poppler-utils'`. Se actualizó el atributo del paquete a `poppler-utils`.
 
 - **2026-11-12** — Error de hash mismatch en AnyDesk (`anydesk-8.0.2-amd64.tar.gz.drv`): al construir el sistema (`nixos-rebuild build`), la descarga de AnyDesk 8.0.2 reportó un nuevo hash (`sha256-6noMPfe0x6kx/whyd66qcmk7WhEivx3xK5q58Se9Ij0=`). Se actualizó `outputHash` en `nixos/modulos/remoto.nix`.

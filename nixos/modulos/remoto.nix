@@ -7,7 +7,10 @@
 let
   anydeskMirrored = pkgs.anydesk.overrideAttrs (old: {
     src = old.src.overrideAttrs (oldSrc: {
-      outputHash = "sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=";
+      outputHash =
+        if (pkgs.lib.strings.hasPrefix "8.0" (old.version or pkgs.anydesk.version))
+        then "sha256-6noMPfe0x6kx/whyd66qcmk7WhEivx3xK5q58Se9Ij0="
+        else "sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=";
       urls = oldSrc.urls ++ [
         "https://web.archive.org/web/20260611112327if_/${builtins.head oldSrc.urls}"
       ];
