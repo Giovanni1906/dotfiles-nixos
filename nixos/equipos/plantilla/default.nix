@@ -17,6 +17,7 @@
     ../../modulos/desarrollo.nix
     ../../modulos/desarrollo-apps.nix
     ../../modulos/remoto.nix
+    ../../modulos/impresion.nix    # CUPS, drivers y utilidades de impresión
     ../../modulos/ia.nix           # Agentes de IA y MCP context-hub
     # ../../modulos/juegos.nix     # Steam, Heroic, Lutris
   ];

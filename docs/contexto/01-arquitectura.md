@@ -46,6 +46,7 @@ dotfiles/
 │   │   ├── desarrollo.nix       # Docker, Kubernetes local (Kind, Skaffold, dominios en /etc/hosts), virtualización, editores y clientes de BD/API
 │   │   ├── desarrollo-apps.nix  # Flutter, Dart, Android Studio, Android SDK/ADB, JDK 17 y toolchain de escritorio Linux
 │   │   ├── remoto.nix           # Tailscale, OpenSSH (solo por Tailscale), Valent, WayVNC, Remmina, tmux y sus puertos
+│   │   ├── impresion.nix        # CUPS, drivers (HP, Brother, Epson, Canon), Avahi mDNS y alias imprimir
 │   │   ├── ia.nix               # Agentes de IA (agy, claude, cursor, hermes), MCP context-hub y alias context-init
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
 │   └── equipos/                 # Una carpeta por máquina (sin hardware)
@@ -70,6 +71,7 @@ dotfiles/
 │   ├── elegir-tema.sh           # Selector Rofi con vista previa (SUPER + F2)
 │   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
 │   ├── mover-ventana.sh         # Mover la ventana en el mosaico o al otro monitor (SUPER + SHIFT + flechas)
+│   ├── impresion.sh             # Menú interactivo en Rofi para plotter e impresoras estándar (SUPER + P)
 │   ├── nix-config.sh            # Menú en terminal: elegir qué parte de nixos/ editar y aplicarla (alias nix-config)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   ├── historial-notificaciones.sh # Historial de Mako en Rofi (SUPER + F3)

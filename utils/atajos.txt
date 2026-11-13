@@ -17,6 +17,7 @@ Hyprland | SUPER + B                   | Abrir navegador (Zen Browser)
 Hyprland | SUPER + D                   | Abrir utilidad para descargar y convertir multimedia
 Hyprland | SUPER + SHIFT + D           | Abrir gestor de Docker y Compose (lazydocker)
 Hyprland | SUPER + I                   | Abrir optimizador y redimensionador de imágenes
+Hyprland | SUPER + P                   | Abrir gestor de impresión (plotter e impresoras)
 Hyprland | SUPER + C                   | Cerrar ventana activa
 Hyprland | SUPER + V                   | Alternar ventana flotante
 Hyprland | SUPER + F                   | Pantalla completa

@@ -60,7 +60,7 @@
       pulse.enable = true;
       #jack.enable = true;   # Para aplicaciones JACK
     };
-    services.printing.enable = true;           # CUPS
+    # services.printing.enable = true;           # Movido a nixos/modulos/impresion.nix
 
     # --------------------------------------------------
     # ---                  Usuario                   ---
