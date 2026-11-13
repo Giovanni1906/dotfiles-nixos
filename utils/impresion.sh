@@ -314,7 +314,7 @@ while true; do
         FILAS_IMP=""
         while IFS= read -r pr; do
             [ -z "$pr" ] && continue
-            local marca=""
+            marca=""
             [ "$pr" = "$IMPRESORA" ] && marca="  ·  actual"
             FILAS_IMP+="<b>$pr</b><span alpha='65%'>$marca</span>\0icon\x1fprinter\n"
         done <<< "$TODAS"
