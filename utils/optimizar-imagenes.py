@@ -75,6 +75,22 @@ FILTROS_ARCHIVOS = [
     ("todos", "Todos los archivos (*.*)"),
 ]
 
+PRESETS_RECORTE = [
+    ("cuadrado",   "1:1 Cuadrado",           1,   1  ),
+    ("4_3",        "4:3",                    4,   3  ),
+    ("16_9",       "16:9",                   16,  9  ),
+    ("3_2",        "3:2 Foto",               3,   2  ),
+    ("dni_peru",   "DNI Perú (354×472)",     354, 472),
+    ("pasaporte",  "Pasaporte (413×531)",     413, 531),
+    ("custom",     "Personalizado",           0,   0  ),
+]
+
+POSICIONES_RECORTE = [
+    ("Center",    "Centro"),
+    ("North",     "Arriba (mantiene tope)"),
+    ("NorthWest", "Superior-izquierda"),
+]
+
 
 def obtener_bin_xsel():
     ruta = shutil.which("xsel")
@@ -240,6 +256,12 @@ class OptimizadorApp:
         self.en_proceso_extraer = False
         self.ultima_carpeta_salida_extraer = None
         self.debounce_timer_extraer = None
+
+        # Estado Módulo 5 (Recortar)
+        self.carpeta_recortar = self.carpeta_compartida
+        self.en_proceso_recortar = False
+        self.cancelar_solicitado_recortar = False
+        self.ultima_carpeta_salida_recortar = None
 
         self._construir_ventana()
 
@@ -442,7 +464,7 @@ class OptimizadorApp:
         lbl_tit.get_style_context().add_class("titulo-app")
         caja_titulos.pack_start(lbl_tit, False, False, 0)
 
-        lbl_sub = Gtk.Label(label="Reducir peso (20 KB) · Listar nombres · Renombrar en lote (_FTR) · Copiar por lista")
+        lbl_sub = Gtk.Label(label="Reducir peso · Listar nombres · Renombrar en lote · Copiar por lista · Recortar imágenes")
         lbl_sub.set_halign(Gtk.Align.START)
         lbl_sub.get_style_context().add_class("subtitulo-app")
         caja_titulos.pack_start(lbl_sub, False, False, 0)
@@ -472,6 +494,11 @@ class OptimizadorApp:
         self.btn_tab_extraer.connect("clicked", lambda *_: self._cambiar_pestana("extraer"))
         barra_tabs.pack_start(self.btn_tab_extraer, True, True, 0)
 
+        self.btn_tab_recortar = Gtk.Button(label="✂️  Recortar")
+        self.btn_tab_recortar.get_style_context().add_class("tab-nav")
+        self.btn_tab_recortar.connect("clicked", lambda *_: self._cambiar_pestana("recortar"))
+        barra_tabs.pack_start(self.btn_tab_recortar, True, True, 0)
+
         contenedor.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 2)
 
         # STACK DE CONTENIDO
@@ -484,6 +511,7 @@ class OptimizadorApp:
         self.stack.add_named(self._construir_tab_listar(), "listar")
         self.stack.add_named(self._construir_tab_renombrar(), "renombrar")
         self.stack.add_named(self._construir_tab_extraer(), "extraer")
+        self.stack.add_named(self._construir_tab_recortar(), "recortar")
 
         # Activar la primera pestaña por defecto
         self._cambiar_pestana("optimizar")
@@ -492,10 +520,11 @@ class OptimizadorApp:
 
     def _cambiar_pestana(self, nombre):
         self.stack.set_visible_child_name(nombre)
-        self.btn_tab_opt.get_style_context().remove_class("tab-activa")
-        self.btn_tab_listar.get_style_context().remove_class("tab-activa")
-        self.btn_tab_renombrar.get_style_context().remove_class("tab-activa")
-        self.btn_tab_extraer.get_style_context().remove_class("tab-activa")
+        for btn in (
+            self.btn_tab_opt, self.btn_tab_listar, self.btn_tab_renombrar,
+            self.btn_tab_extraer, self.btn_tab_recortar,
+        ):
+            btn.get_style_context().remove_class("tab-activa")
 
         if nombre == "optimizar":
             self.btn_tab_opt.get_style_context().add_class("tab-activa")
@@ -508,6 +537,9 @@ class OptimizadorApp:
         elif nombre == "extraer":
             self.btn_tab_extraer.get_style_context().add_class("tab-activa")
             self._actualizar_carpeta_extraer(self.carpeta_compartida)
+        elif nombre == "recortar":
+            self.btn_tab_recortar.get_style_context().add_class("tab-activa")
+            self._actualizar_carpeta_recortar(self.carpeta_compartida)
 
     def _etiqueta_seccion(self, texto):
         lbl = Gtk.Label(label=texto)
@@ -519,6 +551,8 @@ class OptimizadorApp:
         if event.keyval == Gdk.KEY_Escape:
             if self.en_proceso_opt:
                 self._cancelar_proceso_opt(None)
+            elif self.en_proceso_recortar:
+                self._cancelar_recorte(None)
             else:
                 self.win.destroy()
             return True
@@ -2235,6 +2269,355 @@ class OptimizadorApp:
     def _abrir_destino_extraer(self, btn):
         if self.ultima_carpeta_salida_extraer and self.ultima_carpeta_salida_extraer.exists():
             subprocess.Popen(["xdg-open", str(self.ultima_carpeta_salida_extraer)])
+
+
+    # =========================================================================
+    # MÓDULO 5: RECORTAR
+    # =========================================================================
+
+    def _construir_tab_recortar(self):
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+
+        caja = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        scroll.add(caja)
+
+        # 1. Carpeta origen con drop zone
+        caja.pack_start(self._etiqueta_seccion("1. CARPETA ORIGEN"), False, False, 0)
+
+        self.caja_drop_recortar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self.caja_drop_recortar.get_style_context().add_class("caja-drop")
+        caja.pack_start(self.caja_drop_recortar, False, False, 0)
+
+        self.caja_drop_recortar.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self.caja_drop_recortar.drag_dest_add_uri_targets()
+        self.caja_drop_recortar.connect("drag-data-received", self._al_soltar_en_recortar)
+
+        fila_sel = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.caja_drop_recortar.pack_start(fila_sel, False, False, 0)
+
+        self.entrada_dir_recortar = Gtk.Entry()
+        self.entrada_dir_recortar.set_editable(False)
+        self.entrada_dir_recortar.set_text(str(self.carpeta_recortar))
+        fila_sel.pack_start(self.entrada_dir_recortar, True, True, 0)
+
+        btn_examinar = Gtk.Button(label="Examinar...")
+        btn_examinar.connect("clicked", self._al_elegir_carpeta_recortar)
+        fila_sel.pack_start(btn_examinar, False, False, 0)
+
+        self.lbl_info_origen_recortar = Gtk.Label(label="Arrastra una carpeta o usa Examinar...")
+        self.lbl_info_origen_recortar.set_halign(Gtk.Align.START)
+        self.lbl_info_origen_recortar.get_style_context().add_class("info-secundaria")
+        self.caja_drop_recortar.pack_start(self.lbl_info_origen_recortar, False, False, 0)
+
+        # 2. Preset de recorte
+        caja.pack_start(self._etiqueta_seccion("2. TIPO DE RECORTE"), False, False, 0)
+
+        fila_presets = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        caja.pack_start(fila_presets, False, False, 0)
+
+        self._preset_btns_recortar = {}
+        self._preset_activo_recortar = "cuadrado"
+
+        for key, label, _pw, _ph in PRESETS_RECORTE:
+            btn = Gtk.Button(label=label)
+            btn.get_style_context().add_class("preset-btn")
+            btn.connect("clicked", self._al_seleccionar_preset_recorte, key)
+            fila_presets.pack_start(btn, True, True, 0)
+            self._preset_btns_recortar[key] = btn
+
+        self._preset_btns_recortar["cuadrado"].get_style_context().add_class("chip-activo")
+
+        # Dimensiones personalizadas (ocultas por defecto)
+        self.fila_dims_custom_recortar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        caja.pack_start(self.fila_dims_custom_recortar, False, False, 0)
+
+        self.fila_dims_custom_recortar.pack_start(Gtk.Label(label="Ancho:"), False, False, 0)
+        adj_w = Gtk.Adjustment(value=800, lower=10, upper=10000, step_increment=10, page_increment=100, page_size=0)
+        self.spin_ancho_recortar = Gtk.SpinButton(adjustment=adj_w)
+        self.spin_ancho_recortar.set_numeric(True)
+        self.fila_dims_custom_recortar.pack_start(self.spin_ancho_recortar, False, False, 0)
+
+        self.fila_dims_custom_recortar.pack_start(Gtk.Label(label=" × Alto:"), False, False, 0)
+        adj_h = Gtk.Adjustment(value=600, lower=10, upper=10000, step_increment=10, page_increment=100, page_size=0)
+        self.spin_alto_recortar = Gtk.SpinButton(adjustment=adj_h)
+        self.spin_alto_recortar.set_numeric(True)
+        self.fila_dims_custom_recortar.pack_start(self.spin_alto_recortar, False, False, 0)
+
+        self.fila_dims_custom_recortar.pack_start(Gtk.Label(label=" px"), False, False, 0)
+        self.fila_dims_custom_recortar.set_no_show_all(True)
+        self.fila_dims_custom_recortar.set_visible(False)
+
+        self.lbl_desc_preset_recortar = Gtk.Label(
+            label="Recorta el cuadrado central más grande posible sin redimensionar."
+        )
+        self.lbl_desc_preset_recortar.set_halign(Gtk.Align.START)
+        self.lbl_desc_preset_recortar.get_style_context().add_class("info-secundaria")
+        caja.pack_start(self.lbl_desc_preset_recortar, False, False, 0)
+
+        # 3. Opciones
+        caja.pack_start(self._etiqueta_seccion("3. POSICIÓN Y FORMATO"), False, False, 0)
+
+        fila_opts = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        caja.pack_start(fila_opts, False, False, 0)
+
+        fila_opts.pack_start(Gtk.Label(label="Posición:"), False, False, 0)
+        self.combo_posicion_recortar = Gtk.ComboBoxText()
+        for key, label in POSICIONES_RECORTE:
+            self.combo_posicion_recortar.append(key, label)
+        self.combo_posicion_recortar.set_active(0)
+        fila_opts.pack_start(self.combo_posicion_recortar, False, False, 0)
+
+        fila_opts.pack_start(Gtk.Label(label="  Formato salida:"), False, False, 0)
+        self.combo_fmt_recortar = Gtk.ComboBoxText()
+        self.combo_fmt_recortar.append("mismo", "Conservar formato")
+        self.combo_fmt_recortar.append("jpg",   "JPG")
+        self.combo_fmt_recortar.append("png",   "PNG")
+        self.combo_fmt_recortar.append("webp",  "WebP")
+        self.combo_fmt_recortar.set_active(0)
+        fila_opts.pack_start(self.combo_fmt_recortar, False, False, 0)
+
+        # 4. Estado y progreso
+        self.lbl_estado_recortar = Gtk.Label(label="Listo. Selecciona una carpeta con imágenes.")
+        self.lbl_estado_recortar.set_halign(Gtk.Align.START)
+        self.lbl_estado_recortar.get_style_context().add_class("estado-texto")
+        caja.pack_start(self.lbl_estado_recortar, False, False, 0)
+
+        self.barra_prog_recortar = Gtk.ProgressBar()
+        self.barra_prog_recortar.set_show_text(True)
+        self.barra_prog_recortar.set_text("")
+        caja.pack_start(self.barra_prog_recortar, False, False, 0)
+
+        # 5. Botones de acción
+        fila_btns = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        caja.pack_start(fila_btns, False, False, 0)
+
+        self.btn_recortar_exec = Gtk.Button(label="✂️  Recortar imágenes")
+        self.btn_recortar_exec.get_style_context().add_class("btn-principal")
+        self.btn_recortar_exec.connect("clicked", self._ejecutar_recorte)
+        fila_btns.pack_start(self.btn_recortar_exec, True, True, 0)
+
+        self.btn_recortar_cancelar = Gtk.Button(label="⏹ Cancelar")
+        self.btn_recortar_cancelar.get_style_context().add_class("btn-cancelar")
+        self.btn_recortar_cancelar.connect("clicked", self._cancelar_recorte)
+        self.btn_recortar_cancelar.set_sensitive(False)
+        fila_btns.pack_start(self.btn_recortar_cancelar, False, False, 0)
+
+        self.btn_recortar_abrir = Gtk.Button(label="📁 Abrir")
+        self.btn_recortar_abrir.connect("clicked", self._abrir_destino_recortar)
+        self.btn_recortar_abrir.set_sensitive(False)
+        fila_btns.pack_start(self.btn_recortar_abrir, False, False, 0)
+
+        return scroll
+
+    def _al_soltar_en_recortar(self, widget, ctx, x, y, data, info, time):
+        uris = data.get_uris()
+        if not uris:
+            return
+        ruta = Path(unquote(urlparse(uris[0]).path))
+        if ruta.is_dir():
+            self._actualizar_carpeta_recortar(ruta)
+        elif ruta.is_file():
+            self._actualizar_carpeta_recortar(ruta.parent)
+
+    def _al_elegir_carpeta_recortar(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Seleccionar carpeta con imágenes a recortar",
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN,   Gtk.ResponseType.OK,
+        )
+        dialog.set_current_folder(str(self.carpeta_recortar))
+        if dialog.run() == Gtk.ResponseType.OK:
+            self._actualizar_carpeta_recortar(Path(dialog.get_filename()))
+        dialog.destroy()
+
+    def _actualizar_carpeta_recortar(self, ruta):
+        self.carpeta_recortar = ruta
+        self.carpeta_compartida = ruta
+        self.entrada_dir_recortar.set_text(str(ruta))
+        try:
+            imgs = [
+                f for f in ruta.iterdir()
+                if f.is_file() and f.suffix.lower() in EXTENSIONES_IMAGEN
+            ]
+            n = len(imgs)
+            self.lbl_info_origen_recortar.set_text(
+                f"{n} imagen{'es' if n != 1 else ''} encontrada{'s' if n != 1 else ''} en {ruta.name}/"
+            )
+            self.lbl_estado_recortar.set_text(f"{n} imágenes detectadas en {ruta.name}/")
+        except PermissionError:
+            self.lbl_info_origen_recortar.set_text("Sin permisos para leer la carpeta.")
+
+    def _al_seleccionar_preset_recorte(self, btn, key):
+        for k, b in self._preset_btns_recortar.items():
+            b.get_style_context().remove_class("chip-activo")
+        self._preset_btns_recortar[key].get_style_context().add_class("chip-activo")
+        self._preset_activo_recortar = key
+
+        descs = {
+            "cuadrado":  "Recorta el cuadrado central más grande posible sin redimensionar.",
+            "4_3":       "Recorta al aspecto 4:3 desde el centro. Ideal para fotos estándar.",
+            "16_9":      "Recorta al aspecto 16:9 desde el centro. Ideal para miniaturas web.",
+            "3_2":       "Recorta al aspecto 3:2 desde el centro. Formato DSLR estándar.",
+            "dni_peru":  "Redimensiona y recorta exactamente a 354×472 px (3×4 cm @ 300 dpi).",
+            "pasaporte": "Redimensiona y recorta exactamente a 413×531 px (35×45 mm ICAO).",
+            "custom":    "Define las dimensiones exactas del recorte en píxeles.",
+        }
+        self.lbl_desc_preset_recortar.set_text(descs.get(key, ""))
+        self.fila_dims_custom_recortar.set_visible(key == "custom")
+
+    def _calcular_dims_recorte(self, img_w, img_h, preset_key, custom_w, custom_h):
+        """Devuelve (crop_w, crop_h, necesita_resize)."""
+        if preset_key == "cuadrado":
+            lado = min(img_w, img_h)
+            return lado, lado, False
+        elif preset_key == "4_3":
+            ratio = 4.0 / 3.0
+        elif preset_key == "16_9":
+            ratio = 16.0 / 9.0
+        elif preset_key == "3_2":
+            ratio = 3.0 / 2.0
+        elif preset_key == "dni_peru":
+            return 354, 472, True
+        elif preset_key == "pasaporte":
+            return 413, 531, True
+        elif preset_key == "custom":
+            return max(10, custom_w), max(10, custom_h), False
+        else:
+            lado = min(img_w, img_h)
+            return lado, lado, False
+
+        # Cálculo para presets de ratio
+        if img_w / img_h >= ratio:
+            crop_h = img_h
+            crop_w = int(img_h * ratio)
+        else:
+            crop_w = img_w
+            crop_h = int(img_w / ratio)
+        return crop_w, crop_h, False
+
+    def _ejecutar_recorte(self, btn):
+        if self.en_proceso_recortar:
+            return
+
+        carpeta = self.carpeta_recortar
+        try:
+            imgs = sorted([
+                f for f in carpeta.iterdir()
+                if f.is_file() and f.suffix.lower() in EXTENSIONES_IMAGEN
+            ])
+        except Exception:
+            imgs = []
+
+        if not imgs:
+            self.lbl_estado_recortar.set_text("No se encontraron imágenes en la carpeta seleccionada.")
+            return
+
+        self.en_proceso_recortar = True
+        self.cancelar_solicitado_recortar = False
+        self.btn_recortar_exec.set_sensitive(False)
+        self.btn_recortar_cancelar.set_sensitive(True)
+        self.btn_recortar_abrir.set_sensitive(False)
+        self.barra_prog_recortar.set_fraction(0.0)
+        self.barra_prog_recortar.set_text(f"0/{len(imgs)}")
+
+        preset_key = self._preset_activo_recortar
+        gravity = self.combo_posicion_recortar.get_active_id() or "Center"
+        fmt     = self.combo_fmt_recortar.get_active_id() or "mismo"
+        custom_w = int(self.spin_ancho_recortar.get_value())
+        custom_h = int(self.spin_alto_recortar.get_value())
+
+        threading.Thread(
+            target=self._procesar_recorte_hilo,
+            args=(imgs, carpeta, preset_key, gravity, fmt, custom_w, custom_h),
+            daemon=True,
+        ).start()
+
+    def _cancelar_recorte(self, btn):
+        self.cancelar_solicitado_recortar = True
+
+    def _procesar_recorte_hilo(self, imgs, carpeta, preset_key, gravity, fmt, custom_w, custom_h):
+        dir_salida = carpeta / "recortadas"
+        dir_salida.mkdir(exist_ok=True)
+
+        total   = len(imgs)
+        exitos  = 0
+        errores = 0
+
+        for idx, src in enumerate(imgs, start=1):
+            if self.cancelar_solicitado_recortar:
+                break
+
+            try:
+                # Obtener dimensiones de la imagen original
+                res = subprocess.run(
+                    ["identify", "-format", "%wx%h", str(src)],
+                    capture_output=True, text=True, timeout=10,
+                )
+                partes = res.stdout.strip().split("x")
+                if res.returncode != 0 or len(partes) < 2:
+                    errores += 1
+                    continue
+                img_w, img_h = int(partes[0]), int(partes[1])
+
+                crop_w, crop_h, necesita_resize = self._calcular_dims_recorte(
+                    img_w, img_h, preset_key, custom_w, custom_h
+                )
+
+                # Destino
+                ext_salida = src.suffix if fmt == "mismo" else f".{fmt}"
+                dst = dir_salida / (src.stem + ext_salida)
+
+                # Comando ImageMagick
+                if necesita_resize:
+                    cmd = [
+                        "convert", str(src),
+                        "-gravity", gravity,
+                        "-resize", f"{crop_w}x{crop_h}^",
+                        "-crop",   f"{crop_w}x{crop_h}+0+0",
+                        "+repage", str(dst),
+                    ]
+                else:
+                    cmd = [
+                        "convert", str(src),
+                        "-gravity", gravity,
+                        "-crop",   f"{crop_w}x{crop_h}+0+0",
+                        "+repage", str(dst),
+                    ]
+
+                subprocess.run(cmd, capture_output=True, check=True, timeout=30)
+                exitos += 1
+
+            except Exception:
+                errores += 1
+
+            fraccion = idx / total
+            GLib.idle_add(self.barra_prog_recortar.set_fraction, fraccion)
+            GLib.idle_add(self.barra_prog_recortar.set_text, f"{idx}/{total}")
+
+        def _finalizar():
+            self.en_proceso_recortar = False
+            self.btn_recortar_exec.set_sensitive(True)
+            self.btn_recortar_cancelar.set_sensitive(False)
+            self.btn_recortar_abrir.set_sensitive(exitos > 0)
+            self.ultima_carpeta_salida_recortar = dir_salida
+            self.barra_prog_recortar.set_fraction(1.0 if exitos else 0.0)
+            sufijo_err = f", {errores} con error" if errores else ""
+            self.barra_prog_recortar.set_text(f"✓ {exitos} recortadas{sufijo_err}")
+            self.lbl_estado_recortar.set_text(
+                f"✓ {exitos} imágenes guardadas en recortadas/{sufijo_err}"
+            )
+            notificar("Recorte completado", f"{exitos} imágenes guardadas en {dir_salida.name}/")
+            return False
+
+        GLib.idle_add(_finalizar)
+
+    def _abrir_destino_recortar(self, btn):
+        if self.ultima_carpeta_salida_recortar and self.ultima_carpeta_salida_recortar.exists():
+            subprocess.Popen(["xdg-open", str(self.ultima_carpeta_salida_recortar)])
 
 
 def main():
