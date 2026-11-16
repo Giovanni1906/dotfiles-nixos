@@ -28,7 +28,7 @@ THORIUM_URL="https://github.com/Alex313031/Thorium/releases/download/M128.0.6613
 CONTEXT_HUB_REPO="https://github.com/Giovanni1906/context-hub.git"
 SIMULAR=0
 AVISOS=()
-MODULOS_ORDEN=(escritorio tema desarrollo desarrollo-apps remoto ia juegos)
+MODULOS_ORDEN=(escritorio tema desarrollo desarrollo-apps remoto ia multimedia juegos)
 MODULOS_YA_CONFIGURADOS=0
 
 # Flakes requeridos para evaluar módulos como ia.nix (builtins.getFlake)

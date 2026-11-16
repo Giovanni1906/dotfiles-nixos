@@ -46,8 +46,17 @@
 
   # Fuentes del sistema (la del tema se elige en tema/tema.conf)
   fonts.packages = with pkgs; [
+    # Iconos y tipografía de terminal
     font-awesome                # Iconos clásicos (batería, wifi, etc.)
     nerd-fonts.jetbrains-mono   # La tipografía con iconos integrados
+
+    # Fuentes de documentos (OnlyOffice, Zathura, navegador, etc.)
+    corefonts                   # Arial, Times New Roman, Courier New, Verdana, Georgia, Impact…
+    vista-fonts                 # Calibri, Cambria, Candara, Consolas, Constantia, Corbel (Word moderno)
+    liberation_ttf              # Alternativas libres métricamente compatibles con las de Microsoft
+    noto-fonts                  # Cobertura Unicode amplia (tildes, símbolos, idiomas)
+    noto-fonts-cjk-sans         # Chino, japonés y coreano
+    dejavu_fonts                # DejaVu Sans/Serif/Mono — sustitutos robustos para textos mixtos
   ];
 
   # --------------------------------------------------
@@ -115,6 +124,8 @@
     onlyoffice-desktopeditors   # Editor de documentos
     zathura                     # Para visualizar pdf
     imv                         # Para visualizar imágenes
+    amberol                     # Reproductor gráfico de audio y música (GTK4)
+    mpv                         # Reproductor universal de video y audio
 
     # Calendario flotante del reloj (clic derecho). El script sigue en el repo.
     (let
@@ -137,46 +148,7 @@
       export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
       exec ${calendarioPython}/bin/python3 "$HOME/dotfiles/config/waybar/scripts/calendario.py"
     '')
-
-    # Utilidad gráfica de descargas (yt-dlp) y conversión multimedia (ffmpeg) (SUPER + D).
-    (let
-      multimediaPython = python3.withPackages (ps: [
-        ps.pygobject3
-      ]);
-    in writeShellScriptBin "multimedia" ''
-      export GDK_BACKEND=wayland
-      export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [
-        glib.out
-        pango.out
-        gtk3
-        gdk-pixbuf
-        atk
-        harfbuzz
-        gobject-introspection
-      ]}"
-      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
-      exec ${multimediaPython}/bin/python3 "$HOME/dotfiles/utils/multimedia.py"
-    '')
-
-    # Utilidad gráfica para optimizar y redimensionar imágenes (SUPER + I).
-    (let
-      optimizarImagenesPython = python3.withPackages (ps: [
-        ps.pygobject3
-      ]);
-    in writeShellScriptBin "optimizar-imagenes" ''
-      export GDK_BACKEND=wayland
-      export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [
-        glib.out
-        pango.out
-        gtk3
-        gdk-pixbuf
-        atk
-        harfbuzz
-        gobject-introspection
-      ]}"
-      export XDG_DATA_DIRS="${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}''${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
-      exec ${optimizarImagenesPython}/bin/python3 "$HOME/dotfiles/utils/optimizar-imagenes.py"
-    '')
+    # Nota: los binarios 'multimedia' y 'optimizar-imagenes' están en multimedia.nix (módulo opcional)
   ];
 
   environment.shellAliases = {

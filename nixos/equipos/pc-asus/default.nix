@@ -16,8 +16,9 @@
     ../../modulos/desarrollo-apps.nix
     ../../modulos/remoto.nix
     ../../modulos/impresion.nix    # CUPS, drivers y utilidades de impresión
+    ../../modulos/multimedia.nix   # Descargas, conversión, imágenes y pipeline de voz
     ../../modulos/ia.nix           # Agentes de IA y MCP context-hub
-    ../../modulos/juegos.nix     # Steam, Heroic, Lutris
+    ../../modulos/juegos.nix       # Steam, Heroic, Lutris
   ];
 
   dotfiles.equipo = "pc-asus";
