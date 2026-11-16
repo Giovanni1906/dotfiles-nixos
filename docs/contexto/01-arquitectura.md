@@ -23,7 +23,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
 | Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor Catppuccin del color de cada tema (`catppuccin-mocha-<color>-cursors`, 24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
-| Audio | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar) |
+| Audio y Multimedia | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar), reproductores `amberol` (audio/música GTK4) y `mpv` (video/audio), y utilidades propias GTK3 (`multimedia.py`, `optimizar-imagenes.py`, `voz-limpia.py`) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente), AnyDesk (respaldo con espejo Web Archive) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
@@ -47,6 +47,7 @@ dotfiles/
 │   │   ├── desarrollo-apps.nix  # Flutter, Dart, Android Studio, Android SDK/ADB, JDK 17 y toolchain de escritorio Linux
 │   │   ├── remoto.nix           # Tailscale, OpenSSH (solo por Tailscale), Valent, WayVNC, Remmina, tmux y sus puertos
 │   │   ├── impresion.nix        # CUPS, drivers (HP, Brother, Epson, Canon), Avahi mDNS y alias imprimir
+│   │   ├── multimedia.nix       # Herramientas creativas y apps GTK3: multimedia, optimizar-imagenes y voz-limpia
 │   │   ├── ia.nix               # Agentes de IA (agy, claude, cursor, hermes), MCP context-hub y alias context-init
 │   │   └── juegos.nix           # Steam, Heroic, Lutris
 │   └── equipos/                 # Una carpeta por máquina (sin hardware)
@@ -72,6 +73,9 @@ dotfiles/
 │   ├── atajos.sh + atajos.txt   # Lista única de atajos (SUPER + F1)
 │   ├── mover-ventana.sh         # Mover la ventana en el mosaico o al otro monitor (SUPER + SHIFT + flechas)
 │   ├── impresion.sh             # Menú interactivo en Rofi para plotter e impresoras estándar (SUPER + P)
+│   ├── multimedia.py + .sh      # App GTK3 de descargas (yt-dlp) y conversión (ffmpeg) (SUPER + D)
+│   ├── optimizar-imagenes.py + .sh # App GTK3 de optimización, recorte y conversión de imágenes (SUPER + I)
+│   ├── voz-limpia.py + .sh + voz_limpia/ # App GTK3 modular de limpieza de voz con IA y comparador A/B (SUPER + A)
 │   ├── nix-config.sh            # Menú en terminal: elegir qué parte de nixos/ editar y aplicarla (alias nix-config)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   ├── historial-notificaciones.sh # Historial de Mako en Rofi (SUPER + F3)
