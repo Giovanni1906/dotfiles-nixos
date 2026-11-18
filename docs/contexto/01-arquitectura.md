@@ -23,7 +23,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Bloqueo de pantalla | `hyprlock` (`programs.hyprlock`, con su PAM) con el diseño del login; `hypridle` lo abre antes de suspender |
 | Temas | Presets en `tema/temas/*.conf`; GTK `dotfiles-tema` (`adw-gtk3-dark` con la paleta del tema; `Adwaita-dark` en GTK2), iconos `dotfiles-iconos` (`Papirus-Dark` con las carpetas del color del tema), cursor Catppuccin del color de cada tema (`catppuccin-mocha-<color>-cursors`, 24 px), fuentes `JetBrainsMono Nerd Font` + `font-awesome` |
 | Archivos | Thunar + `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `gvfs` |
-| Audio y Multimedia | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar), reproductores `amberol` (audio/música GTK4) y `mpv` (video/audio), y utilidades propias GTK3 (`multimedia.py`, `optimizar-imagenes.py`, `voz-limpia.py`) |
+| Audio y Multimedia | PipeWire (ALSA + Pulse), `pwvucontrol` (clic en el volumen de Waybar), capturas (`grim` + `slurp`), grabador de pantalla continuo multimonitor (`wf-recorder` con `SUPER + SHIFT + R`), reproductores `amberol` (audio/música GTK4) y `mpv` (video/audio), y utilidades propias GTK3 (`multimedia.py`, `optimizar-imagenes.py`, `voz-limpia.py`) |
 | Celular | Valent (implementación GTK de KDE Connect), puertos 1714–1764 TCP/UDP |
 | Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente), AnyDesk (respaldo con espejo Web Archive) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |

@@ -268,3 +268,15 @@
 - **Consecuencias**:
   - Positivas: Bugsito evoluciona en su propio repositorio público con soporte para cualquier PC Linux (con o sin `dotfiles`, Wayland LayerShell o X11 flotante, Piper propio o `voz.sh`) y flexibilidad total de LLMs (IP local o Token vía Genkit), manteniendo 100% de la integración estética y funcional en NixOS.
   - Negativas: Requiere clonar `~/Proyectos/bugsito` (automatizado desde `./init.sh`).
+
+## ADR-035: Grabación de pantalla continua multimonitor para Hyprland sin cortes por workspace (`wf-recorder`)
+- **Fecha**: 2026-11-18
+- **Contexto**: El sistema carecía de un grabador de pantalla configurado. El usuario reportó que las grabaciones previas se cortaban al cambiar de workspace en Hyprland (del 1 al 2, 10, etc.), causado por atar la captura a ventanas o regiones que se desmapean al salir del escritorio virtual, o por geometrías cruzadas en multimonitor.
+- **Decisión**: Se integró `pkgs.wf-recorder` en `nixos/modulos/escritorio.nix` y se desarrolló `utils/grabar-pantalla.sh`:
+  1. **Captura por Salida Física (`-o OUTPUT`)**: Al capturar la salida de pantalla directamente mediante `wlr-screencopy-unstable-v1`, los cambios de workspace (`SUPER + 1-9,0`) ocurren dentro del mismo flujo de renderizado del compositor sin interrumpir el stream ni cerrar el contenedor MP4.
+  2. **Multimonitor y Áreas**: Menú Rofi dinámico para elegir: pantalla enfocada/actual, monitor específico (`DP-3`, `DP-2`), ambas pantallas combinadas (captura paralela sincronizada con ensamblado panorámico automático vía `ffmpeg hstack`) o recorte por ratón (`slurp`).
+  3. **Opciones de Audio**: Soporta micrófono (`@DEFAULT_SOURCE@`), sonido del sistema (`@DEFAULT_SINK@.monitor`) o video mudo.
+  4. **Atajo Toggle Global**: `SUPER + SHIFT + R` en `config/hypr/hyprland.conf` y `utils/atajos.txt`. Al presionar inicia el menú; al presionar mientras graba, finaliza la grabación limpiamente con `SIGINT` (cerrando el contenedor MP4 sin corrupción), notifica ruta/peso/duración y emite sonido de confirmación en `~/Vídeos/Grabaciones/`.
+- **Consecuencias**:
+  - Positivas: Cero interrupciones al cambiar de workspace; soporte completo para configuraciones de uno o dos monitores; formato universal H.264 `yuv420p`.
+  - Negativas: Ninguna.

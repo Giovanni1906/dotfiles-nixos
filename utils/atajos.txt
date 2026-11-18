@@ -33,6 +33,7 @@ Hyprland | SUPER + Arrastrar clic izq. | Mover ventana con el ratón
 Hyprland | SUPER + Arrastrar clic der. | Redimensionar ventana con el ratón
 Hyprland | Impr Pant                   | Captura completa (portapapeles + ~/Imágenes/CapturasPantalla)
 Hyprland | SUPER + SHIFT + S           | Captura de un área (portapapeles + archivo)
+Hyprland | SUPER + SHIFT + R           | Iniciar o detener grabación de pantalla (menú / toggle continuo)
 Hyprland | Escape (gestor de volumen)  | Cerrar el gestor de volumen
 
 Kitty    | CTRL + Rueda del ratón      | Aumentar / reducir el tamaño de la fuente

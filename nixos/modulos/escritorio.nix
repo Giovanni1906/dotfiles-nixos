@@ -92,6 +92,7 @@
     xsel                        # Gestión del portapapeles en X11/XWayland (OnlyOffice, etc.)
     grim                        # El capturador
     slurp                       # El selector de área
+    wf-recorder                 # Grabador de pantalla continuo para Wayland (sin cortes al cambiar de workspace)
     networkmanagerapplet        # Gestor de red
     pwvucontrol                 # Gestor de volumen gráfico de PipeWire (clic en el volumen de Waybar)
     pulseaudio                  # Proporciona el comando 'paplay' para reproducir el sonido (.oga)
