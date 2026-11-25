@@ -41,7 +41,7 @@
   # Atajos de la infraestructura de admisión
   environment.shellAliases = {
     k-prod = "kubectl --kubeconfig=\"/home/admision/.kube/dalthon-server-kubeconfig.yaml\"";
-    stern-prod = "stern --kubeconfig=\"/home/admision/.kube/dalthon-server-kubeconfig.yaml\"";
+    stern-prod = "~/dotfiles/utils/stern-prod.sh";
     open-conexion = "/home/admision/Utilidades/open-conexion.sh";
     local-open-conexion = "/home/admision/Utilidades/local_open-conexion.sh";
     backups-dev-restore = "~/dotfiles/utils/backups_impresiones_local.sh";
