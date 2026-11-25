@@ -45,7 +45,7 @@ cd ~/dotfiles
 
 `init.sh` pregunta qué equipo es esta máquina. Si eliges "Nuevo equipo", crea `nixos/equipos/<nombre>` desde la plantilla con la versión de NixOS de la instalación y te permite elegir interactivamente qué módulos activar (para no descargar herramientas pesadas como apps de desarrollo o agentes de IA si no las necesitas). Después:
 
-1. Enlaza `config/` en `~/.config`, aplica el tema y crea los archivos locales (`.env`, `config/hypr/local.conf`).
+1. Enlaza `config/` en `~/.config`, aplica el tema, crea los archivos locales (`.env`, `config/hypr/local.conf`), sincroniza `context-hub` en `~/Proyectos/context-hub` y pregunta si deseas instalar el asistente de voz **Bugsito** (antes Jarvis) en `~/Proyectos/bugsito`.
 2. Escribe `/etc/nixos/configuration.nix` apuntando al equipo, conserva el `hardware-configuration.nix` de la máquina y ejecuta `nixos-rebuild switch`. Lo que reemplaza lo deja en `/etc/nixos/*.respaldo-<fecha>`.
 3. Instala Zen Browser (Flatpak) y Thorium (AppImage) si faltan.
 4. Inicia sesión en Tailscale si no hay sesión.
@@ -85,6 +85,8 @@ Comprueba que funciona con `git ls-remote origin HEAD` (debe responder sin pedir
 | Activar o quitar un grupo de cosas (juegos, desarrollo) | `nix-config` → "Activar o quitar módulos" y aplicar |
 | Ajustar monitores o touchpad de esta máquina | `config/hypr/local.conf` (no se versiona) |
 | Cambiar el tema | `SUPER + F2` |
+| Instalar o actualizar el asistente de voz Bugsito | `./init.sh bugsito` (lo clona en `~/Proyectos/bugsito` y enlaza `~/.config/bugsito/config.toml`) |
+| Cambiar el LLM de Bugsito (local por IP o por Token) | `bugsito llm list`, `bugsito llm mode <local\|token\|auto>`, `bugsito llm use <perfil>` |
 
 ### Si una generación no arranca
 
@@ -111,9 +113,16 @@ Cómo funciona:
 - La pantalla de bloqueo (`config/hypr/hyprlock.conf`) tiene el mismo diseño que el inicio de sesión. `hypridle` (`config/hypr/hypridle.conf`) la abre antes de cada suspensión. Para bloquear sin suspender, `SUPER + X` → Bloquear: la red, WayVNC y lo que corre en segundo plano siguen activos, y se puede desbloquear escribiendo la contraseña desde AVNC (por Tailscale).
 - El cursor y los iconos de un tema deben estar instalados (`nixos/modulos/escritorio.nix`): hay un cursor Catppuccin por tema (celeste, rojo, rosa, azul, amarillo y malva) y `papirus-icon-theme`. Si el cursor de un tema aún no está instalado, `tema-aplicar` avisa y mantiene el actual hasta el `nix-switch`.
 
+## Asistente de voz Bugsito (antes Jarvis) y motor Multi-LLM con Genkit
+
+El asistente de voz interactivo vive en su propio repositorio público ([`Giovanni1906/bugsito`](https://github.com/Giovanni1906/bugsito)) y se clona en **`~/Proyectos/bugsito`** (si eliges `S` durante `./init.sh` o ejecutando `./init.sh bugsito`).
+
+- **Integración con `dotfiles`**: Lee en tiempo real los colores del tema activo desde `~/dotfiles/tema/tema.conf`, utiliza `~/dotfiles/utils/voz.sh` para síntesis de voz con Piper TTS y se lanza con **`SUPER + SPACE`** (`utils/bugsito.sh`). Su configuración versionada para este ecosistema está en `config/bugsito/config.toml` (enlazada en `~/.config/bugsito/config.toml`).
+- **Configuración de LLMs con Firebase Genkit**: Soporta modo **`local`** (por IP/Tailscale hacia Ollama en la Mac Mini o localhost), modo **`token`** (mediante API Key para Google Gemini, OpenAI, Groq o DeepSeek) y modo **`auto`** (fallback automático entre perfiles). Los secretos y tokens se configuran en `~/.config/bugsito/.env` o en `~/dotfiles/.env`.
+
 ## Variables de entorno y `.env`
 
-`.env` guarda valores sensibles y locales (`PASS_SWAYLOCK` para el desbloqueo remoto, `CONTEXT_HUB_URL` con la URL del servidor MCP por Tailscale, `VALENT_DEVICE_ID` con el ID del celular en Valent y `NTFY_TOPIC` para notificaciones móviles con ntfy). `init.sh` lo crea desde `.env.example` con permisos `600`; edítalo con tus valores.
+`.env` guarda valores sensibles y locales (`PASS_SWAYLOCK` para el desbloqueo remoto, `CONTEXT_HUB_URL` con la URL del servidor MCP por Tailscale, `VALENT_DEVICE_ID` con el ID del celular en Valent, `NTFY_TOPIC` para notificaciones móviles con ntfy y las variables opcionales `BUGSITO_LLM_*` / `GEMINI_API_KEY` / `OPENAI_API_KEY` para el motor Genkit de Bugsito). `init.sh` lo crea desde `.env.example` con permisos `600`; edítalo con tus valores.
 
 - No subas `.env` (está en `.gitignore`).
 - Mantén `.env.example` con placeholders y documenta aquí cada variable nueva.

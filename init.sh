@@ -5,12 +5,13 @@
 # Uso: ./init.sh [paso] [opciones]
 #
 #   (sin paso) | todo [equipo]  Máquina nueva: usuario, sistema, apps y red
-#   usuario                     Enlaces de config/, tema, permisos, context-hub y archivos locales
+#   usuario                     Enlaces de config/, tema, permisos, context-hub, bugsito y archivos locales
 #   sistema [equipo]            /etc/nixos usa el equipo del repo + nixos-rebuild switch
 #   modulos [equipo]            Elige qué módulos activar/desactivar en un equipo
+#   bugsito                     Instala o actualiza el asistente de voz Bugsito (antes Jarvis) en ~/Proyectos/bugsito
 #   apps                        Zen Browser (Flatpak) y Thorium (AppImage), si faltan
 #   red                         Inicia sesión en Tailscale, si no hay sesión
-#   actualizar                  git pull (dotfiles + context-hub) + usuario + sistema (alias dotfiles-actualizar)
+#   actualizar                  git pull (dotfiles + context-hub + bugsito) + usuario + sistema (alias dotfiles-actualizar)
 #   nuevo-equipo <nombre>       Crea nixos/equipos/<nombre> desde la plantilla
 #
 #   --simular                   Muestra lo que haría con sudo, sin ejecutarlo
@@ -26,6 +27,7 @@ FECHA="$(date +%Y%m%d-%H%M%S)"
 RESPALDO="$HOME/.local/state/dotfiles/respaldo/$FECHA"
 THORIUM_URL="https://github.com/Alex313031/Thorium/releases/download/M128.0.6613.189/Thorium_Browser_128.0.6613.189_AVX2.AppImage"
 CONTEXT_HUB_REPO="https://github.com/Giovanni1906/context-hub.git"
+BUGSITO_REPO="https://github.com/Giovanni1906/bugsito.git"
 SIMULAR=0
 AVISOS=()
 MODULOS_ORDEN=(escritorio tema desarrollo desarrollo-apps remoto ia multimedia juegos)
@@ -40,7 +42,7 @@ ok()     { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 aviso()  { printf '  \033[33m!\033[0m %s\n' "$*"; AVISOS+=("$*"); }
 error()  { printf '\n\033[1;31m✗ %s\033[0m\n' "$*" >&2; exit 1; }
 
-ayuda() { sed -n '5,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+ayuda() { sed -n '5,21p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 # --- SUDO ---
 SUDO_ACTIVO=0
@@ -320,6 +322,7 @@ EOF
     fi
 
     sincronizar_context_hub
+    sincronizar_bugsito "${1:-preguntar}"
 }
 
 # Clona o actualiza el repositorio de context-hub y ejecuta su instalador de cliente
@@ -352,6 +355,75 @@ sincronizar_context_hub() {
             ok "Cliente Context Hub instalado (context-init, context-menu y agentes MCP)"
         else
             aviso "No se pudo instalar el modo cliente de context-hub"
+        fi
+    fi
+}
+
+# Inicializa/actualiza el asistente de voz Bugsito (antes Jarvis).
+# Prioridad: submódulo en ~/dotfiles/bugsito/ → ~/Proyectos/bugsito → clona en Proyectos.
+sincronizar_bugsito() {
+    local modo="${1:-preguntar}"
+
+    # 1. Submódulo integrado en dotfiles (ruta canónica)
+    local submod_dir="$DOTFILES/bugsito"
+    if [ -f "$submod_dir/.git" ] || [ -d "$submod_dir/.git" ]; then
+        git -C "$DOTFILES" submodule update --init --remote bugsito > /dev/null 2>&1 || true
+        ok "Bugsito al día (submódulo ~/dotfiles/bugsito)"
+        bg_dir="$submod_dir"
+    else
+        # 2. Repo externo (ubicaciones legacy)
+        local bg_dir="$HOME/Proyectos/bugsito"
+        if [ ! -d "$bg_dir/.git" ] && [ -d "$HOME/Proyectos/personal/bugsito/.git" ]; then
+            bg_dir="$HOME/Proyectos/personal/bugsito"
+        elif [ ! -d "$bg_dir/.git" ] && [ -d "$HOME/.local/share/bugsito/.git" ]; then
+            bg_dir="$HOME/.local/share/bugsito"
+        fi
+
+        if [ -d "$bg_dir/.git" ]; then
+            if [ "$modo" = "preguntar" ] && [ -t 0 ]; then
+                local r=""
+                read -rp "  ¿Deseas sincronizar/activar el asistente de voz Bugsito? [S/n] " r
+                if [[ "$r" =~ ^[nN] ]]; then
+                    ok "Bugsito omitido"
+                    return 0
+                fi
+            fi
+            if git -C "$bg_dir" pull --rebase --autostash > /dev/null 2>&1; then
+                ok "Bugsito al día (${bg_dir/#$HOME/\~})"
+            else
+                aviso "No se pudo actualizar bugsito desde GitHub (revisa conexión o git status en ${bg_dir/#$HOME/\~})"
+            fi
+        else
+            if [ "$modo" = "auto" ]; then
+                return 0
+            fi
+            if [ "$modo" = "preguntar" ] && [ -t 0 ]; then
+                local r=""
+                read -rp "  ¿Deseas instalar el asistente de voz Bugsito en ~/Proyectos/bugsito? [S/n] " r
+                if [[ "$r" =~ ^[nN] ]]; then
+                    ok "Bugsito omitido (puedes instalarlo con ./init.sh bugsito)"
+                    return 0
+                fi
+            fi
+            mkdir -p "$(dirname "$bg_dir")"
+            if git clone -q "$BUGSITO_REPO" "$bg_dir" 2> /dev/null; then
+                ok "Bugsito clonado en ${bg_dir/#$HOME/\~}"
+            else
+                aviso "No se pudo clonar bugsito ($BUGSITO_REPO): verifica tu conexión"
+                return 0
+            fi
+        fi
+    fi
+
+    if [ -f "$DOTFILES/config/bugsito/config.toml" ]; then
+        enlazar "$DOTFILES/config/bugsito/config.toml" "$HOME/.config/bugsito/config.toml"
+    fi
+
+    if [ -x "$bg_dir/scripts/install-client.sh" ]; then
+        if "$bg_dir/scripts/install-client.sh" --non-interactive > /dev/null; then
+            ok "Cliente Bugsito instalado (comandos bugsito/jarvis, tema conectado y motor Genkit)"
+        else
+            aviso "No se pudo instalar el cliente de Bugsito"
         fi
     fi
 }
@@ -532,8 +604,9 @@ paso_red() {
 paso_actualizar() {
     titulo "Actualizar el repo"
     git -C "$DOTFILES" pull --rebase --autostash || error "git pull falló: resuelve el conflicto y vuelve a ejecutar"
+    git -C "$DOTFILES" submodule update --init --remote > /dev/null 2>&1 && ok "Submódulos al día" || true
     ok "Repo al día"
-    paso_usuario
+    paso_usuario "auto"
     paso_sistema
 }
 
@@ -568,6 +641,7 @@ main() {
         usuario)      paso_usuario ;;
         sistema)      paso_sistema "${args[1]:-}" ;;
         modulos)      local eq; eq=$(elegir_equipo "${args[1]:-}"); seleccionar_modulos_equipo "$eq" ;;
+        bugsito|jarvis) titulo "Asistente de voz: Bugsito"; sincronizar_bugsito "forzar" ;;
         apps)         paso_apps ;;
         red)          paso_red ;;
         actualizar)   paso_actualizar ;;

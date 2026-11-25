@@ -28,7 +28,7 @@ Repositorio de **dotfiles personales** para un escritorio **NixOS + Hyprland** (
 | Acceso remoto | Tailscale (VPN), OpenSSH (`:22` solo en `tailscale0` + `tmux`), WayVNC solo en la IP de Tailscale (`:5900`, cliente AVNC en el celular; activo desde el login `nwg-hello` y en la sesión), Remmina (cliente), AnyDesk (respaldo con espejo Web Archive) |
 | Desarrollo | Docker, libvirtd/virt-manager (QEMU + swtpm), VS Code, Sublime Text, Figma, Postman, Navicat, FileZilla |
 | Desarrollo de Apps | Flutter, Dart, Android Studio, SDK/ADB (`android-tools`), OpenJDK 17, Chromium, toolchain Linux Desktop (Clang, CMake, Ninja, GTK3); módulo `desarrollo-apps.nix` |
-| IA | Antigravity CLI (`agy`), Claude Code (`claude`), Claude Desktop GUI, Cursor, Hermes Agent (`hermes`), asistente de voz Jarvis (`SUPER + SPACE` con widget LayerShell) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
+| IA | Antigravity CLI (`agy`), Claude Code (`claude`), Claude Desktop GUI, Cursor, Hermes Agent (`hermes`), asistente de voz Bugsito (`SUPER + SPACE` con widget LayerShell, repositorio independiente `Giovanni1906/bugsito` en `~/Proyectos/bugsito` con motor Multi-LLM Genkit) y configuración automática del MCP `context-hub` (`CONTEXT_HUB_URL` en `.env`); módulo `ia.nix` |
 | Juegos | Steam, Heroic, Lutris, ProtonUp-Qt (módulo opcional por equipo) |
 | Apps fuera de nixpkgs | Flatpak (Zen Browser, desde Flathub) y AppImage (Thorium, vía `appimage-run`) |
 
@@ -75,7 +75,7 @@ dotfiles/
 │   ├── impresion.sh             # Menú interactivo en Rofi para plotter e impresoras estándar (SUPER + P)
 │   ├── multimedia.py + .sh      # App GTK3 de descargas (yt-dlp) y conversión (ffmpeg) (SUPER + D)
 │   ├── optimizar-imagenes.py + .sh # App GTK3 de optimización, recorte y conversión de imágenes (SUPER + I)
-│   ├── voz-limpia.py + .sh + voz_limpia/ # App GTK3 modular de limpieza de voz con IA y comparador A/B (SUPER + A)
+│   ├── voz-limpia.py + .sh + voz_limpia/ # App GTK3 modular de limpieza, reconstrucción Vocos 48 kHz con IA y comparador A/B (SUPER + A)
 │   ├── nix-config.sh            # Menú en terminal: elegir qué parte de nixos/ editar y aplicarla (alias nix-config)
 │   ├── wayvnc-tailscale.sh      # WayVNC solo en la IP de Tailscale (al iniciar sesión, alias remote-conexion)
 │   ├── historial-notificaciones.sh # Historial de Mako en Rofi (SUPER + F3)

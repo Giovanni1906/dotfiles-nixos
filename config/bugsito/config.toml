@@ -1,0 +1,114 @@
+# =============================================================================
+# Configuración de Bugsito (antes Jarvis) integrada con Dotfiles NixOS
+# =============================================================================
+# Se enlaza en ~/.config/bugsito/config.toml mediante `./init.sh`.
+# Los secretos (IPs o Tokens de LLM) se leen desde ~/.config/bugsito/.env y ~/dotfiles/.env.
+
+[general]
+name = "Bugsito"
+wake_words = ["bugsito", "jarvis"]
+language = "es"
+timeout_seconds = 12
+
+[ui]
+anchor_bottom = true
+anchor_right = true
+margin_bottom = 55
+margin_right = 35
+width = 260
+height = 260
+font_family = "JetBrainsMono Nerd Font"
+
+[theme]
+# Extrae dinámicamente ACENTO, SECUNDARIO e INFO del tema activo en dotfiles
+env_file = "~/dotfiles/tema/tema.conf"
+accent = "#a77bf3"
+secondary = "#7ee08f"
+info = "#8fd3f4"
+
+[audio]
+whisper_model_dir = "~/.local/share/whisper"
+whisper_model_name = "ggml-base.bin"
+whisper_model_url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
+whisper_prompt = "Bugsito, Jarvis, Hermes, terminal, proyecto, git, dotfiles, código, abre, ejecuta, corre, cursor"
+external_tts_cmd = "~/dotfiles/utils/voz.sh --silencio"
+piper_model_dir = "~/.local/share/piper"
+piper_default_voice = "es_MX-claude-high"
+espeak_voice = "es-419"
+
+[workspace]
+projects_dirs = ["~/Proyectos", "~/Proyectos/personal", "~/dotfiles"]
+default_editor = "cursor"
+terminal = "kitty"
+browser = "flatpak run app.zen_browser.zen"
+file_manager = "thunar"
+lock_command = "hyprlock"
+
+# =============================================================================
+# Motor Multi-LLM con Firebase Genkit (Modo Local por IP o por Token)
+# =============================================================================
+[llm]
+# mode: "local" (solo IP/Tailscale), "token" (solo API Key Cloud), "auto" (fallback automático)
+mode = "auto"
+active_profile = "mac-ollama"
+fallback_order = ["mac-ollama", "gemini", "openai", "groq", "local-ollama"]
+use_genkit_server = true
+genkit_server_url = "http://127.0.0.1:3400"
+
+system_prompt = """Eres Bugsito, el asistente de voz inteligente del sistema NixOS de Nova. \
+Responde siempre en español de forma natural, concisa y directa (máximo 1 o 2 oraciones breves). \
+Sin texto de relleno, sin markdown ni listas, optimizado para ser leído en voz alta por TTS."""
+
+[llm.profiles.mac-ollama]
+type = "local"
+provider = "ollama"
+# "auto" usa BUGSITO_OLLAMA_HOST o deduce la IP de CONTEXT_HUB_URL en ~/dotfiles/.env
+host = "auto"
+port = 11434
+model = "llama3.1:8b"
+timeout = 8
+
+[llm.profiles.local-ollama]
+type = "local"
+provider = "ollama"
+host = "http://127.0.0.1"
+port = 11434
+model = "llama3.1:8b"
+timeout = 8
+
+[llm.profiles.gemini]
+type = "token"
+provider = "googleai"
+model = "gemini-2.5-flash"
+api_key_env = "GEMINI_API_KEY"
+timeout = 10
+
+[llm.profiles.openai]
+type = "token"
+provider = "openai"
+base_url = "https://api.openai.com/v1"
+model = "gpt-4o-mini"
+api_key_env = "OPENAI_API_KEY"
+timeout = 10
+
+[llm.profiles.groq]
+type = "token"
+provider = "openai-compatible"
+base_url = "https://api.groq.com/openai/v1"
+model = "llama-3.3-70b-versatile"
+api_key_env = "GROQ_API_KEY"
+timeout = 8
+
+[llm.profiles.deepseek]
+type = "token"
+provider = "openai-compatible"
+base_url = "https://api.deepseek.com/v1"
+model = "deepseek-chat"
+api_key_env = "DEEPSEEK_API_KEY"
+timeout = 10
+
+[skills.custom]
+"hermes" = { cmd = "kitty --class hermes-agent -e hermes", response = "Iniciando Hermes Agent." }
+"claude" = { cmd = "kitty -e claude", response = "Iniciando Claude Code." }
+"antigravity" = { cmd = "kitty -e agy", response = "Iniciando Antigravity." }
+"lazydocker" = { cmd = "kitty --class lazydocker -e lazydocker", response = "Abriendo Lazydocker." }

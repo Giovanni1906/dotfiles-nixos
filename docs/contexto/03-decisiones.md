@@ -238,16 +238,33 @@
 ## ADR-033: Asistente de voz Jarvis con widget de bola de energía flotante en Hyprland
 - **Fecha**: 2026-11-12
 - **Contexto**: Se requería un asistente de voz interactivo ("Jarvis") integrado al escritorio NixOS / Hyprland que permitiera dictar comandos por voz, ejecutarlos en proyectos, terminal o agentes de IA, y recibir respuesta hablada por altavoces, acompañado de una interfaz visual tipo reactor arc / bola de energía reactiva en la esquina inferior derecha.
-- **Decisión**: Se implementó una arquitectura en capas:
-  1. **Disparador y Atajo**: `SUPER + SPACE` (Hyprland `bind` en `config/hypr/hyprland.conf` y `utils/atajos.txt`) ejecuta `utils/jarvis.sh`. Funciona en modo toggle: la primera pulsación abre el asistente e inicia la captura; pulsar `Espacio` (o `SUPER + SPACE` de nuevo) finaliza la grabación y procesa la orden; `Escape` cancela.
-  2. **Interfaz Gráfica Wayland (Widget "Bola de Energía")**: `utils/jarvis.py` utiliza GTK3 + `GtkLayerShell` (capa `OVERLAY`, anclada en la esquina inferior derecha `BOTTOM + RIGHT` encima de Waybar) con Cairo para renderizar en tiempo real un reactor de energía reactivo con núcleo de plasma, anillos giratorios segmentados y ondas de pulso que adoptan los colores del tema activo (`tema/tema.conf`).
+- **Decisión**: Se implementó una arquitectura en capas (posteriormente modularizada como **Bugsito** en ADR-034):
+  1. **Disparador y Atajo**: `SUPER + SPACE` (Hyprland `bind` en `config/hypr/hyprland.conf` y `utils/atajos.txt`) ejecuta `utils/bugsito.sh` (con alias `utils/jarvis.sh`). Funciona en modo toggle: la primera pulsación abre el asistente e inicia la captura; pulsar `Espacio` (o `SUPER + SPACE` de nuevo) finaliza la grabación y procesa la orden; `Escape` cancela.
+  2. **Interfaz Gráfica Wayland (Widget "Bola de Energía")**: Utiliza GTK3 + `GtkLayerShell` (capa `OVERLAY`, anclada en la esquina inferior derecha `BOTTOM + RIGHT` encima de Waybar) con Cairo para renderizar en tiempo real un reactor de energía reactivo con núcleo de plasma, anillos giratorios segmentados y ondas de pulso que adoptan los colores del tema activo (`tema/tema.conf`).
   3. **STT Local Ultrarrápido**: Transcripción mediante `whisper-cpp` (`pkgs.whisper-cpp` en `nixos/modulos/ia.nix`) con el modelo `ggml-base.bin` multilingüe en `~/.local/share/whisper/`, permitiendo reconocimiento en español en menos de 1 segundo sin llamadas a nubes de terceros.
   4. **Orquestador Inteligente**: Enruta según la intención hacia:
      - Terminal activa: inyección directa de comandos mediante `wtype` (ej. "escribe en la terminal git status").
      - Proyectos y editores: apertura de repositorios en `~/Proyectos/` o `~/dotfiles` en Cursor, Sublime o Kitty.
      - Control del sistema: lanzamiento de navegador, apps, bloqueo (`hyprlock`) o volumen (`wpctl`).
-     - Agentes / IA: consultas a Ollama en la Mac mini (`llama3.1:8b`) o Hermes Agent con respuestas concisas para TTS.
+     - Agentes / IA: consultas a LLMs con respuestas concisas para TTS.
   5. **Respuesta por Voz (TTS)**: Respuestas habladas automáticas mediante `utils/voz.sh` (Piper TTS neuronal).
 - **Consecuencias**:
   - Positivas: Flujo de voz hands-free rápido y fluido; widget estético que no bloquea el foco del usuario; procesamiento de audio 100% local o en red privada vía Tailscale.
   - Negativas: Requiere que `whisper-cli` y el modelo GGML estén descargados localmente (~141 MB).
+
+## ADR-034: Separación de Jarvis como proyecto independiente `bugsito` con motor Multi-LLM Genkit
+- **Fecha**: 2026-11-24
+- **Contexto**: Se necesitaba separar la esencia del asistente de voz Jarvis en su propio repositorio público (`github.com/Giovanni1906/bugsito`, renombrado a **Bugsito**) para poder evolucionar su modelo y sus capacidades como un proyecto independiente y reutilizarlo en otras PCs, sin perder la integración profunda con el ecosistema `dotfiles` (temas dinámicos `tema.conf`, síntesis de voz `voz.sh` y variables de `.env`). Además, debía incorporar configuración propia de LLMs mediante **Firebase Genkit** soportando tanto modo local por IP como modo por Token.
+- **Decisión**:
+  1. **Repositorio Independiente (`Giovanni1906/bugsito`)**: Se estructuró el paquete modular en `~/Proyectos/bugsito` con `flake.nix`, `pyproject.toml`, `genkit/` (flujo `bugsitoVoiceFlow` en TypeScript con `@genkit-ai/googleai`, `genkitx-ollama`, `genkitx-openai`) y cliente Python (`bugsito/llm/genkit_client.py`, `bugsito/ui/orb.py`, `bugsito/audio/`, `bugsito/orchestrator/`).
+  2. **Motor Multi-LLM con Genkit**: Soporta tres modos configurables en `~/.config/bugsito/config.toml` y `~/.config/bugsito/.env`:
+     - `local`: conexión por IP/Tailscale a servidores Ollama (`mac-ollama` deduciendo la IP de `CONTEXT_HUB_URL`, o `local-ollama` en `127.0.0.1:11434`) y servidores compatibles con OpenAI.
+     - `token`: conexión mediante API Key / Token a modelos cloud con Genkit (`gemini`, `openai`, `groq`, `deepseek`, `anthropic`).
+     - `auto`: intenta el perfil activo y aplica fallback automático según `fallback_order`.
+  3. **Integración en `dotfiles` e `init.sh`**:
+     - `config/bugsito/config.toml` guarda la configuración adaptada a `dotfiles` (conectada a `~/dotfiles/tema/tema.conf` y `~/dotfiles/utils/voz.sh`) y se enlaza en `~/.config/bugsito/config.toml`.
+     - `init.sh` incluye `sincronizar_bugsito` (y el paso `./init.sh bugsito`), preguntando interactivamente (`[S/n]`) si se desea instalar/sincronizar Bugsito en `~/Proyectos/bugsito` y ejecutando `scripts/install-client.sh --non-interactive`.
+     - `utils/bugsito.sh` (y el alias `utils/jarvis.sh`) actúa como puente ligero desde el atajo `SUPER + SPACE` de Hyprland.
+- **Consecuencias**:
+  - Positivas: Bugsito evoluciona en su propio repositorio público con soporte para cualquier PC Linux (con o sin `dotfiles`, Wayland LayerShell o X11 flotante, Piper propio o `voz.sh`) y flexibilidad total de LLMs (IP local o Token vía Genkit), manteniendo 100% de la integración estética y funcional en NixOS.
+  - Negativas: Requiere clonar `~/Proyectos/bugsito` (automatizado desde `./init.sh`).

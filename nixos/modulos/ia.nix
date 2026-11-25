@@ -125,5 +125,8 @@ EOF
     context-init = "~/dotfiles/utils/context-init.sh";
     # Menú interactivo TUI de context-hub (proyectos, Notion, secrets, MDD)
     context-menu = "~/dotfiles/utils/context-init.sh --menu";
+    # Asistente de voz interactivo Bugsito (antes Jarvis) y su gestor Multi-LLM con Genkit
+    bugsito = "~/dotfiles/utils/bugsito.sh";
+    jarvis = "~/dotfiles/utils/bugsito.sh";
   };
 }
