@@ -357,6 +357,12 @@ if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     # Por línea de comandos: en NixOS el proceso se llama .swaybg-wrapped
     pkill -f '^swaybg( |$)' || true
     hyprctl dispatch exec "swaybg -i '$WALLPAPER' -m fill" > /dev/null
+    # Shader de escala de grises: activo si el tema lo pide, desactivado en cualquier otro caso
+    if [ "${ESCALA_GRISES:-0}" = "1" ]; then
+        hyprctl keyword misc:screen_shader "$DOTFILES/config/hypr/shaders/escala-grises.glsl" > /dev/null || true
+    else
+        hyprctl keyword misc:screen_shader "[[EMPTY]]" > /dev/null || true
+    fi
 fi
 pkill -USR2 -f '^waybar( |$)' || true
 # Kitty se recarga por su socket de control remoto (listen_on en kitty.conf)

@@ -108,6 +108,7 @@
     catppuccin-cursors.mochaBlue   # Cursor azul (Noche)
     catppuccin-cursors.mochaYellow # Cursor amarillo (Relámpago)
     catppuccin-cursors.mochaMauve  # Cursor malva (Violeta)
+    bibata-cursors                 # Cursor negro/blanco (Manga — escala de grises)
     papirus-icon-theme          # Iconos
     adwaita-icon-theme          # Iconos y cursores base oscuros
     gnome-themes-extra          # Adwaita-dark (solo para apps GTK2)
