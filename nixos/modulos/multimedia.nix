@@ -53,9 +53,15 @@
       exec ${optimizarImagenesPython}/bin/python3 "$HOME/dotfiles/utils/optimizar-imagenes.py"
     '')
 
-    # App GTK3: Limpieza neuronal de voz, aislamiento vocal y comparador A/B — SUPER + A
+    # App GTK3: Limpieza neuronal de voz, reconstrucción Vocos 48 kHz y comparador A/B — SUPER + A
     (let
-      vozLimpiaPython = python3.withPackages (ps: [ ps.pygobject3 ps.pycairo ]);
+      vozLimpiaPython = python3.withPackages (ps: [
+        ps.pygobject3
+        ps.pycairo
+        ps.onnxruntime
+        ps.scipy
+        ps.numpy
+      ]);
     in writeShellScriptBin "voz-limpia-bin" ''
       export GDK_BACKEND=wayland
       export GI_TYPELIB_PATH="${lib.makeSearchPath "lib/girepository-1.0" [

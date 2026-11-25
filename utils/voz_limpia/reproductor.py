@@ -232,6 +232,10 @@ class PanelReproductorAB(Gtk.Box):
 
         self.archivo_original: Path | None = None
         self.archivo_limpio: Path | None = None
+        self.archivo_base_ia_live: Path | None = None
+        self.filtro_live_b: str = ""
+        self.usar_live_dsp: bool = False
+        self.etiqueta_limpio: str | None = None
         self.onda_original: list[float] = [0.08] * 110
         self.onda_limpio: list[float] = [0.08] * 110
 
@@ -325,16 +329,38 @@ class PanelReproductorAB(Gtk.Box):
         self.escala_vol.connect("value-changed", self._al_cambiar_volumen)
         caja_vol.pack_start(self.escala_vol, False, False, 0)
 
-    def cargar_audios(self, original: Path | None, limpio: Path | None = None, seleccionar_limpio: bool = False):
+    def _limpio_disponible(self) -> bool:
+        return bool(
+            (self.archivo_limpio and self.archivo_limpio.is_file())
+            or (self.archivo_base_ia_live and self.archivo_base_ia_live.is_file())
+        )
+
+    def cargar_audios(
+        self,
+        original: Path | None,
+        limpio: Path | None = None,
+        seleccionar_limpio: bool = False,
+        base_ia_live: Path | None = None,
+        filtro_live_b: str = "",
+        usar_live_dsp: bool = False,
+        etiqueta_limpio: str | None = None,
+    ):
         """Carga las pistas de audio y calcula sus formas de onda en segundo plano."""
         self.detener(reiniciar=True)
         self.archivo_original = original if (original and original.is_file()) else None
         self.archivo_limpio = limpio if (limpio and limpio.is_file()) else None
+        self.archivo_base_ia_live = (
+            base_ia_live if (base_ia_live and base_ia_live.is_file()) else None
+        )
+        self.filtro_live_b = filtro_live_b
+        self.usar_live_dsp = bool(usar_live_dsp and self.archivo_base_ia_live)
+        self.etiqueta_limpio = etiqueta_limpio
 
+        limpio_ok = self._limpio_disponible()
         self.btn_pista_orig.set_sensitive(self.archivo_original is not None)
-        self.btn_pista_limpio.set_sensitive(self.archivo_limpio is not None)
+        self.btn_pista_limpio.set_sensitive(limpio_ok)
 
-        if seleccionar_limpio and self.archivo_limpio:
+        if seleccionar_limpio and limpio_ok:
             self.pista_activa = "limpio"
         else:
             self.pista_activa = "original"
@@ -351,9 +377,11 @@ class PanelReproductorAB(Gtk.Box):
         self.posicion_seg = 0.0
         self._actualizar_etiquetas_tiempo()
 
+        arch_limpio_onda = self.archivo_limpio or self.archivo_base_ia_live
+
         def _calcular_ondas():
             onda_o = extraer_onda_audio(self.archivo_original) if self.archivo_original else [0.08] * 110
-            onda_l = extraer_onda_audio(self.archivo_limpio) if self.archivo_limpio else [0.08] * 110
+            onda_l = extraer_onda_audio(arch_limpio_onda) if arch_limpio_onda else [0.08] * 110
 
             def _aplicar():
                 self.onda_original = onda_o
@@ -366,9 +394,23 @@ class PanelReproductorAB(Gtk.Box):
         threading.Thread(target=_calcular_ondas, daemon=True).start()
 
     def _obtener_archivo_activo(self) -> Path | None:
-        if self.pista_activa == "limpio" and self.archivo_limpio:
-            return self.archivo_limpio
+        if self.pista_activa == "limpio":
+            if self.usar_live_dsp and self.archivo_base_ia_live and self.archivo_base_ia_live.is_file():
+                return self.archivo_base_ia_live
+            if self.archivo_limpio and self.archivo_limpio.is_file():
+                return self.archivo_limpio
+            if self.archivo_base_ia_live and self.archivo_base_ia_live.is_file():
+                return self.archivo_base_ia_live
         return self.archivo_original
+
+    def reaplicar_filtro_live(self, filtro: str, activar: bool = True) -> None:
+        """Actualiza el filtro DSP de tiempo real en la pista B y reinicia en el mismo instante si suena."""
+        self.filtro_live_b = filtro or ""
+        self.usar_live_dsp = bool(activar and self.archivo_base_ia_live and self.archivo_base_ia_live.is_file())
+        self._actualizar_botones_pista()
+        if self.reproduciendo and self.pista_activa == "limpio":
+            pos = min(self.duracion, self._offset_inicio + (time.monotonic() - self._t0_monotonic))
+            self.iniciar_reproduccion(desde_seg=pos)
 
     def _actualizar_botones_pista(self):
         ctx_o = self.btn_pista_orig.get_style_context()
@@ -376,11 +418,17 @@ class PanelReproductorAB(Gtk.Box):
         ctx_o.remove_class("chip-activo")
         ctx_l.remove_class("chip-exito")
 
-        if self.pista_activa == "limpio" and self.archivo_limpio:
+        if self.pista_activa == "limpio" and self._limpio_disponible():
             ctx_l.add_class("chip-exito")
-            self.lbl_pista_actual.set_text(
-                f"✨ Escuchando: VOZ LIMPIA ({self.archivo_limpio.name})"
-            )
+            if self.usar_live_dsp:
+                nombre = self.etiqueta_limpio or (self.archivo_base_ia_live.name if self.archivo_base_ia_live else "En vivo")
+                self.lbl_pista_actual.set_text(
+                    f"🎛️ Escuchando EN VIVO (Post-IA): {nombre}"
+                )
+            elif self.archivo_limpio:
+                self.lbl_pista_actual.set_text(
+                    f"✨ Escuchando: VOZ LIMPIA ({self.archivo_limpio.name})"
+                )
         elif self.archivo_original:
             ctx_o.add_class("chip-activo")
             self.lbl_pista_actual.set_text(
@@ -392,12 +440,12 @@ class PanelReproductorAB(Gtk.Box):
         self._refrescar_lienzo()
 
     def _refrescar_lienzo(self):
-        es_limpio = self.pista_activa == "limpio" and self.archivo_limpio is not None
+        es_limpio = self.pista_activa == "limpio" and self._limpio_disponible()
         barras = self.onda_limpio if es_limpio else self.onda_original
         self.lienzo_onda.actualizar_datos(barras, modo_limpio=es_limpio)
 
     def cambiar_pista(self, nueva_pista: str):
-        if nueva_pista == "limpio" and not self.archivo_limpio:
+        if nueva_pista == "limpio" and not self._limpio_disponible():
             return
         if nueva_pista == "original" and not self.archivo_original:
             return
@@ -405,8 +453,8 @@ class PanelReproductorAB(Gtk.Box):
             return
 
         estaba_reproduciendo = self.reproduciendo
-        pos_actual = self.posicion_seg
         self.detener(reiniciar=False)
+        pos_actual = self.posicion_seg
         self.pista_activa = nueva_pista
         self.posicion_seg = pos_actual
         self._actualizar_botones_pista()
@@ -415,7 +463,7 @@ class PanelReproductorAB(Gtk.Box):
             self.iniciar_reproduccion(desde_seg=pos_actual)
 
     def alternar_ab(self):
-        if self.pista_activa == "original" and self.archivo_limpio:
+        if self.pista_activa == "original" and self._limpio_disponible():
             self.cambiar_pista("limpio")
         elif self.pista_activa == "limpio" and self.archivo_original:
             self.cambiar_pista("original")
@@ -449,8 +497,15 @@ class PanelReproductorAB(Gtk.Box):
             "-loglevel", "quiet",
             "-ss", f"{self.posicion_seg:.2f}",
             "-volume", str(int(self.volumen)),
-            str(archivo),
         ]
+        if (
+            self.pista_activa == "limpio"
+            and self.usar_live_dsp
+            and self.filtro_live_b
+            and self.filtro_live_b != "anull"
+        ):
+            cmd.extend(["-af", self.filtro_live_b])
+        cmd.append(str(archivo))
         try:
             self._proc_ffplay = subprocess.Popen(
                 cmd,

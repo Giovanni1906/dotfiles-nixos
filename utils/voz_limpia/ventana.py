@@ -14,11 +14,13 @@ from gi.repository import Gdk, GLib, Gtk, Pango
 from .motor import (
     FORMATOS_SALIDA,
     INTENSIDADES_RUIDO,
+    MODOS_RECONSTRUCCION,
     NIVELES_AISLAMIENTO,
     PERFILES,
     TONOS_VOZ,
     OpcionesProcesamiento,
     ProcesadorVoz,
+    construir_filtros_post_dsp,
     estado_motores_ia,
 )
 from .reproductor import PanelReproductorAB
@@ -48,6 +50,9 @@ class VozLimpiaWindow:
         self.ocupado: bool = False
         self.perfil_actual: str = "estudio"
         self._actualizando_controles: bool = False
+        self._sincronizando_live: bool = False
+        self._en_vista_previa: bool = False
+        self._ultima_pos_previa: float = 0.0
         self.ultima_carpeta: Path = carpeta_xdg("DOWNLOAD", "Descargas")
 
         self._construir_ventana()
@@ -72,8 +77,8 @@ class VozLimpiaWindow:
 
     def _construir_ventana(self):
         self.win = Gtk.Window(title="Voz Limpia")
-        self.win.set_default_size(720, 660)
-        self.win.set_resizable(False)
+        self.win.set_default_size(760, 745)
+        self.win.set_resizable(True)
         self.win.set_decorated(False)
         visual = self.win.get_screen().get_rgba_visual()
         if visual is not None:
@@ -97,14 +102,18 @@ class VozLimpiaWindow:
         fila_tit.pack_start(lbl_titulo, False, False, 0)
 
         est_ia = estado_motores_ia()
-        txt_badge = "IA DeepFilterNet 3 + RNNoise Activo" if est_ia["listo"] else "IA Auto-Descargable"
+        txt_badge = (
+            "IA DeepFilter 3 + Vocos · Tiempo Real"
+            if est_ia["listo"]
+            else "IA Auto-Descargable"
+        )
         self.lbl_badge_ia = Gtk.Label(label=txt_badge)
         self.lbl_badge_ia.get_style_context().add_class("badge-ia")
         fila_tit.pack_start(self.lbl_badge_ia, False, False, 0)
         caja_titulo.pack_start(fila_tit, False, False, 0)
 
         lbl_sub = Gtk.Label(
-            label="Eliminar ruido de fondo, aislar voz principal de murmullos y masterizar (-16 LUFS)"
+            label="Limpieza neuronal 48 kHz sin voz robótica, vista previa de 12s y ajuste Post-IA en tiempo real"
         )
         lbl_sub.set_halign(Gtk.Align.START)
         lbl_sub.get_style_context().add_class("subtitulo-app")
@@ -180,7 +189,14 @@ class VozLimpiaWindow:
         self.btn_cancelar.hide()
         fila_acciones.pack_start(self.btn_cancelar, False, False, 0)
 
-        self.btn_ejecutar = Gtk.Button(label="✨  Limpiar y Mejorar Voz")
+        self.btn_probar = Gtk.Button(label="⚡  Probar 12s")
+        self.btn_probar.set_tooltip_text(
+            "Procesa solo 12 segundos (~1-2 s) para escuchar y ajustar el tono en tiempo real antes de exportar"
+        )
+        self.btn_probar.connect("clicked", self._iniciar_vista_previa)
+        fila_acciones.pack_start(self.btn_probar, False, False, 0)
+
+        self.btn_ejecutar = Gtk.Button(label="✨  Limpiar y Guardar")
         self.btn_ejecutar.get_style_context().add_class("accion-principal")
         self.btn_ejecutar.connect("clicked", self._iniciar_procesamiento)
         fila_acciones.pack_start(self.btn_ejecutar, False, False, 0)
@@ -246,10 +262,11 @@ class VozLimpiaWindow:
 
         self.botones_perfil: dict[str, Gtk.Button] = {}
         for clave, etiqueta in (
-            ("estudio", "🎙️ Estudio / Podcast"),
-            ("aislar_voz", "👥 Anti-Voces / Eco"),
-            ("rapido", "⚡ Rápido Natural"),
-            ("personalizado", "🎛️ Personalizado"),
+            ("estudio", "🎙️ Estudio"),
+            ("rescate", "🔥 Rescate IA"),
+            ("aislar_voz", "👥 Anti-Voces"),
+            ("rapido", "⚡ Rápido"),
+            ("personalizado", "🎛️ Manual"),
         ):
             btn = Gtk.Button(label=etiqueta)
             btn.set_tooltip_text(PERFILES[clave]["descripcion"])
@@ -262,30 +279,30 @@ class VozLimpiaWindow:
         self.lbl_desc_perfil.get_style_context().add_class("info-archivo")
         caja.pack_start(self.lbl_desc_perfil, False, False, 0)
 
-        # 3. Ajustes Acústicos y de IA (2 filas x 2 columnas)
+        # 3. Ajustes Acústicos y de IA
         fila_combos_1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         fila_combos_1.set_homogeneous(True)
         caja.pack_start(fila_combos_1, False, False, 0)
 
         col_ruido = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        col_ruido.pack_start(self._etiqueta_seccion("REDUCCIÓN DE RUIDO Y FONDO"), False, False, 0)
+        col_ruido.pack_start(self._etiqueta_seccion("REDUCCIÓN DE RUIDO Y FONDO (FASE IA)"), False, False, 0)
         self.combo_ruido = Gtk.ComboBoxText()
         for k, v in INTENSIDADES_RUIDO:
             self.combo_ruido.append(k, v)
-        self.combo_ruido.set_active_id("maxima")
+        self.combo_ruido.set_active_id("equilibrada")
         self.combo_ruido.connect("changed", self._al_cambiar_ajuste_manual)
         col_ruido.pack_start(self.combo_ruido, False, False, 0)
         fila_combos_1.pack_start(col_ruido, True, True, 0)
 
         col_aislar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         col_aislar.pack_start(
-            self._etiqueta_seccion("SUPRESIÓN DE VOCES SECUNDARIAS / MURMULLOS"),
+            self._etiqueta_seccion("PUERTA / MURMULLOS (TIEMPO REAL)"),
             False, False, 0,
         )
         self.combo_aislar = Gtk.ComboBoxText()
         for k, v in NIVELES_AISLAMIENTO:
             self.combo_aislar.append(k, v)
-        self.combo_aislar.set_active_id("moderado")
+        self.combo_aislar.set_active_id("off")
         self.combo_aislar.connect("changed", self._al_cambiar_ajuste_manual)
         col_aislar.pack_start(self.combo_aislar, False, False, 0)
         fila_combos_1.pack_start(col_aislar, True, True, 0)
@@ -294,12 +311,25 @@ class VozLimpiaWindow:
         fila_combos_2.set_homogeneous(True)
         caja.pack_start(fila_combos_2, False, False, 0)
 
+        col_rec = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        col_rec.pack_start(
+            self._etiqueta_seccion("RECONSTRUCCIÓN DE VOZ IA (FASE IA)"),
+            False, False, 0,
+        )
+        self.combo_reconstruir = Gtk.ComboBoxText()
+        for k, v in MODOS_RECONSTRUCCION:
+            self.combo_reconstruir.append(k, v)
+        self.combo_reconstruir.set_active_id("off")
+        self.combo_reconstruir.connect("changed", self._al_cambiar_ajuste_manual)
+        col_rec.pack_start(self.combo_reconstruir, False, False, 0)
+        fila_combos_2.pack_start(col_rec, True, True, 0)
+
         col_tono = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        col_tono.pack_start(self._etiqueta_seccion("TONO Y ECUALIZACIÓN DE VOZ"), False, False, 0)
+        col_tono.pack_start(self._etiqueta_seccion("TONO Y ECUALIZACIÓN (TIEMPO REAL)"), False, False, 0)
         self.combo_tono = Gtk.ComboBoxText()
         for k, v in TONOS_VOZ:
             self.combo_tono.append(k, v)
-        self.combo_tono.set_active_id("locutor")
+        self.combo_tono.set_active_id("claridad")
         self.combo_tono.connect("changed", self._al_cambiar_ajuste_manual)
         col_tono.pack_start(self.combo_tono, False, False, 0)
         fila_combos_2.pack_start(col_tono, True, True, 0)
@@ -311,7 +341,7 @@ class VozLimpiaWindow:
             self.combo_formato.append(k, v)
         self.combo_formato.set_active_id("m4a")
         col_fmt.pack_start(self.combo_formato, False, False, 0)
-        fila_combos_2.pack_start(col_fmt, True, True, 0)
+        caja.pack_start(col_fmt, False, False, 0)
 
         # 4. Interruptores de módulos y modo de guardado
         caja_checks = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -330,7 +360,7 @@ class VozLimpiaWindow:
         fila_chk1.pack_start(self.chk_deepfilter, True, True, 0)
 
         self.chk_eco = Gtk.CheckButton(
-            label="Eliminar eco y reverberación de habitación"
+            label="Eliminar eco y resonancia de sala"
         )
         self.chk_eco.set_active(True)
         self.chk_eco.connect("toggled", self._al_cambiar_ajuste_manual)
@@ -363,7 +393,7 @@ class VozLimpiaWindow:
     # PESTAÑA 2: REPRODUCTOR Y COMPARADOR A/B
     # =========================================================================
     def _construir_tab_reproductor(self) -> Gtk.Widget:
-        caja = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        caja = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
         caja.pack_start(
             self._etiqueta_seccion("COMPARADOR EN VIVO: ESCUCHA EL ANTES (A) Y EL DESPUÉS (B)"),
@@ -378,9 +408,63 @@ class VozLimpiaWindow:
         self.reproductor = PanelReproductorAB(self.tema)
         tarjeta_rep.pack_start(self.reproductor, False, False, 0)
 
+        # Panel de ajuste en tiempo real Post-IA (sin esperar re-procesamiento de IA)
+        caja.pack_start(
+            self._etiqueta_seccion("AJUSTE EN TIEMPO REAL (POST-IA · SIN ESPERAS)"),
+            False, False, 0,
+        )
+
+        tarjeta_live = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        tarjeta_live.get_style_context().add_class("tarjeta-panel")
+        caja.pack_start(tarjeta_live, False, False, 0)
+
+        fila_live_1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        fila_live_1.set_homogeneous(True)
+        tarjeta_live.pack_start(fila_live_1, False, False, 0)
+
+        col_lt = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        col_lt.pack_start(self._etiqueta_seccion("TONO Y ECUALIZACIÓN"), False, False, 0)
+        self.combo_live_tono = Gtk.ComboBoxText()
+        for k, v in TONOS_VOZ:
+            self.combo_live_tono.append(k, v)
+        self.combo_live_tono.set_active_id(self.combo_tono.get_active_id() or "claridad")
+        self.combo_live_tono.connect("changed", self._al_cambiar_live)
+        col_lt.pack_start(self.combo_live_tono, False, False, 0)
+        fila_live_1.pack_start(col_lt, True, True, 0)
+
+        col_la = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        col_la.pack_start(self._etiqueta_seccion("PUERTA / MURMULLOS"), False, False, 0)
+        self.combo_live_aislar = Gtk.ComboBoxText()
+        for k, v in NIVELES_AISLAMIENTO:
+            self.combo_live_aislar.append(k, v)
+        self.combo_live_aislar.set_active_id(self.combo_aislar.get_active_id() or "off")
+        self.combo_live_aislar.connect("changed", self._al_cambiar_live)
+        col_la.pack_start(self.combo_live_aislar, False, False, 0)
+        fila_live_1.pack_start(col_la, True, True, 0)
+
+        fila_live_2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        tarjeta_live.pack_start(fila_live_2, False, False, 0)
+
+        self.chk_live_eco = Gtk.CheckButton(label="Anti-eco de sala")
+        self.chk_live_eco.set_active(self.chk_eco.get_active())
+        self.chk_live_eco.connect("toggled", self._al_cambiar_live)
+        fila_live_2.pack_start(self.chk_live_eco, False, False, 0)
+
+        self.chk_live_lufs = Gtk.CheckButton(label="Compresor vocal")
+        self.chk_live_lufs.set_active(self.chk_lufs.get_active())
+        self.chk_live_lufs.connect("toggled", self._al_cambiar_live)
+        fila_live_2.pack_start(self.chk_live_lufs, False, False, 0)
+
+        self.btn_reprobar_live = Gtk.Button(label="⚡  Re-probar 12s aquí")
+        self.btn_reprobar_live.set_tooltip_text(
+            "Re-genera la vista previa de 12s desde este segundo con la configuración actual de Fase IA"
+        )
+        self.btn_reprobar_live.connect("clicked", self._iniciar_vista_previa)
+        fila_live_2.pack_end(self.btn_reprobar_live, False, False, 0)
+
         # Resumen comparativo y acciones sobre el resultado
         caja.pack_start(
-            self._etiqueta_seccion("DETALLES DEL RESULTADO Y ACCIONES RÁPIDAS"),
+            self._etiqueta_seccion("RESULTADO Y EXPORTACIÓN"),
             False, False, 0,
         )
 
@@ -390,7 +474,7 @@ class VozLimpiaWindow:
 
         self.lbl_resumen_ab = Gtk.Label(
             label="Aún no se ha procesado una versión limpia en esta sesión.\n"
-                  "Puedes escuchar el audio original arriba o pulsar '✨ Limpiar y Mejorar Voz'."
+                  "Pulsa '⚡ Probar 12s' para escuchar en ~1s o '✨ Limpiar y Guardar' para el archivo completo."
         )
         self.lbl_resumen_ab.set_halign(Gtk.Align.START)
         self.lbl_resumen_ab.set_line_wrap(True)
@@ -400,12 +484,12 @@ class VozLimpiaWindow:
         fila_botones_res = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         tarjeta_resumen.pack_start(fila_botones_res, False, False, 0)
 
-        btn_ext = Gtk.Button(label="󰎆  Abrir en Reproductor del Sistema (Amberol)")
+        btn_ext = Gtk.Button(label="󰎆  Abrir en Amberol/MPV")
         btn_ext.set_tooltip_text("Abre la pista activa en Amberol o MPV")
         btn_ext.connect("clicked", lambda *_: self.reproductor.abrir_activo_en_externo())
         fila_botones_res.pack_start(btn_ext, False, False, 0)
 
-        self.btn_copiar_limpio = Gtk.Button(label="󰆏  Copiar archivo limpio")
+        self.btn_copiar_limpio = Gtk.Button(label="󰆏  Copiar archivo")
         self.btn_copiar_limpio.set_tooltip_text(
             "Copia el archivo procesado al portapapeles para pegarlo en Thunar, WhatsApp o Telegram"
         )
@@ -413,7 +497,16 @@ class VozLimpiaWindow:
         self.btn_copiar_limpio.connect("clicked", self._copiar_resultado_portapapeles)
         fila_botones_res.pack_start(self.btn_copiar_limpio, False, False, 0)
 
-        btn_volver = Gtk.Button(label="🎛️  Ajustar opciones y volver a procesar")
+        self.btn_exportar_live = Gtk.Button(label="💾  Exportar Archivo Completo")
+        self.btn_exportar_live.get_style_context().add_class("accion-principal")
+        self.btn_exportar_live.set_tooltip_text(
+            "Guarda el archivo final completo con estos ajustes (si ya pasó la Fase IA tarda ~1s)"
+        )
+        self.btn_exportar_live.connect("clicked", self._iniciar_procesamiento)
+        fila_botones_res.pack_end(self.btn_exportar_live, False, False, 0)
+
+        btn_volver = Gtk.Button(label="🎛️  Fase IA")
+        btn_volver.set_tooltip_text("Volver a la pestaña de Fase IA y formato")
         btn_volver.connect("clicked", lambda *_: self._cambiar_pestana("procesar"))
         fila_botones_res.pack_end(btn_volver, False, False, 0)
 
@@ -454,17 +547,64 @@ class VozLimpiaWindow:
             self.combo_ruido.set_active_id(datos["intensidad_ruido"])
             self.combo_aislar.set_active_id(datos["aislar_voz_principal"])
             self.chk_eco.set_active(datos["quitar_eco"])
+            self.combo_reconstruir.set_active_id(datos.get("reconstruir_voz", "off"))
             self.combo_tono.set_active_id(datos["tono_voz"])
             self.chk_lufs.set_active(datos["normalizar_lufs"])
             self._actualizando_controles = False
+            self._sincronizar_controles_live_desde_tab1()
+            self._aplicar_dsp_en_vivo_si_disponible()
 
     def _al_cambiar_ajuste_manual(self, *_args):
-        if not self._actualizando_controles and self.perfil_actual != "personalizado":
+        if self._actualizando_controles:
+            return
+        if self.perfil_actual != "personalizado":
             self._seleccionar_perfil("personalizado")
+        self._sincronizar_controles_live_desde_tab1()
+        self._aplicar_dsp_en_vivo_si_disponible()
+
+    def _sincronizar_controles_live_desde_tab1(self):
+        if not hasattr(self, "combo_live_tono") or self._sincronizando_live:
+            return
+        self._sincronizando_live = True
+        self.combo_live_tono.set_active_id(self.combo_tono.get_active_id() or "claridad")
+        self.combo_live_aislar.set_active_id(self.combo_aislar.get_active_id() or "off")
+        self.chk_live_eco.set_active(self.chk_eco.get_active())
+        self.chk_live_lufs.set_active(self.chk_lufs.get_active())
+        self._sincronizando_live = False
+
+    def _al_cambiar_live(self, *_args):
+        if self._sincronizando_live:
+            return
+        self._sincronizando_live = True
+        self._actualizando_controles = True
+        self.combo_tono.set_active_id(self.combo_live_tono.get_active_id() or "claridad")
+        self.combo_aislar.set_active_id(self.combo_live_aislar.get_active_id() or "off")
+        self.chk_eco.set_active(self.chk_live_eco.get_active())
+        self.chk_lufs.set_active(self.chk_live_lufs.get_active())
+        self._actualizando_controles = False
+        if self.perfil_actual != "personalizado":
+            self._seleccionar_perfil("personalizado")
+        self._sincronizando_live = False
+        self._aplicar_dsp_en_vivo_si_disponible()
+
+    def _aplicar_dsp_en_vivo_si_disponible(self):
+        base_ia = self.procesador.obtener_base_ia_actual()
+        if not base_ia or not hasattr(self, "reproductor"):
+            return
+        opciones = self._construir_opciones()
+        filtro_live = construir_filtros_post_dsp(opciones, duracion=0.0, en_vivo=True)
+        self.reproductor.reaplicar_filtro_live(filtro_live, activar=True)
+        if not self._en_vista_previa and self.archivo_resultado:
+            self._fijar_estado(
+                "🎛️ Ajuste en tiempo real aplicado · Pulsa '💾 Exportar Archivo Completo' para guardarlo (~1s)"
+            )
 
     def _fijar_archivo_origen(self, ruta: Path):
         if not ruta.is_file():
             return
+        self.procesador.limpiar_cache()
+        self._en_vista_previa = False
+        self._ultima_pos_previa = 0.0
         self.archivo_origen = ruta
         self.archivo_resultado = None
         self.ultima_carpeta = ruta.parent
@@ -500,10 +640,109 @@ class VozLimpiaWindow:
         else:
             self.lbl_resumen_ab.set_text(
                 f"Archivo cargado: {ruta.name} ({formatear_tiempo(meta['duracion'])})\n"
-                "Pulsa '✨ Limpiar y Mejorar Voz' para generar la pista limpia y comparar A/B."
+                "Pulsa '⚡ Probar 12s' para escuchar rápido o '✨ Limpiar y Guardar' para el archivo completo."
             )
 
         self._fijar_estado(f"Listo para procesar: {ruta.name}")
+
+    def _construir_opciones(self) -> OpcionesProcesamiento:
+        return OpcionesProcesamiento(
+            perfil=self.perfil_actual,
+            usar_deepfilter=self.chk_deepfilter.get_active(),
+            intensidad_ruido=self.combo_ruido.get_active_id() or "equilibrada",
+            aislar_voz_principal=self.combo_aislar.get_active_id() or "off",
+            quitar_eco=self.chk_eco.get_active(),
+            tono_voz=self.combo_tono.get_active_id() or "claridad",
+            normalizar_lufs=self.chk_lufs.get_active(),
+            reconstruir_voz=self.combo_reconstruir.get_active_id() or "off",
+            formato_salida=self.combo_formato.get_active_id() or "m4a",
+            reemplazar_original=self.chk_reemplazar.get_active(),
+            carpeta_destino=self.archivo_origen.parent if self.archivo_origen else None,
+        )
+
+    def _iniciar_vista_previa(self, *_args):
+        if self.ocupado:
+            return
+        if not self.archivo_origen or not self.archivo_origen.is_file():
+            self._fijar_estado("Selecciona primero un archivo de audio", error=True)
+            return
+
+        inicio_seg = (
+            self._ultima_pos_previa
+            if self._en_vista_previa
+            else max(0.0, float(self.reproductor.posicion_seg))
+        )
+        self._ultima_pos_previa = inicio_seg
+        self.reproductor.detener(reiniciar=False)
+
+        opciones = self._construir_opciones()
+        self._fijar_ocupado(True)
+        self.barra_progreso.set_fraction(0.05)
+        self._fijar_estado("Preparando vista previa rápida de 12s...")
+
+        archivo_in = self.archivo_origen
+
+        def _progreso_ui(texto: str, fraccion: float):
+            GLib.idle_add(self._actualizar_progreso_seguro, texto, fraccion)
+
+        def _hilo():
+            exito, orig_wav, ia_wav, es_completo, msg = self.procesador.preparar_vista_previa(
+                archivo_in,
+                opciones,
+                inicio_seg=inicio_seg,
+                duracion_seg=12.0,
+                cb_progreso=_progreso_ui,
+            )
+            GLib.idle_add(
+                self._al_terminar_vista_previa,
+                exito, orig_wav, ia_wav, es_completo, msg, opciones, inicio_seg,
+            )
+
+        threading.Thread(target=_hilo, daemon=True).start()
+
+    def _al_terminar_vista_previa(
+        self,
+        exito: bool,
+        orig_wav: Path | None,
+        ia_wav: Path | None,
+        es_completo: bool,
+        msg: str,
+        opciones: OpcionesProcesamiento,
+        inicio_seg: float,
+    ):
+        self._fijar_ocupado(False)
+        if exito and orig_wav and ia_wav and ia_wav.is_file():
+            self.barra_progreso.set_fraction(1.0)
+            self._en_vista_previa = not es_completo
+            filtro_live = construir_filtros_post_dsp(opciones, duracion=0.0, en_vivo=True)
+            etiqueta = (
+                f"Completo en vivo ({self.archivo_origen.name})"
+                if es_completo
+                else f"Vista Previa 12s (desde {formatear_tiempo(inicio_seg)})"
+            )
+            self.reproductor.cargar_audios(
+                orig_wav,
+                None,
+                seleccionar_limpio=True,
+                base_ia_live=ia_wav,
+                filtro_live_b=filtro_live,
+                usar_live_dsp=True,
+                etiqueta_limpio=etiqueta,
+            )
+            self.lbl_resumen_ab.set_text(
+                f"⚡ {etiqueta} · Fase IA en caché.\n"
+                "Mueve los controles de 'Ajuste en Tiempo Real' arriba para oír el cambio al instante y luego pulsa '💾 Exportar Archivo Completo'."
+            )
+            self._fijar_estado(
+                "⚡ Vista previa lista · Ajusta tono/eco/puerta en tiempo real",
+                exito=True,
+            )
+            self._cambiar_pestana("reproductor")
+            self.reproductor.iniciar_reproduccion(0.0)
+        else:
+            self.barra_progreso.set_fraction(0.0)
+            self._fijar_estado(msg, error=True)
+        return False
 
     def _mostrar_menu_recientes(self, boton):
         recientes = buscar_audios_recientes(limite=12)
@@ -575,23 +814,14 @@ class VozLimpiaWindow:
             return
 
         self.reproductor.detener(reiniciar=False)
-
-        opciones = OpcionesProcesamiento(
-            perfil=self.perfil_actual,
-            usar_deepfilter=self.chk_deepfilter.get_active(),
-            intensidad_ruido=self.combo_ruido.get_active_id() or "maxima",
-            aislar_voz_principal=self.combo_aislar.get_active_id() or "moderado",
-            quitar_eco=self.chk_eco.get_active(),
-            tono_voz=self.combo_tono.get_active_id() or "locutor",
-            normalizar_lufs=self.chk_lufs.get_active(),
-            formato_salida=self.combo_formato.get_active_id() or "m4a",
-            reemplazar_original=self.chk_reemplazar.get_active(),
-            carpeta_destino=self.archivo_origen.parent,
-        )
+        opciones = self._construir_opciones()
 
         self._fijar_ocupado(True)
         self.barra_progreso.set_fraction(0.03)
-        self._fijar_estado("Iniciando motor de limpieza neuronal...")
+        if self.procesador.tiene_cache_ia_completo(self.archivo_origen, opciones):
+            self._fijar_estado("Reutilizando Fase IA en caché · Exportando rápido...")
+        else:
+            self._fijar_estado("Iniciando motor de limpieza neuronal...")
 
         archivo_in = self.archivo_origen
         tam_antes = archivo_in.stat().st_size
@@ -623,24 +853,31 @@ class VozLimpiaWindow:
         self._fijar_ocupado(False)
         if exito and ruta_out and ruta_out.is_file():
             self.barra_progreso.set_fraction(1.0)
+            self._en_vista_previa = False
             self.archivo_resultado = ruta_out
             self.ultima_carpeta = ruta_out.parent
             self.btn_copiar_limpio.set_sensitive(True)
 
             tam_despues = ruta_out.stat().st_size
             orig_para_ab = None if opciones.reemplazar_original else self.archivo_origen
+            base_ia = self.procesador.obtener_base_ia_actual()
+            filtro_live = construir_filtros_post_dsp(opciones, duracion=0.0, en_vivo=True)
 
             self.reproductor.cargar_audios(
                 orig_para_ab or ruta_out,
                 ruta_out,
                 seleccionar_limpio=True,
+                base_ia_live=base_ia,
+                filtro_live_b=filtro_live,
+                usar_live_dsp=False,
+                etiqueta_limpio=ruta_out.name,
             )
 
             self.lbl_resumen_ab.set_text(
                 f"✓ ¡Procesamiento completado! Archivo: {ruta_out.name}\n"
                 f"Peso original: {formatear_tamano(tam_antes)}   →   "
                 f"Peso final ({opciones.formato_salida.upper()}): {formatear_tamano(tam_despues)}   ·   "
-                f"Temporales eliminados."
+                f"Si cambias algún ajuste arriba, exporta en ~1s usando la Fase IA en caché."
             )
             self._fijar_estado(f"✓ {msg} · Compara el antes y después aquí", exito=True)
             notificar("Voz Limpia completado ✓", ruta_out.name, sonido=True)
@@ -662,6 +899,11 @@ class VozLimpiaWindow:
     def _fijar_ocupado(self, activo: bool):
         self.ocupado = activo
         self.btn_ejecutar.set_sensitive(not activo)
+        self.btn_probar.set_sensitive(not activo)
+        if hasattr(self, "btn_reprobar_live"):
+            self.btn_reprobar_live.set_sensitive(not activo)
+        if hasattr(self, "btn_exportar_live"):
+            self.btn_exportar_live.set_sensitive(not activo)
         if activo:
             self.btn_cancelar.show()
         else:
@@ -726,12 +968,14 @@ class VozLimpiaWindow:
         if self.ocupado:
             self.procesador.cancelar()
         self.reproductor.detener(reiniciar=False)
+        self.procesador.limpiar_cache()
         self.win.destroy()
 
     def _al_destruir(self, *_args):
         if self.ocupado:
             self.procesador.cancelar()
         self.reproductor.detener(reiniciar=False)
+        self.procesador.limpiar_cache()
         Gtk.main_quit()
 
     def ejecutar(self):
