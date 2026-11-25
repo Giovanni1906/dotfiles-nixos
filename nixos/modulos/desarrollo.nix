@@ -110,6 +110,7 @@ in
     navicat-premium
     postman
     kubectl                     # Cliente de Kubernetes (alias k)
+    stern                       # Seguimiento de logs de múltiples pods en Kubernetes
     kind                        # Clúster de Kubernetes dentro de Docker
     skaffold                    # Construye y despliega en el clúster mientras se edita
     gnumake                     # make para los Makefile de los proyectos
