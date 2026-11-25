@@ -95,6 +95,13 @@ in
   # El binario de Sublime Text (sublime4) enlaza OpenSSL 1.1 para su host de plugins
   nixpkgs.config.permittedInsecurePackages = [ "openssl-1.1.1w" ];
 
+  programs.neovim = {
+    enable = true;
+    defaultEditor = false;      # No reemplaza $EDITOR globalmente (vscode sigue siendo el default)
+    viAlias = true;
+    vimAlias = true;
+  };
+
   environment.systemPackages = with pkgs; [
     vscode                      # Editor de código con Copilot
     sublime4                    # Sublime Text (build fijado arriba)

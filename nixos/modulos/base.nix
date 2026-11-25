@@ -105,6 +105,10 @@
       nix-clean  = "sudo nix-collect-garbage -d && sudo nixos-rebuild boot";
       # Menú para elegir qué parte editar (módulos, paquetes y alias del equipo o de cada módulo)
       nix-config = "~/dotfiles/utils/nix-config.sh ${config.dotfiles.equipo}";
+      # Instalación completa en máquina nueva (usuario + sistema + apps + red)
+      dotfiles-init       = "~/dotfiles/init.sh";
+      # Elegir qué módulos activar/desactivar en este equipo
+      dotfiles-modulos    = "~/dotfiles/init.sh modulos";
       # git pull + enlaces y tema + nixos-rebuild switch
       dotfiles-actualizar = "~/dotfiles/init.sh actualizar";
 
